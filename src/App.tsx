@@ -21,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<NotFound />} /> {/* Temporarily using NotFound until we create the Dashboard */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
