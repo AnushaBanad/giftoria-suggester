@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,42 +24,83 @@ const occasions = [
   "Boss's Day", "Teacher Appreciation", "Friendship Day"
 ];
 
-// Function to generate gift suggestions based on interests, budget, and occasion
 const generateGiftSuggestions = (interests: string[], budget: number, occasion: string) => {
   const suggestions = new Set<string>();
   
   interests.forEach(interest => {
     switch (interest) {
       case "Technology":
-        suggestions.add(`Smart ${budget > 200 ? 'Watch' : 'Speaker'}`);
-        suggestions.add(`Wireless ${budget > 150 ? 'Headphones' : 'Earbuds'}`);
+        suggestions.add(`Smart ${budget > 15000 ? 'Watch' : 'Speaker'}`);
+        suggestions.add(`Wireless ${budget > 10000 ? 'Headphones' : 'Earbuds'}`);
         break;
       case "Books":
         suggestions.add("Premium Book Collection");
         suggestions.add("E-reader");
         break;
       case "Gaming":
-        suggestions.add(`${budget > 300 ? 'Gaming Console' : 'Popular Video Game'}`);
+        suggestions.add(`${budget > 25000 ? 'Gaming Console' : 'Popular Video Game'}`);
         suggestions.add("Gaming Accessories");
         break;
-      // Add more cases for other interests
+      case "Fashion":
+        suggestions.add(`${budget > 5000 ? 'Designer Wear' : 'Fashion Accessories'}`);
+        suggestions.add("Trendy Footwear");
+        break;
+      case "Art":
+        suggestions.add("Custom Art Piece");
+        suggestions.add("Art Supplies Kit");
+        break;
+      case "Music":
+        suggestions.add(`${budget > 20000 ? 'Premium Headphones' : 'Bluetooth Speaker'}`);
+        suggestions.add("Vinyl Records Collection");
+        break;
+      case "Cooking":
+        suggestions.add(`${budget > 15000 ? 'Stand Mixer' : 'Cookware Set'}`);
+        suggestions.add("Gourmet Ingredients Box");
+        break;
+      case "Photography":
+        suggestions.add(`${budget > 30000 ? 'DSLR Camera' : 'Instant Camera'}`);
+        suggestions.add("Photo Printing Kit");
+        break;
+      case "Fitness":
+        suggestions.add(`${budget > 20000 ? 'Smart Fitness Watch' : 'Fitness Tracker'}`);
+        suggestions.add("Premium Yoga Set");
+        break;
+      case "Beauty":
+        suggestions.add("Luxury Skincare Set");
+        suggestions.add("Premium Makeup Kit");
+        break;
     }
   });
 
-  // Add occasion-specific suggestions
   switch (occasion) {
     case "Wedding":
       suggestions.add("Personalized Photo Album");
-      suggestions.add("Custom Art Piece");
+      suggestions.add("Custom Couple Portrait");
+      suggestions.add("Premium Home Appliance");
       break;
     case "Birthday":
       suggestions.add("Experience Gift Card");
       suggestions.add("Premium Gift Basket");
+      suggestions.add("Personalized Birthday Collection");
       break;
-    // Add more cases for other occasions
+    case "Anniversary":
+      suggestions.add("Couples Spa Voucher");
+      suggestions.add("Custom Anniversary Watch");
+      suggestions.add("Romantic Getaway Package");
+      break;
+    case "Graduation":
+      suggestions.add("Professional Laptop Bag");
+      suggestions.add("Premium Pen Set");
+      suggestions.add("Career Development Course");
+      break;
+    case "Housewarming":
+      suggestions.add("Smart Home Starter Kit");
+      suggestions.add("Luxury Bed Linen Set");
+      suggestions.add("Premium Kitchen Appliance");
+      break;
   }
 
-  return Array.from(suggestions).slice(0, 6); // Return up to 6 suggestions
+  return Array.from(suggestions).slice(0, 6);
 };
 
 const Dashboard = () => {
@@ -114,7 +154,6 @@ const Dashboard = () => {
       description: "We're personalizing recommendations just for you!",
     });
 
-    // Generate and display suggestions
     const newSuggestions = generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
     setSuggestions(newSuggestions);
     setShowSuggestions(true);
@@ -122,39 +161,38 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#1A1F2C] relative overflow-hidden">
-      {/* Floating Gift Animations */}
-      {[...Array(10)].map((_, i) => (
+      {[...Array(15)].map((_, i) => (
         <div
           key={i}
           className="absolute animate-float"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            animation: `float ${10 + Math.random() * 10}s infinite`,
+            animation: `float ${8 + Math.random() * 12}s infinite`,
             animationDelay: `${Math.random() * 5}s`,
           }}
         >
-          <div className={`w-8 h-8 rounded-lg opacity-20 rotate-${Math.random() * 360}`}
-               style={{
-                 backgroundColor: [
-                   "#F2FCE2", "#FEF7CD", "#FEC6A1", "#E5DEFF", 
-                   "#FFDEE2", "#FDE1D3", "#D3E4FD"
-                 ][i % 7]
-               }}>
+          <div 
+            className={`w-8 h-8 rounded-lg opacity-20 rotate-${Math.random() * 360}`}
+            style={{
+              backgroundColor: [
+                "#FFE4E6", "#E7EFE6", "#FFF1E6", "#E5DEFF", 
+                "#FFDEE2", "#FDE1D3", "#D3E4FD", "#F2FCE2",
+                "#FEF7CD", "#FEC6A1", "#F1F0FB"
+              ][i % 11]
+            }}>
           </div>
         </div>
       ))}
 
       <div className="container mx-auto max-w-4xl relative z-10">
         <div className="flex flex-col space-y-6 animate-fadeIn py-8">
-          {/* Header */}
           <div className="flex items-center justify-center space-x-4 mb-8">
             <Gift className="w-8 h-8 text-white" />
             <h1 className="text-3xl font-bold text-white">Personalize Your Gifts</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Interests Section */}
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader>
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -183,18 +221,17 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Budget Section */}
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader>
                 <h2 className="text-xl font-semibold">Set Your Budget</h2>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Label htmlFor="budget">Budget Amount ($)</Label>
+                  <Label htmlFor="budget">Budget Amount (₹)</Label>
                   <Input
                     id="budget"
                     type="number"
-                    placeholder="Enter your budget"
+                    placeholder="Enter your budget in Rupees"
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
                     min="0"
@@ -204,7 +241,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Occasions Section */}
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader>
                 <h2 className="text-xl font-semibold">Select Occasion</h2>
@@ -230,7 +266,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Submit Button */}
             <Button
               type="submit"
               className="w-full bg-theme-rose hover:bg-theme-sage text-gray-800 py-6 text-lg transition-all duration-300"
@@ -240,7 +275,6 @@ const Dashboard = () => {
             </Button>
           </form>
 
-          {/* Gift Suggestions Section */}
           {showSuggestions && suggestions.length > 0 && (
             <Card className="backdrop-blur-sm bg-white/10 mt-8 animate-fadeIn">
               <CardHeader>

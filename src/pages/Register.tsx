@@ -16,6 +16,21 @@ const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validatePassword = (password: string) => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    if (!hasUpperCase) return "Password must contain at least one uppercase letter";
+    if (!hasLowerCase) return "Password must contain at least one lowercase letter";
+    if (!hasNumbers) return "Password must contain at least one number";
+    if (!hasSpecialChar) return "Password must contain at least one special character";
+    if (password.length < 8) return "Password must be at least 8 characters long";
+    
+    return "";
+  };
+
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
@@ -29,10 +44,9 @@ const Register = () => {
       newErrors.email = "Please enter a valid email";
     }
 
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      newErrors.password = passwordError;
     }
 
     setErrors(newErrors);
@@ -43,13 +57,11 @@ const Register = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Here you would typically make an API call to register the user
-      // For now, we'll simulate a successful registration
       toast({
         title: "Registration successful!",
         description: "Welcome to our gift recommendation platform.",
       });
-      navigate("/dashboard"); // Navigate to the dashboard/interests page
+      navigate("/dashboard");
     } else {
       toast({
         variant: "destructive",
