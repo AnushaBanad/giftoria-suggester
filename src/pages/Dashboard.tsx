@@ -17,11 +17,17 @@ const interests = [
 
 const occasions = [
   "Birthday", "Anniversary", "Wedding", "Graduation",
-  "Christmas", "Valentine's Day", "Mother's Day", "Father's Day",
   "Housewarming", "Baby Shower", "Retirement", "New Job",
-  "Thank You", "Get Well Soon", "Engagement", "New Year",
-  "Easter", "Halloween", "Sweet 16", "Quinceañera",
-  "Boss's Day", "Teacher Appreciation", "Friendship Day"
+  "Thank You", "Get Well Soon", "Engagement",
+  
+  "Diwali", "Holi", "Raksha Bandhan", "Eid",
+  "Navratri", "Durga Puja", "Ganesh Chaturthi",
+  "Karwa Chauth", "Bhai Dooj", "Pongal",
+  "Onam", "Lohri", "Makar Sankranti",
+  
+  "Christmas", "New Year", "Valentine's Day",
+  "Mother's Day", "Father's Day", "Easter",
+  "Halloween", "Thanksgiving"
 ];
 
 const generateGiftSuggestions = (interests: string[], budget: number, occasion: string) => {
@@ -88,15 +94,20 @@ const generateGiftSuggestions = (interests: string[], budget: number, occasion: 
       suggestions.add("Custom Anniversary Watch");
       suggestions.add("Romantic Getaway Package");
       break;
-    case "Graduation":
-      suggestions.add("Professional Laptop Bag");
-      suggestions.add("Premium Pen Set");
-      suggestions.add("Career Development Course");
+    case "Diwali":
+      suggestions.add("Premium Dry Fruits Box");
+      suggestions.add("Designer Diya Set");
+      suggestions.add("Traditional Wear");
       break;
-    case "Housewarming":
-      suggestions.add("Smart Home Starter Kit");
-      suggestions.add("Luxury Bed Linen Set");
-      suggestions.add("Premium Kitchen Appliance");
+    case "Holi":
+      suggestions.add("Organic Colors Set");
+      suggestions.add("Water Gun Collection");
+      suggestions.add("Traditional Sweets Box");
+      break;
+    case "Raksha Bandhan":
+      suggestions.add("Premium Watch");
+      suggestions.add("Designer Rakhi Set");
+      suggestions.add("Traditional Jewelry");
       break;
   }
 

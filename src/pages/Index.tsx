@@ -11,10 +11,34 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-theme-warm to-white">
       <div className="container mx-auto px-4 py-12 md:py-24">
+        {/* Sparkling Background */}
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${5 + Math.random() * 10}s infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+            }}
+          >
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{
+                background: `radial-gradient(circle at center, 
+                  ${['#FFD700', '#FFA500', '#FF69B4', '#00CED1'][i % 4]} 0%,
+                  transparent 70%)`,
+                opacity: 0.6,
+              }}
+            />
+          </div>
+        ))}
+
         {/* Hero Section */}
         <div className="flex flex-col items-center text-center space-y-8 animate-fadeIn">
           <div className="relative">
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-theme-rose to-theme-sage blur opacity-75"></div>
+            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-theme-rose via-[#FFD700] to-theme-sage blur opacity-75"></div>
             <div className="relative bg-white rounded-full p-4">
               <Gift className="w-12 h-12 text-gray-800" />
             </div>
@@ -76,3 +100,4 @@ const Index = () => {
 };
 
 export default Index;
+

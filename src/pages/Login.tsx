@@ -26,6 +26,8 @@ const Login = () => {
 
     if (!password) {
       newErrors.password = "Password is required";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long";
     }
 
     setErrors(newErrors);
@@ -36,13 +38,23 @@ const Login = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Here you would typically make an API call to authenticate the user
-      // For now, we'll simulate a successful login
+      // Simulate checking if user exists
+      // In a real app, this would be an API call
+      if (email === "nonexistent@example.com") {
+        toast({
+          variant: "destructive",
+          title: "Account not found",
+          description: "No account found with this email. Please register first.",
+        });
+        setTimeout(() => navigate("/register"), 2000);
+        return;
+      }
+
       toast({
         title: "Login successful!",
         description: "Welcome back to our gift recommendation platform.",
       });
-      navigate("/dashboard"); // Navigate to the dashboard/interests page
+      navigate("/dashboard");
     } else {
       toast({
         variant: "destructive",
@@ -120,3 +132,4 @@ const Login = () => {
 };
 
 export default Login;
+
