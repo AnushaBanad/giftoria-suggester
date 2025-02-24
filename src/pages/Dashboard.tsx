@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -203,62 +202,22 @@ const occasions = [
 ];
 
 const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
+  console.log("Generating suggestions for:", { interests, budget, occasion });
   let suggestions: GiftSuggestion[] = [];
   
   // Add interest-based suggestions
   interests.forEach(interest => {
     if (giftDatabase[interest]) {
+      console.log("Found gifts for interest:", interest);
       const categoryGifts = giftDatabase[interest];
       const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
       suggestions.push(...affordableGifts);
     }
   });
 
-  // Add occasion-specific suggestions
-  const occasionGifts: Record<string, GiftSuggestion[]> = {
-    "Diwali": [
-      {
-        name: "Premium Dry Fruits Gift Box",
-        price: 2499,
-        image: "https://images.unsplash.com/photo-1610869504857-4d6e4170d0b0",
-        description: "Luxurious assortment of dry fruits in a beautiful gift box",
-        shopLink: "https://amazon.in/dry-fruits-box"
-      },
-      {
-        name: "Designer Diya Set",
-        price: 1999,
-        image: "https://images.unsplash.com/photo-1605197161470-d0261cac6767",
-        description: "Handcrafted designer diyas for festive decoration",
-        shopLink: "https://amazon.in/designer-diya-set"
-      }
-    ],
-    "Wedding": [
-      {
-        name: "Premium Couple Watch Set",
-        price: 29999,
-        image: "https://images.unsplash.com/photo-1518131672697-613becd4fab5",
-        description: "Elegant matching watches for couples",
-        shopLink: "https://amazon.in/couple-watch-set"
-      }
-    ],
-    "Birthday": [
-      {
-        name: "Premium Gift Hamper",
-        price: 4999,
-        image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48",
-        description: "Curated collection of premium gifts",
-        shopLink: "https://amazon.in/gift-hamper"
-      }
-    ]
-  };
-
-  if (occasionGifts[occasion]) {
-    const occasionSpecificGifts = occasionGifts[occasion];
-    suggestions.push(...occasionSpecificGifts.filter(gift => gift.price <= budget));
-  }
-
-  // If no suggestions found, add generic gifts within budget
+  // If no interest-based suggestions, try to get generic suggestions
   if (suggestions.length === 0) {
+    console.log("No interest-based suggestions found, adding generic suggestions");
     Object.values(giftDatabase).forEach(categoryGifts => {
       const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
       suggestions.push(...affordableGifts);
@@ -270,10 +229,13 @@ const generateGiftSuggestions = (interests: string[], budget: number, occasion: 
     new Map(suggestions.map(item => [item.name, item])).values()
   );
 
-  return uniqueSuggestions
+  const filteredSuggestions = uniqueSuggestions
     .filter(gift => gift.price <= budget)
     .sort((a, b) => a.price - b.price)
     .slice(0, 6);
+
+  console.log("Final suggestions:", filteredSuggestions);
+  return filteredSuggestions;
 };
 
 const Dashboard = () => {
@@ -294,6 +256,11 @@ const Dashboard = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted with:", {
+      interests: selectedInterests,
+      budget,
+      occasion: selectedOccasion
+    });
     
     if (!selectedOccasion) {
       toast({
@@ -304,11 +271,11 @@ const Dashboard = () => {
       return;
     }
 
-    if (!budget) {
+    if (!budget || Number(budget) <= 0) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please enter your budget",
+        description: "Please enter a valid budget",
       });
       return;
     }
@@ -322,13 +289,29 @@ const Dashboard = () => {
       return;
     }
 
-    const newSuggestions = generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
+    const newSuggestions = generateGiftSuggestions(
+      selectedInterests,
+      Number(budget),
+      selectedOccasion
+    );
+
+    console.log("Generated suggestions:", newSuggestions);
+    
+    if (newSuggestions.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No matches found",
+        description: "Try adjusting your budget or selecting different interests",
+      });
+      return;
+    }
+
     setSuggestions(newSuggestions);
     setShowSuggestions(true);
 
     toast({
       title: "Perfect gifts found!",
-      description: "Click on any gift to view shopping options.",
+      description: `Found ${newSuggestions.length} gift suggestions for you.`,
     });
   };
 
@@ -508,4 +491,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
