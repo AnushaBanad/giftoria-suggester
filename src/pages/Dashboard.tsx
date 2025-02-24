@@ -20,14 +20,14 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
     {
       name: "Smart Watch Pro",
       price: 15999,
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+      image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12",
       description: "Premium smartwatch with health tracking features",
       shopLink: "https://amazon.in/smartwatch-pro"
     },
     {
       name: "Wireless Earbuds",
       price: 8999,
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
+      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df",
       description: "High-quality wireless earbuds with noise cancellation",
       shopLink: "https://amazon.in/wireless-earbuds"
     }
@@ -36,14 +36,14 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
     {
       name: "Premium Book Collection",
       price: 4999,
-      image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9",
+      image: "https://images.unsplash.com/photo-1524578271613-d550eacf6090",
       description: "Curated collection of bestselling books",
       shopLink: "https://amazon.in/book-collection"
     },
     {
       name: "E-Reader Ultimate",
       price: 12999,
-      image: "https://images.unsplash.com/photo-1618558087827-c19f0b08bb07",
+      image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c",
       description: "Latest e-reader with backlight and weeks of battery life",
       shopLink: "https://amazon.in/e-reader"
     }
@@ -52,16 +52,32 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
     {
       name: "Designer Watch Collection",
       price: 24999,
-      image: "https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e",
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
       description: "Elegant designer watch for any occasion",
       shopLink: "https://amazon.in/designer-watch"
     },
     {
       name: "Premium Fashion Set",
       price: 9999,
-      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b",
       description: "Trendy fashion collection for the style-conscious",
       shopLink: "https://amazon.in/fashion-set"
+    }
+  ],
+  Music: [
+    {
+      name: "Premium Headphones",
+      price: 19999,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+      description: "High-end headphones with superior sound quality",
+      shopLink: "https://amazon.in/premium-headphones"
+    },
+    {
+      name: "Smart Speaker",
+      price: 7999,
+      image: "https://images.unsplash.com/photo-1589492477829-5e65395b66cc",
+      description: "Wireless speaker with voice control",
+      shopLink: "https://amazon.in/smart-speaker"
     }
   ],
   Gaming: [
@@ -78,6 +94,38 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       image: "https://images.unsplash.com/photo-1527814050087-3793815479db",
       description: "Professional gaming headset with surround sound",
       shopLink: "https://amazon.in/gaming-headset"
+    }
+  ],
+  Beauty: [
+    {
+      name: "Luxury Skincare Set",
+      price: 5999,
+      image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881",
+      description: "Complete skincare routine with premium products",
+      shopLink: "https://amazon.in/luxury-skincare"
+    },
+    {
+      name: "Premium Makeup Kit",
+      price: 8999,
+      image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796",
+      description: "Professional makeup kit with all essentials",
+      shopLink: "https://amazon.in/makeup-kit"
+    }
+  ],
+  Sports: [
+    {
+      name: "Smart Fitness Watch",
+      price: 12999,
+      image: "https://images.unsplash.com/photo-1557166983-5939644443f5",
+      description: "Advanced fitness tracker with heart rate monitoring",
+      shopLink: "https://amazon.in/fitness-watch"
+    },
+    {
+      name: "Premium Yoga Set",
+      price: 3999,
+      image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
+      description: "Complete yoga kit with mat and accessories",
+      shopLink: "https://amazon.in/yoga-set"
     }
   ]
 };
@@ -107,28 +155,64 @@ const occasions = [
 ];
 
 const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
-  const suggestions: GiftSuggestion[] = [];
+  let suggestions: GiftSuggestion[] = [];
   
+  // Add interest-based suggestions
   interests.forEach(interest => {
     const categoryGifts = giftDatabase[interest] || [];
     const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
     suggestions.push(...affordableGifts);
   });
 
-  switch (occasion) {
-    case "Diwali":
-      suggestions.push({
+  // Add occasion-specific suggestions
+  const occasionGifts: Record<string, GiftSuggestion[]> = {
+    "Diwali": [
+      {
         name: "Premium Dry Fruits Gift Box",
         price: 2499,
-        image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9",
+        image: "https://images.unsplash.com/photo-1610869504857-4d6e4170d0b0",
         description: "Luxurious assortment of dry fruits in a beautiful gift box",
         shopLink: "https://amazon.in/dry-fruits-box"
-      });
-      break;
-  }
+      },
+      {
+        name: "Designer Diya Set",
+        price: 1999,
+        image: "https://images.unsplash.com/photo-1605197161470-d0261cac6767",
+        description: "Handcrafted designer diyas for festive decoration",
+        shopLink: "https://amazon.in/designer-diya-set"
+      }
+    ],
+    "Wedding": [
+      {
+        name: "Premium Couple Watch Set",
+        price: 29999,
+        image: "https://images.unsplash.com/photo-1518131672697-613becd4fab5",
+        description: "Elegant matching watches for couples",
+        shopLink: "https://amazon.in/couple-watch-set"
+      }
+    ],
+    "Birthday": [
+      {
+        name: "Premium Gift Hamper",
+        price: 4999,
+        image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48",
+        description: "Curated collection of premium gifts",
+        shopLink: "https://amazon.in/gift-hamper"
+      }
+    ]
+  };
 
-  return Array.from(new Set(suggestions))
+  const occasionSpecificGifts = occasionGifts[occasion] || [];
+  suggestions.push(...occasionSpecificGifts.filter(gift => gift.price <= budget));
+
+  // Remove duplicates and limit to 6 suggestions
+  const uniqueSuggestions = Array.from(
+    new Map(suggestions.map(item => [item.name, item])).values()
+  );
+
+  return uniqueSuggestions
     .filter(gift => gift.price <= budget)
+    .sort(() => Math.random() - 0.5)
     .slice(0, 6);
 };
 
