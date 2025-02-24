@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,9 +39,47 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9",
       description: "Curated collection of bestselling books",
       shopLink: "https://amazon.in/book-collection"
+    },
+    {
+      name: "E-Reader Ultimate",
+      price: 12999,
+      image: "https://images.unsplash.com/photo-1618558087827-c19f0b08bb07",
+      description: "Latest e-reader with backlight and weeks of battery life",
+      shopLink: "https://amazon.in/e-reader"
     }
   ],
-  // Add more categories with their respective products
+  Fashion: [
+    {
+      name: "Designer Watch Collection",
+      price: 24999,
+      image: "https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e",
+      description: "Elegant designer watch for any occasion",
+      shopLink: "https://amazon.in/designer-watch"
+    },
+    {
+      name: "Premium Fashion Set",
+      price: 9999,
+      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+      description: "Trendy fashion collection for the style-conscious",
+      shopLink: "https://amazon.in/fashion-set"
+    }
+  ],
+  Gaming: [
+    {
+      name: "Gaming Console Pro",
+      price: 49999,
+      image: "https://images.unsplash.com/photo-1486401899868-0e435ed85128",
+      description: "Latest gaming console with 4K graphics",
+      shopLink: "https://amazon.in/gaming-console"
+    },
+    {
+      name: "Gaming Headset",
+      price: 7999,
+      image: "https://images.unsplash.com/photo-1527814050087-3793815479db",
+      description: "Professional gaming headset with surround sound",
+      shopLink: "https://amazon.in/gaming-headset"
+    }
+  ]
 };
 
 const interests = [
@@ -163,12 +202,13 @@ const Dashboard = () => {
           }}
         >
           <div 
-            className="w-8 h-8 rounded-lg opacity-20"
+            className={`w-8 h-8 rounded-lg opacity-20 rotate-${Math.random() * 360}`}
             style={{
-              background: `radial-gradient(circle at center, 
-                ${['#FFD700', '#FFA500', '#FF69B4', '#00CED1'][i % 4]} 0%,
-                transparent 70%)`,
-              transform: `rotate(${Math.random() * 360}deg)`,
+              backgroundColor: [
+                "#FFE4E6", "#E7EFE6", "#FFF1E6", "#E5DEFF", 
+                "#FFDEE2", "#FDE1D3", "#D3E4FD", "#F2FCE2",
+                "#FEF7CD", "#FEC6A1", "#F1F0FB"
+              ][i % 11]
             }}>
           </div>
         </div>
@@ -324,3 +364,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
