@@ -127,6 +127,54 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       description: "Complete yoga kit with mat and accessories",
       shopLink: "https://amazon.in/yoga-set"
     }
+  ],
+  "Art": [
+    {
+      name: "Professional Art Set",
+      price: 4999,
+      image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f",
+      description: "Complete art supplies kit for professionals",
+      shopLink: "https://amazon.in/art-set"
+    },
+    {
+      name: "Digital Drawing Tablet",
+      price: 8999,
+      image: "https://images.unsplash.com/photo-1559336197-ded8aaa244bc",
+      description: "High-precision drawing tablet for digital artists",
+      shopLink: "https://amazon.in/drawing-tablet"
+    }
+  ],
+  "Home Decor": [
+    {
+      name: "Smart LED Lighting Set",
+      price: 6999,
+      image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15",
+      description: "Customizable LED lighting for modern homes",
+      shopLink: "https://amazon.in/led-lights"
+    },
+    {
+      name: "Premium Wall Art Collection",
+      price: 12999,
+      image: "https://images.unsplash.com/photo-1513519245088-0e12902e35a6",
+      description: "Curated collection of elegant wall art pieces",
+      shopLink: "https://amazon.in/wall-art"
+    }
+  ],
+  "Photography": [
+    {
+      name: "Camera Accessories Kit",
+      price: 15999,
+      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32",
+      description: "Essential accessories for photography enthusiasts",
+      shopLink: "https://amazon.in/camera-kit"
+    },
+    {
+      name: "Mini Photo Printer",
+      price: 7999,
+      image: "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6",
+      description: "Portable printer for instant photo prints",
+      shopLink: "https://amazon.in/photo-printer"
+    }
   ]
 };
 
@@ -159,9 +207,11 @@ const generateGiftSuggestions = (interests: string[], budget: number, occasion: 
   
   // Add interest-based suggestions
   interests.forEach(interest => {
-    const categoryGifts = giftDatabase[interest] || [];
-    const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
-    suggestions.push(...affordableGifts);
+    if (giftDatabase[interest]) {
+      const categoryGifts = giftDatabase[interest];
+      const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
+      suggestions.push(...affordableGifts);
+    }
   });
 
   // Add occasion-specific suggestions
@@ -202,17 +252,27 @@ const generateGiftSuggestions = (interests: string[], budget: number, occasion: 
     ]
   };
 
-  const occasionSpecificGifts = occasionGifts[occasion] || [];
-  suggestions.push(...occasionSpecificGifts.filter(gift => gift.price <= budget));
+  if (occasionGifts[occasion]) {
+    const occasionSpecificGifts = occasionGifts[occasion];
+    suggestions.push(...occasionSpecificGifts.filter(gift => gift.price <= budget));
+  }
 
-  // Remove duplicates and limit to 6 suggestions
+  // If no suggestions found, add generic gifts within budget
+  if (suggestions.length === 0) {
+    Object.values(giftDatabase).forEach(categoryGifts => {
+      const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
+      suggestions.push(...affordableGifts);
+    });
+  }
+
+  // Remove duplicates and sort by price
   const uniqueSuggestions = Array.from(
     new Map(suggestions.map(item => [item.name, item])).values()
   );
 
   return uniqueSuggestions
     .filter(gift => gift.price <= budget)
-    .sort(() => Math.random() - 0.5)
+    .sort((a, b) => a.price - b.price)
     .slice(0, 6);
 };
 
