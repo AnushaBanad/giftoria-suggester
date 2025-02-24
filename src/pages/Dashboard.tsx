@@ -3,8 +3,45 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gift, Search, Heart, ShoppingBag, DollarSign } from "lucide-react";
+import { Gift, Search, Heart, ShoppingBag, DollarSign, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+
+interface GiftSuggestion {
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+  shopLink: string;
+}
+
+const giftDatabase: Record<string, GiftSuggestion[]> = {
+  Technology: [
+    {
+      name: "Smart Watch Pro",
+      price: 15999,
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+      description: "Premium smartwatch with health tracking features",
+      shopLink: "https://amazon.in/smartwatch-pro"
+    },
+    {
+      name: "Wireless Earbuds",
+      price: 8999,
+      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
+      description: "High-quality wireless earbuds with noise cancellation",
+      shopLink: "https://amazon.in/wireless-earbuds"
+    }
+  ],
+  Books: [
+    {
+      name: "Premium Book Collection",
+      price: 4999,
+      image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9",
+      description: "Curated collection of bestselling books",
+      shopLink: "https://amazon.in/book-collection"
+    }
+  ],
+  // Add more categories with their respective products
+};
 
 const interests = [
   "Technology", "Fashion", "Sports", "Books", "Music", 
@@ -30,95 +67,37 @@ const occasions = [
   "Halloween", "Thanksgiving"
 ];
 
-const generateGiftSuggestions = (interests: string[], budget: number, occasion: string) => {
-  const suggestions = new Set<string>();
+const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
+  const suggestions: GiftSuggestion[] = [];
   
   interests.forEach(interest => {
-    switch (interest) {
-      case "Technology":
-        suggestions.add(`Smart ${budget > 15000 ? 'Watch' : 'Speaker'}`);
-        suggestions.add(`Wireless ${budget > 10000 ? 'Headphones' : 'Earbuds'}`);
-        break;
-      case "Books":
-        suggestions.add("Premium Book Collection");
-        suggestions.add("E-reader");
-        break;
-      case "Gaming":
-        suggestions.add(`${budget > 25000 ? 'Gaming Console' : 'Popular Video Game'}`);
-        suggestions.add("Gaming Accessories");
-        break;
-      case "Fashion":
-        suggestions.add(`${budget > 5000 ? 'Designer Wear' : 'Fashion Accessories'}`);
-        suggestions.add("Trendy Footwear");
-        break;
-      case "Art":
-        suggestions.add("Custom Art Piece");
-        suggestions.add("Art Supplies Kit");
-        break;
-      case "Music":
-        suggestions.add(`${budget > 20000 ? 'Premium Headphones' : 'Bluetooth Speaker'}`);
-        suggestions.add("Vinyl Records Collection");
-        break;
-      case "Cooking":
-        suggestions.add(`${budget > 15000 ? 'Stand Mixer' : 'Cookware Set'}`);
-        suggestions.add("Gourmet Ingredients Box");
-        break;
-      case "Photography":
-        suggestions.add(`${budget > 30000 ? 'DSLR Camera' : 'Instant Camera'}`);
-        suggestions.add("Photo Printing Kit");
-        break;
-      case "Fitness":
-        suggestions.add(`${budget > 20000 ? 'Smart Fitness Watch' : 'Fitness Tracker'}`);
-        suggestions.add("Premium Yoga Set");
-        break;
-      case "Beauty":
-        suggestions.add("Luxury Skincare Set");
-        suggestions.add("Premium Makeup Kit");
-        break;
-    }
+    const categoryGifts = giftDatabase[interest] || [];
+    const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
+    suggestions.push(...affordableGifts);
   });
 
   switch (occasion) {
-    case "Wedding":
-      suggestions.add("Personalized Photo Album");
-      suggestions.add("Custom Couple Portrait");
-      suggestions.add("Premium Home Appliance");
-      break;
-    case "Birthday":
-      suggestions.add("Experience Gift Card");
-      suggestions.add("Premium Gift Basket");
-      suggestions.add("Personalized Birthday Collection");
-      break;
-    case "Anniversary":
-      suggestions.add("Couples Spa Voucher");
-      suggestions.add("Custom Anniversary Watch");
-      suggestions.add("Romantic Getaway Package");
-      break;
     case "Diwali":
-      suggestions.add("Premium Dry Fruits Box");
-      suggestions.add("Designer Diya Set");
-      suggestions.add("Traditional Wear");
-      break;
-    case "Holi":
-      suggestions.add("Organic Colors Set");
-      suggestions.add("Water Gun Collection");
-      suggestions.add("Traditional Sweets Box");
-      break;
-    case "Raksha Bandhan":
-      suggestions.add("Premium Watch");
-      suggestions.add("Designer Rakhi Set");
-      suggestions.add("Traditional Jewelry");
+      suggestions.push({
+        name: "Premium Dry Fruits Gift Box",
+        price: 2499,
+        image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9",
+        description: "Luxurious assortment of dry fruits in a beautiful gift box",
+        shopLink: "https://amazon.in/dry-fruits-box"
+      });
       break;
   }
 
-  return Array.from(suggestions).slice(0, 6);
+  return Array.from(new Set(suggestions))
+    .filter(gift => gift.price <= budget)
+    .slice(0, 6);
 };
 
 const Dashboard = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [budget, setBudget] = useState("");
   const [selectedOccasion, setSelectedOccasion] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const { toast } = useToast();
 
@@ -160,19 +139,19 @@ const Dashboard = () => {
       return;
     }
 
-    toast({
-      title: "Finding perfect gifts...",
-      description: "We're personalizing recommendations just for you!",
-    });
-
     const newSuggestions = generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
     setSuggestions(newSuggestions);
     setShowSuggestions(true);
+
+    toast({
+      title: "Perfect gifts found!",
+      description: "Click on any gift to view shopping options.",
+    });
   };
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C] relative overflow-hidden">
-      {[...Array(15)].map((_, i) => (
+    <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] relative overflow-hidden">
+      {[...Array(20)].map((_, i) => (
         <div
           key={i}
           className="absolute animate-float"
@@ -184,13 +163,12 @@ const Dashboard = () => {
           }}
         >
           <div 
-            className={`w-8 h-8 rounded-lg opacity-20 rotate-${Math.random() * 360}`}
+            className="w-8 h-8 rounded-lg opacity-20"
             style={{
-              backgroundColor: [
-                "#FFE4E6", "#E7EFE6", "#FFF1E6", "#E5DEFF", 
-                "#FFDEE2", "#FDE1D3", "#D3E4FD", "#F2FCE2",
-                "#FEF7CD", "#FEC6A1", "#F1F0FB"
-              ][i % 11]
+              background: `radial-gradient(circle at center, 
+                ${['#FFD700', '#FFA500', '#FF69B4', '#00CED1'][i % 4]} 0%,
+                transparent 70%)`,
+              transform: `rotate(${Math.random() * 360}deg)`,
             }}>
           </div>
         </div>
@@ -295,21 +273,45 @@ const Dashboard = () => {
                 </h2>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {suggestions.map((suggestion, index) => (
-                    <div
+                    <a
                       key={index}
-                      className="p-4 rounded-lg backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all duration-300"
+                      href={suggestion.shopLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group"
                     >
-                      <div className="flex items-center gap-2 text-white">
-                        <Gift className="w-4 h-4 text-theme-rose" />
-                        <span>{suggestion}</span>
+                      <div className="rounded-lg overflow-hidden backdrop-blur-sm bg-white/5 hover:bg-white/10 transition-all duration-300 transform hover:scale-105">
+                        <div className="relative h-48">
+                          <img
+                            src={suggestion.image}
+                            alt={suggestion.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-theme-rose">
+                            {suggestion.name}
+                          </h3>
+                          <p className="text-sm text-gray-300 mb-2">
+                            {suggestion.description}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-theme-rose font-semibold">
+                              ₹{suggestion.price.toLocaleString()}
+                            </span>
+                            <Button
+                              size="sm"
+                              className="bg-theme-rose hover:bg-theme-sage text-white"
+                            >
+                              Shop Now <ExternalLink className="w-4 h-4 ml-1" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="mt-2 text-sm text-gray-400">
-                        <DollarSign className="w-4 h-4 inline-block mr-1" />
-                        Fits your budget
-                      </div>
-                    </div>
+                    </a>
                   ))}
                 </div>
               </CardContent>
