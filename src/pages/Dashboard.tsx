@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,90 +20,90 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
     {
       name: "Smart Watch Pro",
       price: 15999,
-      image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12",
+      image: "https://images.meesho.com/images/products/266650767/m33ea_512.jpg",
       description: "Premium smartwatch with health tracking features",
-      shopLink: "https://amazon.in/smartwatch-pro"
+      shopLink: "https://www.meesho.com/smart-watches-men/p/5dfvg7"
     },
     {
       name: "Wireless Earbuds",
       price: 8999,
-      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df",
+      image: "https://images.meesho.com/images/products/288171825/qnl5p_512.jpg",
       description: "High-quality wireless earbuds with noise cancellation",
-      shopLink: "https://amazon.in/wireless-earbuds"
+      shopLink: "https://www.meesho.com/wireless-earbuds/p/3ft5b8"
     },
     {
       name: "Budget Phone Stand",
       price: 299,
-      image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07",
+      image: "https://images.meesho.com/images/products/134724058/lqlsj_512.jpg",
       description: "Adjustable phone stand for desk or bedside use",
-      shopLink: "https://flipkart.com/phone-stand"
+      shopLink: "https://www.meesho.com/mobile-phone-stand/p/2r5y4n"
     },
     {
       name: "USB LED Light",
       price: 149,
-      image: "https://images.unsplash.com/photo-1573921539234-a058e9d3db8c",
+      image: "https://images.meesho.com/images/products/41392459/dzxcj_512.jpg",
       description: "Flexible USB light for laptops and portable use",
-      shopLink: "https://myntra.com/usb-light"
+      shopLink: "https://www.meesho.com/usb-light/p/7tg4b9"
     }
   ],
   Books: [
     {
       name: "Premium Book Collection",
       price: 4999,
-      image: "https://images.unsplash.com/photo-1524578271613-d550eacf6090",
+      image: "https://images.meesho.com/images/products/219166248/wbqao_512.jpg",
       description: "Curated collection of bestselling books",
-      shopLink: "https://amazon.in/book-collection"
+      shopLink: "https://www.meesho.com/books-collection/p/2c9k4l"
     },
     {
       name: "E-Reader Ultimate",
       price: 12999,
-      image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c",
+      image: "https://images.meesho.com/images/products/147729391/rqjwx_512.jpg",
       description: "Latest e-reader with backlight and weeks of battery life",
-      shopLink: "https://amazon.in/e-reader"
+      shopLink: "https://www.meesho.com/e-reader/p/1d5g8t"
     },
     {
       name: "Budget Bestseller",
       price: 199,
-      image: "https://images.unsplash.com/photo-1512820790803-83ca734da794",
+      image: "https://images.meesho.com/images/products/187629345/wrypc_512.jpg",
       description: "Paperback edition of current bestselling novel",
-      shopLink: "https://flipkart.com/bestseller"
+      shopLink: "https://www.meesho.com/bestseller/p/9f3v2n"
     },
     {
       name: "Pocket Dictionary",
       price: 99,
-      image: "https://images.unsplash.com/photo-1595351298020-0f2c394c90ee",
+      image: "https://images.meesho.com/images/products/153620156/ebqsh_512.jpg",
       description: "Compact dictionary for students and travelers",
-      shopLink: "https://meesho.com/dictionary"
+      shopLink: "https://www.meesho.com/dictionary/p/4t6y8i"
     }
   ],
   Fashion: [
     {
       name: "Designer Watch Collection",
       price: 24999,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+      image: "https://images.meesho.com/images/products/256720223/wkmba_512.jpg",
       description: "Elegant designer watch for any occasion",
-      shopLink: "https://amazon.in/designer-watch"
+      shopLink: "https://www.meesho.com/designer-watch/p/8c3d6v"
     },
     {
       name: "Premium Fashion Set",
       price: 9999,
-      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b",
+      image: "https://images.meesho.com/images/products/229487177/xrbln_512.jpg",
       description: "Trendy fashion collection for the style-conscious",
-      shopLink: "https://amazon.in/fashion-set"
+      shopLink: "https://www.meesho.com/fashion-set/p/5s7v9b"
     },
     {
       name: "Casual Cotton Scarf",
       price: 299,
-      image: "https://images.unsplash.com/photo-1565084888279-aca607ecce0c",
+      image: "https://images.meesho.com/images/products/109245393/krhkc_512.jpg",
       description: "Stylish scarf for daily wear in multiple colors",
-      shopLink: "https://myntra.com/cotton-scarf"
+      shopLink: "https://www.meesho.com/cotton-scarf/p/3g6h9j"
     },
     {
       name: "Fashion Wrist Band",
       price: 99,
-      image: "https://images.unsplash.com/photo-1535632787350-4e68ef0ac584",
+      image: "https://images.meesho.com/images/products/152075602/myvkq_512.jpg",
       description: "Trendy wristband with modern design",
-      shopLink: "https://meesho.com/wristband"
+      shopLink: "https://www.meesho.com/wristband/p/7k8l9p"
     }
   ],
   Music: [
@@ -409,37 +408,37 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
   ]
 };
 
-// Website alternatives for different budget ranges
+// Website alternatives with Meesho links for different budget ranges
 const alternativeShops: Record<string, Record<string, string>> = {
   "Low Budget": { // Below 500
-    "Technology": "https://meesho.com/tech-accessories",
-    "Books": "https://storytel.in/budget-reads",
-    "Fashion": "https://www.myntra.com/budget-fashion",
-    "Music": "https://flipkart.com/budget-audio",
-    "Gaming": "https://snapdeal.com/gaming-accessories",
-    "Beauty": "https://purplle.com/budget-beauty",
-    "Sports": "https://decathlon.in/affordable-fitness",
-    "Art": "https://stationaryshop.in/budget-art",
-    "Home Decor": "https://pepperfry.com/budget-decor",
-    "Photography": "https://olx.in/camera-accessories",
-    "Cooking": "https://bigbasket.com/kitchen-tools",
-    "Outdoor": "https://decathlon.in/outdoor-basics",
-    "Fitness": "https://decathlon.in/fitness-essentials"
+    "Technology": "https://www.meesho.com/tech-accessories/pl/e7u9i0",
+    "Books": "https://www.meesho.com/books/pl/f5r2q1",
+    "Fashion": "https://www.meesho.com/budget-fashion/pl/j8m3n6",
+    "Music": "https://www.meesho.com/headphones-earphones/pl/p2o8i7",
+    "Gaming": "https://www.meesho.com/gaming-accessories/pl/c5v9b1",
+    "Beauty": "https://www.meesho.com/beauty-products/pl/z3x5c1",
+    "Sports": "https://www.meesho.com/fitness-accessories/pl/q3w7e9",
+    "Art": "https://www.meesho.com/stationery/pl/g5h8j2",
+    "Home Decor": "https://www.meesho.com/home-decor/pl/f4d6s1",
+    "Photography": "https://www.meesho.com/camera-accessories/pl/u8i2o4",
+    "Cooking": "https://www.meesho.com/kitchen-tools/pl/x3c7v9",
+    "Outdoor": "https://www.meesho.com/outdoor-accessories/pl/b4n8m2",
+    "Fitness": "https://www.meesho.com/fitness-equipment/pl/t7r3e9"
   },
   "Medium Budget": { // 500-5000
-    "Technology": "https://croma.com/mid-range-tech",
-    "Books": "https://bookswagon.com/collections",
-    "Fashion": "https://ajio.com/trending-fashion",
-    "Music": "https://reliance-digital.com/audio",
-    "Gaming": "https://gamestop.in/accessories",
-    "Beauty": "https://nykaa.com/beauty-products",
-    "Sports": "https://sportsadda.com/equipment",
-    "Art": "https://itsupp.ly/art-supplies",
-    "Home Decor": "https://homecentre.in/decor-items",
-    "Photography": "https://imagineonline.store/accessories",
-    "Cooking": "https://wonderchef.com/cooking-tools",
-    "Outdoor": "https://adventureworx.in/gear",
-    "Fitness": "https://cult.fit/equipment"
+    "Technology": "https://www.meesho.com/electronics/pl/r5t8y1",
+    "Books": "https://www.meesho.com/premium-books/pl/w2e6r9",
+    "Fashion": "https://www.meesho.com/fashion/pl/a4s7d2",
+    "Music": "https://www.meesho.com/speakers-headphones/pl/z6x4c8",
+    "Gaming": "https://www.meesho.com/gaming/pl/q9w5e3",
+    "Beauty": "https://www.meesho.com/beauty-products/pl/r4t6y2",
+    "Sports": "https://www.meesho.com/sports-equipment/pl/f8g5h3",
+    "Art": "https://www.meesho.com/art-supplies/pl/j9k3l7",
+    "Home Decor": "https://www.meesho.com/home-furnishing/pl/p9o3i5",
+    "Photography": "https://www.meesho.com/photography/pl/l3k8j5",
+    "Cooking": "https://www.meesho.com/kitchen-appliances/pl/t6r9e3",
+    "Outdoor": "https://www.meesho.com/camping-hiking/pl/c8v2b5",
+    "Fitness": "https://www.meesho.com/gym-equipment/pl/m2n5b7"
   }
 };
 
@@ -657,154 +656,4 @@ const Dashboard = () => {
         </div>
       ))}
 
-      <div className="container mx-auto max-w-4xl relative z-10">
-        <div className="flex flex-col space-y-6 animate-fadeIn py-8">
-          <div className="flex items-center justify-center space-x-4 mb-8">
-            <Gift className="w-8 h-8 text-white" />
-            <h1 className="text-3xl font-bold text-white">Personalize Your Gifts</h1>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <Card className="backdrop-blur-sm bg-white/80">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-theme-rose" />
-                  Select Your Interests
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {interests.map((interest) => (
-                    <Button
-                      key={interest}
-                      type="button"
-                      variant={selectedInterests.includes(interest) ? "default" : "outline"}
-                      onClick={() => handleInterestClick(interest)}
-                      className={`rounded-full ${
-                        selectedInterests.includes(interest)
-                          ? "bg-theme-sage text-gray-800"
-                          : ""
-                      }`}
-                    >
-                      {interest}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="backdrop-blur-sm bg-white/80">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                  Set Your Budget
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col space-y-4">
-                  <div>
-                    <Label htmlFor="budget">Budget (₹)</Label>
-                    <div className="relative mt-1">
-                      <Input
-                        id="budget"
-                        type="number"
-                        placeholder="Enter your budget in rupees"
-                        value={budget}
-                        onChange={(e) => setBudget(e.target.value)}
-                        className="pl-8"
-                      />
-                      <DollarSign className="w-4 h-4 absolute left-2.5 top-3 text-gray-400" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="backdrop-blur-sm bg-white/80">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Gift className="w-5 h-5 text-purple-600" />
-                  Select Occasion
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {occasions.map((occasion) => (
-                    <Button
-                      key={occasion}
-                      type="button"
-                      variant={selectedOccasion === occasion ? "default" : "outline"}
-                      onClick={() => setSelectedOccasion(occasion)}
-                      className={`rounded-full ${
-                        selectedOccasion === occasion
-                          ? "bg-theme-lavender text-gray-800"
-                          : ""
-                      }`}
-                    >
-                      {occasion}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-center">
-              <Button
-                type="submit"
-                className="px-8 py-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg font-medium rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
-              >
-                <Search className="w-5 h-5" />
-                Find Gift Recommendations
-              </Button>
-            </div>
-          </form>
-
-          {showSuggestions && (
-            <div className="mt-10 space-y-4">
-              <div className="flex items-center justify-center space-x-2 mb-6">
-                <ShoppingBag className="w-7 h-7 text-white" />
-                <h2 className="text-2xl font-bold text-white">Gift Suggestions</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {suggestions.map((gift, index) => (
-                  <Card key={index} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        src={gift.image}
-                        alt={gift.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-bold text-lg">{gift.name}</h3>
-                        <div className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                          ₹{gift.price}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600 mb-4">{gift.description}</p>
-                      <a
-                        href={gift.shopLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors font-medium"
-                      >
-                        Visit Shop
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Dashboard;
+      <div className="container mx-auto max-w-4
