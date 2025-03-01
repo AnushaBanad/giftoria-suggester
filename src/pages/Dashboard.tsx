@@ -1,4 +1,4 @@
-<lov-code>
+
 import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -695,7 +695,116 @@ const Dashboard = () => {
 
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader>
-                <h2 className="text-xl font-semibold">Set Your Budget</h2>
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                  Set Your Budget
+                </h2>
               </CardHeader>
               <CardContent>
-                
+                <div className="flex flex-col space-y-4">
+                  <div>
+                    <Label htmlFor="budget">Budget (₹)</Label>
+                    <div className="relative mt-1">
+                      <Input
+                        id="budget"
+                        type="number"
+                        placeholder="Enter your budget in rupees"
+                        value={budget}
+                        onChange={(e) => setBudget(e.target.value)}
+                        className="pl-8"
+                      />
+                      <DollarSign className="w-4 h-4 absolute left-2.5 top-3 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="backdrop-blur-sm bg-white/80">
+              <CardHeader>
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-purple-600" />
+                  Select Occasion
+                </h2>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {occasions.map((occasion) => (
+                    <Button
+                      key={occasion}
+                      type="button"
+                      variant={selectedOccasion === occasion ? "default" : "outline"}
+                      onClick={() => setSelectedOccasion(occasion)}
+                      className={`rounded-full ${
+                        selectedOccasion === occasion
+                          ? "bg-theme-lavender text-gray-800"
+                          : ""
+                      }`}
+                    >
+                      {occasion}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-center">
+              <Button
+                type="submit"
+                className="px-8 py-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg font-medium rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2"
+              >
+                <Search className="w-5 h-5" />
+                Find Gift Recommendations
+              </Button>
+            </div>
+          </form>
+
+          {showSuggestions && (
+            <div className="mt-10 space-y-4">
+              <div className="flex items-center justify-center space-x-2 mb-6">
+                <ShoppingBag className="w-7 h-7 text-white" />
+                <h2 className="text-2xl font-bold text-white">Gift Suggestions</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {suggestions.map((gift, index) => (
+                  <Card key={index} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div className="h-48 overflow-hidden">
+                      <img
+                        src={gift.image}
+                        alt={gift.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-bold text-lg">{gift.name}</h3>
+                        <div className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                          ₹{gift.price}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4">{gift.description}</p>
+                      <a
+                        href={gift.shopLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors font-medium"
+                      >
+                        Visit Shop
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
