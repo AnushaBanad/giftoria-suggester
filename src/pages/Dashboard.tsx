@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gift, Search, Heart, ShoppingBag, DollarSign, ExternalLink } from "lucide-react";
+import { Gift, Search, Heart, ShoppingBag, DollarSign, ExternalLink, Info } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface GiftSuggestion {
@@ -15,7 +15,7 @@ interface GiftSuggestion {
   shopLink: string;
 }
 
-// Expanded gift database with more affordable options
+// Expanded gift database with more affordable options and direct Meesho links
 const giftDatabase: Record<string, GiftSuggestion[]> = {
   Technology: [
     {
@@ -633,6 +633,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] relative overflow-hidden">
+      {/* Floating decoration elements */}
       {[...Array(20)].map((_, i) => (
         <div
           key={i}
@@ -660,12 +661,31 @@ const Dashboard = () => {
 
       <div className="container mx-auto max-w-4xl relative z-10">
         <div className="flex flex-col space-y-6 py-8">
+          {/* Header */}
           <div className="flex items-center justify-center space-x-4 mb-8">
             <Gift className="w-8 h-8 text-white" />
             <h1 className="text-3xl font-bold text-white">Personalize Your Gifts</h1>
           </div>
 
+          {/* About this app section */}
+          <Card className="backdrop-blur-sm bg-white/80 mb-4">
+            <CardHeader>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Info className="w-5 h-5 text-blue-500" />
+                About This App
+              </h2>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700">
+                This gift suggestion app is built with React, TypeScript, Tailwind CSS, and Shadcn UI. 
+                It helps you find personalized gifts on Meesho within your budget by considering your 
+                interests and the occasion.
+              </p>
+            </CardContent>
+          </Card>
+
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Interests selection */}
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader>
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -694,6 +714,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
+            {/* Budget input */}
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader>
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -716,6 +737,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
+            {/* Occasions selection */}
             <Card className="backdrop-blur-sm bg-white/80">
               <CardHeader>
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -744,6 +766,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
+            {/* Submit button */}
             <Button 
               type="submit" 
               className="w-full py-6 text-lg bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 transition-all hover:scale-[1.02] shadow-lg"
@@ -752,6 +775,7 @@ const Dashboard = () => {
             </Button>
           </form>
 
+          {/* Gift suggestions */}
           {showSuggestions && (
             <div className="mt-8">
               <Card className="backdrop-blur-sm bg-white/90">
