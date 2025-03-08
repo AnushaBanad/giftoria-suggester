@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gift, Search, Heart, ShoppingBag, DollarSign, ExternalLink } from "lucide-react";
+import { Gift, Search, Heart, ShoppingBag, DollarSign } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface GiftSuggestion {
@@ -771,15 +772,22 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {suggestions.map((suggestion, index) => (
-                      <div 
+                      <a 
                         key={index}
+                        href={suggestion.shopLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="flex flex-col rounded-lg overflow-hidden border hover:shadow-xl transition-all duration-300 hover:scale-[1.03] hover:border-emerald-300 hover:bg-emerald-50/30"
                       >
                         <div className="relative h-48 overflow-hidden bg-gray-100">
                           <img 
-                            src={suggestion.image} 
+                            src={suggestion.image}
                             alt={suggestion.name}
                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              // Fallback image if the original fails to load
+                              (e.target as HTMLImageElement).src = "https://images.meesho.com/images/products/207082345/jw3uy_512.jpg";
+                            }}
                           />
                           <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold">
                             ₹{suggestion.price}
@@ -788,16 +796,11 @@ const Dashboard = () => {
                         <div className="p-4 flex flex-col flex-grow">
                           <h3 className="font-bold text-lg mb-2">{suggestion.name}</h3>
                           <p className="text-gray-600 text-sm flex-grow">{suggestion.description}</p>
-                          <a 
-                            href={suggestion.shopLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-4 inline-flex items-center justify-center gap-2 bg-[#FB4E69] hover:bg-[#e63f58] text-white px-4 py-2 rounded-md font-medium text-sm transition-colors"
-                          >
-                            Shop on Meesho <ExternalLink className="w-4 h-4" />
-                          </a>
+                          <div className="mt-4 text-sm font-medium text-emerald-600 hover:underline">
+                            View on Meesho
+                          </div>
                         </div>
-                      </div>
+                      </a>
                     ))}
                   </div>
                 </CardContent>
