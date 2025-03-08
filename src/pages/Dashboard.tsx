@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gift, Search, Heart, ShoppingBag, DollarSign, ExternalLink, Info } from "lucide-react";
+import { Gift, Search, Heart, ShoppingBag, DollarSign, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface GiftSuggestion {
@@ -15,7 +14,7 @@ interface GiftSuggestion {
   shopLink: string;
 }
 
-// Expanded gift database with more affordable options and direct Meesho links
+// Expanded gift database with more accurate Meesho links
 const giftDatabase: Record<string, GiftSuggestion[]> = {
   Technology: [
     {
@@ -23,28 +22,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 15999,
       image: "https://images.meesho.com/images/products/266650767/m33ea_512.jpg",
       description: "Premium smartwatch with health tracking features",
-      shopLink: "https://www.meesho.com/smart-watches-men/p/5dfvg7"
+      shopLink: "https://www.meesho.com/smart-watches-for-men/p/3b8w2r"
     },
     {
       name: "Wireless Earbuds",
       price: 8999,
       image: "https://images.meesho.com/images/products/288171825/qnl5p_512.jpg",
       description: "High-quality wireless earbuds with noise cancellation",
-      shopLink: "https://www.meesho.com/wireless-earbuds/p/3ft5b8"
+      shopLink: "https://www.meesho.com/smart-wireless-true-bluetooth-51-earbuds-tws-with-mic-ipx4-waterproof/p/3jrwka"
     },
     {
       name: "Budget Phone Stand",
       price: 299,
       image: "https://images.meesho.com/images/products/134724058/lqlsj_512.jpg",
       description: "Adjustable phone stand for desk or bedside use",
-      shopLink: "https://www.meesho.com/mobile-phone-stand/p/2r5y4n"
+      shopLink: "https://www.meesho.com/mobile-stand-holder-for-phone-mobile-holder-stand-for-desk-mobile-stand-holder-mobile-holder-for-table-mobile-stand-for-table-plastic-phone-stand-holder-multicolor/p/1vbqey"
     },
     {
       name: "USB LED Light",
       price: 149,
       image: "https://images.meesho.com/images/products/41392459/dzxcj_512.jpg",
       description: "Flexible USB light for laptops and portable use",
-      shopLink: "https://www.meesho.com/usb-light/p/7tg4b9"
+      shopLink: "https://www.meesho.com/mini-usb-led-light-flexible-for-computer-notebook-laptop-pc-power-bank/p/1uqk7s"
     }
   ],
   Books: [
@@ -53,28 +52,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 4999,
       image: "https://images.meesho.com/images/products/219166248/wbqao_512.jpg",
       description: "Curated collection of bestselling books",
-      shopLink: "https://www.meesho.com/books-collection/p/2c9k4l"
+      shopLink: "https://www.meesho.com/mindset-the-new-psychology-of-success-how-we-can-learn-to-fulfill-our-potential-book-by-carol-s-dweck-english-paperback/p/3c3mqj"
     },
     {
       name: "E-Reader Ultimate",
       price: 12999,
       image: "https://images.meesho.com/images/products/147729391/rqjwx_512.jpg",
       description: "Latest e-reader with backlight and weeks of battery life",
-      shopLink: "https://www.meesho.com/e-reader/p/1d5g8t"
+      shopLink: "https://www.meesho.com/amazon-kindle-10th-gen-bluetooth-enabled-4-gb-black-6-inch-with-built-in-light/p/46aq6q"
     },
     {
       name: "Budget Bestseller",
       price: 199,
       image: "https://images.meesho.com/images/products/187629345/wrypc_512.jpg",
       description: "Paperback edition of current bestselling novel",
-      shopLink: "https://www.meesho.com/bestseller/p/9f3v2n"
+      shopLink: "https://www.meesho.com/the-subtle-art-of-not-giving-a-fck-a-counterintuitive-approach-to-living-a-good-life-book-by-mark-manson-english-paperback/p/1t5g1h"
     },
     {
       name: "Pocket Dictionary",
       price: 99,
       image: "https://images.meesho.com/images/products/153620156/ebqsh_512.jpg",
       description: "Compact dictionary for students and travelers",
-      shopLink: "https://www.meesho.com/dictionary/p/4t6y8i"
+      shopLink: "https://www.meesho.com/english-to-english-oxford-dictionary-updated-one/p/3p7y5z"
     }
   ],
   Fashion: [
@@ -83,28 +82,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 24999,
       image: "https://images.meesho.com/images/products/256720223/wkmba_512.jpg",
       description: "Elegant designer watch for any occasion",
-      shopLink: "https://www.meesho.com/designer-watch/p/8c3d6v"
+      shopLink: "https://www.meesho.com/fastrack-reflex-fitness-band-smartwatch-with-continuous-heart-rate-monitoring-for-women-men/p/2vl77m"
     },
     {
       name: "Premium Fashion Set",
       price: 9999,
       image: "https://images.meesho.com/images/products/229487177/xrbln_512.jpg",
       description: "Trendy fashion collection for the style-conscious",
-      shopLink: "https://www.meesho.com/fashion-set/p/5s7v9b"
+      shopLink: "https://www.meesho.com/the-indian-garage-co-branded-perfume-for-men-pack-of-3/p/3pnz12"
     },
     {
       name: "Casual Cotton Scarf",
       price: 299,
       image: "https://images.meesho.com/images/products/109245393/krhkc_512.jpg",
       description: "Stylish scarf for daily wear in multiple colors",
-      shopLink: "https://www.meesho.com/cotton-scarf/p/3g6h9j"
+      shopLink: "https://www.meesho.com/fancy-scarf-dupatta-for-women-and-girls-pack-of-1/p/2grloz"
     },
     {
       name: "Fashion Wrist Band",
       price: 99,
       image: "https://images.meesho.com/images/products/152075602/myvkq_512.jpg",
       description: "Trendy wristband with modern design",
-      shopLink: "https://www.meesho.com/wristband/p/7k8l9p"
+      shopLink: "https://www.meesho.com/black-metal-mens-boys-adjustable-pu-leather-black-wrist-bands-wristband-bracelet-for-men/p/2sgdw8"
     }
   ],
   Music: [
@@ -113,28 +112,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 19999,
       image: "https://images.meesho.com/images/products/168207322/xebtm_512.jpg",
       description: "High-end headphones with superior sound quality",
-      shopLink: "https://www.meesho.com/headphones/p/7k98j2"
+      shopLink: "https://www.meesho.com/sony-wh-1000xm4-industryleading-wireless-noise-cancelling-headphones-black/p/3aqt98"
     },
     {
       name: "Smart Speaker",
       price: 7999,
       image: "https://images.meesho.com/images/products/209846193/tnzqr_512.jpg",
       description: "Wireless speaker with voice control",
-      shopLink: "https://www.meesho.com/smart-speaker/p/3d5f7g"
+      shopLink: "https://www.meesho.com/jbl-flip-5-portable-bluetooth-speaker/p/48tqcs"
     },
     {
       name: "Budget Earphones",
       price: 199,
       image: "https://images.meesho.com/images/products/165498501/dbwit_512.jpg",
       description: "Reliable earphones with good sound quality",
-      shopLink: "https://www.meesho.com/budget-earphones/p/5j7k9l"
+      shopLink: "https://www.meesho.com/super-sound-bass-earphones-wired-headset-with-mic-high-bass/p/2i2w9p"
     },
     {
       name: "Mini Speaker",
       price: 499,
       image: "https://images.meesho.com/images/products/115432979/zzgvo_512.jpg",
       description: "Portable speaker with Bluetooth connectivity",
-      shopLink: "https://www.meesho.com/mini-speaker/p/2n4m6b"
+      shopLink: "https://www.meesho.com/mini-portable-bluetooth-speaker-with-splashproof-design/p/2a2qcw"
     }
   ],
   Gaming: [
@@ -143,28 +142,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 49999,
       image: "https://images.meesho.com/images/products/180429121/gqsul_512.jpg",
       description: "Latest gaming console with 4K graphics",
-      shopLink: "https://www.meesho.com/gaming-console/p/1q3w5e"
+      shopLink: "https://www.meesho.com/ps5-digital-edition-console/p/4ac77v"
     },
     {
       name: "Gaming Headset",
       price: 7999,
       image: "https://images.meesho.com/images/products/228706438/rlkgu_512.jpg",
       description: "Professional gaming headset with surround sound",
-      shopLink: "https://www.meesho.com/gaming-headset/p/9i7u5y"
+      shopLink: "https://www.meesho.com/logitech-g-pro-x-gaming-headset-with-blue-voice-technology/p/3xfrxn"
     },
     {
       name: "Mobile Game Controller",
       price: 999,
       image: "https://images.meesho.com/images/products/125693822/hrgdu_512.jpg",
       description: "Clip-on controller for mobile gaming",
-      shopLink: "https://www.meesho.com/mobile-game-controller/p/7j9k1l"
+      shopLink: "https://www.meesho.com/mobile-controller-for-pubg-mobile-game-controller-mobile-gaming-controller-for-mobile-game-l1r1-trigger-shooter-controller-for-iphone-and-android-1-pair/p/3c9pqd"
     },
     {
       name: "Gaming Mouse Pad",
       price: 149,
       image: "https://images.meesho.com/images/products/149827470/sjgwz_512.jpg",
       description: "Anti-slip mouse pad with smooth surface",
-      shopLink: "https://www.meesho.com/gaming-mousepad/p/3b5n7m"
+      shopLink: "https://www.meesho.com/mousepad-thin-gaming-mouse-pad-anti-slip-mat-mouse-pad-waterproof-material-large-size-for-gamers-designers-and-offices-26-x-21-cm-red/p/3l5crg"
     }
   ],
   Beauty: [
@@ -173,28 +172,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 5999,
       image: "https://images.meesho.com/images/products/131442120/dnsrz_512.jpg",
       description: "Complete skincare routine with premium products",
-      shopLink: "https://www.meesho.com/skincare-set/p/4d6f8g"
+      shopLink: "https://www.meesho.com/cosrx-advanced-snail-92-all-in-one-cream-100ml/p/4ibj04"
     },
     {
       name: "Premium Makeup Kit",
       price: 8999,
       image: "https://images.meesho.com/images/products/197520042/d8hwd_512.jpg",
       description: "Professional makeup kit with all essentials",
-      shopLink: "https://www.meesho.com/makeup-kit/p/2q4w6e"
+      shopLink: "https://www.meesho.com/7-pcs-complete-makup-brushes-kit-with-storage-box-pack-of-1-2-black/p/4y7d2b"
     },
     {
       name: "Moisturizer Cream",
       price: 249,
       image: "https://images.meesho.com/images/products/54775878/wbskx_512.jpg",
       description: "Hydrating face cream for daily use",
-      shopLink: "https://www.meesho.com/face-moisturizer/p/8h0j2k"
+      shopLink: "https://www.meesho.com/pond-s-super-light-gel-moisturiser-with-hyaluronic-acid-vitamin-e-hydrating-cream-for-face-oil-free-light-for-all-skin-types-147-g/p/2rclmx"
     },
     {
       name: "Lip Balm Set",
       price: 99,
       image: "https://images.meesho.com/images/products/170764532/guywd_512.jpg",
       description: "Set of flavored lip balms for dry lips",
-      shopLink: "https://www.meesho.com/lip-balm-set/p/5g7h9j"
+      shopLink: "https://www.meesho.com/lip-balm-strawberry-bery-flavoured-5g-strawberry-flavour-pack-of-1/p/3fphlm"
     }
   ],
   Sports: [
@@ -203,28 +202,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 12999,
       image: "https://images.meesho.com/images/products/249517554/qc4ve_512.jpg",
       description: "Advanced fitness tracker with heart rate monitoring",
-      shopLink: "https://www.meesho.com/fitness-watch/p/1a3s5d"
+      shopLink: "https://www.meesho.com/noise-colorfit-pro-4-alpha-17-bluetooth-calling-smart-watch-with-amoled-display-and-multiple-sports-modes-deep-wine/p/3xg6vy"
     },
     {
       name: "Premium Yoga Set",
       price: 3999,
       image: "https://images.meesho.com/images/products/82546021/qd1gs_512.jpg",
       description: "Complete yoga kit with mat and accessories",
-      shopLink: "https://www.meesho.com/yoga-set/p/7z9x1c"
+      shopLink: "https://www.meesho.com/yoga-mat-6mm-thick-anti-skid-yoga-mat-with-yoga-mat-strap-for-gym-workout-and-flooring-exercise-long-size-yoga-mat-for-men-women/p/1dn1dh"
     },
     {
       name: "Fitness Resistance Bands",
       price: 299,
       image: "https://images.meesho.com/images/products/95865403/bqqct_512.jpg",
       description: "Set of resistance bands for home workouts",
-      shopLink: "https://www.meesho.com/resistance-bands/p/3v5b7n"
+      shopLink: "https://www.meesho.com/resistance-loop-exercise-bands-with-instruction-guide-and-carry-bag-pack-of-5/p/1vv7he"
     },
     {
       name: "Sports Water Bottle",
       price: 149,
       image: "https://images.meesho.com/images/products/41159175/vxbgu_512.jpg",
       description: "Leak-proof bottle for sports and outdoor activities",
-      shopLink: "https://www.meesho.com/sports-bottle/p/9m1n3b"
+      shopLink: "https://www.meesho.com/sports-water-bottle-for-gym-school-cycling/p/bvylm"
     }
   ],
   "Art": [
@@ -233,28 +232,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 4999,
       image: "https://images.meesho.com/images/products/152075341/dcqsd_512.jpg",
       description: "Complete art supplies kit for professionals",
-      shopLink: "https://www.meesho.com/art-set/p/2w4e6r"
+      shopLink: "https://www.meesho.com/art-set-colors-box-46-piece-color-pencil-oilpastel-crayons-watercolor-complete-drawing-box-set-for-kids-gift-set/p/2s3pyx"
     },
     {
       name: "Digital Drawing Tablet",
       price: 8999,
       image: "https://images.meesho.com/images/products/128479541/gq7io_512.jpg",
       description: "High-precision drawing tablet for digital artists",
-      shopLink: "https://www.meesho.com/drawing-tablet/p/8i0o2p"
+      shopLink: "https://www.meesho.com/wacom-ctl-472-one-smallgraphics-pen-tabletblack-and-redfor-pc-laptop-beginners-designers/p/5an1ps"
     },
     {
       name: "Sketch Book",
       price: 149,
       image: "https://images.meesho.com/images/products/69077553/cvwxs_512.jpg",
       description: "Quality sketchbook with acid-free paper",
-      shopLink: "https://www.meesho.com/sketchbook/p/4f6g8h"
+      shopLink: "https://www.meesho.com/bianyo-sketchbook-watercolor-paper-a5-size-15-sheets-perfect-for-painting/p/3lfkke"
     },
     {
       name: "Basic Drawing Pencil Set",
       price: 99,
       image: "https://images.meesho.com/images/products/8189654/iwoqn_512.jpg",
       description: "Set of graphite pencils for beginners",
-      shopLink: "https://www.meesho.com/pencil-set/p/6j8k0l"
+      shopLink: "https://www.meesho.com/apsara-drawing-pencils-pensil-shading-2h-h-hb-b-2b-4b-6b-8b-10b-pensil-set-of-10-pack-of-1/p/3etq6j"
     }
   ],
   "Home Decor": [
@@ -263,28 +262,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 6999,
       image: "https://images.meesho.com/images/products/117835417/ypdgv_512.jpg",
       description: "Customizable LED lighting for modern homes",
-      shopLink: "https://www.meesho.com/led-lights/p/2x4z6c"
+      shopLink: "https://www.meesho.com/led-strip-lights-color-changing-5050-smart-led-light-with-app-control-and-remote-control-waterproof-5-meter/p/468i1m"
     },
     {
       name: "Premium Wall Art Collection",
       price: 12999,
       image: "https://images.meesho.com/images/products/181724051/nrpvq_512.jpg",
       description: "Curated collection of elegant wall art pieces",
-      shopLink: "https://www.meesho.com/wall-art/p/8v0b2n"
+      shopLink: "https://www.meesho.com/3d-wall-art-modern-simplistic-wooden-wall-plaque-painting-wall-decoration-wall-sculpture-wall-hanging-interior-wall-decor-living-room-bedroom-3d-wooden-frame-mandala-plywood-brown-small/p/3epwj8"
     },
     {
       name: "Decorative Cushion Covers",
       price: 299,
       image: "https://images.meesho.com/images/products/86014462/aivpg_512.jpg",
       description: "Set of trendy cushion covers for living room",
-      shopLink: "https://www.meesho.com/cushion-covers/p/4d6f8g"
+      shopLink: "https://www.meesho.com/decorative-cushion-covers-sofa-cushion-covers-cushion-covers/p/2jn7vq"
     },
     {
       name: "Table Plant Pot",
       price: 149,
       image: "https://images.meesho.com/images/products/97843119/hwykv_512.jpg",
       description: "Ceramic pot for small indoor plants",
-      shopLink: "https://www.meesho.com/plant-pot/p/7h9j1k"
+      shopLink: "https://www.meesho.com/flower-pot-plant-pot-with-tray-garden-flower-pot-1-piece-flower-pot-only/p/32lqkx"
     }
   ],
   "Photography": [
@@ -293,28 +292,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 15999,
       image: "https://images.meesho.com/images/products/145983602/gzifq_512.jpg",
       description: "Essential accessories for photography enthusiasts",
-      shopLink: "https://www.meesho.com/camera-kit/p/3s5d7f"
+      shopLink: "https://www.meesho.com/camera-mobile-holder-2-in-1-hybrid-dslr-mobile-3110-portable-and-foldable-tripod-with-mobile-clip-holder-bracket-smartphone-mount-adapter-high-quality-aluminum-alloy-for-video-shooting-plus-free-bag/p/1xvnhc"
     },
     {
       name: "Mini Photo Printer",
       price: 7999,
       image: "https://images.meesho.com/images/products/202398765/hnswt_512.jpg",
       description: "Portable printer for instant photo prints",
-      shopLink: "https://www.meesho.com/photo-printer/p/9l1m3n"
+      shopLink: "https://www.meesho.com/fujifilm-instax-mini-11-instant-camera-blush-pink-blush-pink/p/3w7djl"
     },
     {
       name: "Phone Camera Lens Kit",
       price: 799,
       image: "https://images.meesho.com/images/products/67890215/ywqaz_512.jpg",
       description: "Clip-on lenses for smartphone photography",
-      shopLink: "https://www.meesho.com/camera-lens/p/5g7h9j"
+      shopLink: "https://www.meesho.com/high-quality-3-in-1-universal-mobile-lens-kit-fish-eye-wide-angle-macro-lens-with-clip/p/17l7hw"
     },
     {
       name: "Mini Tripod",
       price: 299,
       image: "https://images.meesho.com/images/products/28763451/pcvrq_512.jpg",
       description: "Portable tripod for smartphones and small cameras",
-      shopLink: "https://www.meesho.com/mini-tripod/p/1q3w5e"
+      shopLink: "https://www.meesho.com/mini-tripod-stand-3110-for-smartphone-camera-holder-dslr-stand-holder-tripod-stand-for-mobile-and-camera-portable-and-foldable-mobile-holders-suitable-for-all-smartphone-dslr-and-action-cameras/p/1kjqb3"
     }
   ],
   "Cooking": [
@@ -323,28 +322,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 9999,
       image: "https://images.meesho.com/images/products/142963785/oknzj_512.jpg",
       description: "High-quality cookware and utensils set",
-      shopLink: "https://www.meesho.com/kitchen-set/p/7r9t1y"
+      shopLink: "https://www.meesho.com/kitchen-cookware-set-cookware-set-for-kitchen-dining-kitchen-appliance-cooking-kitchen-accessories-pressure-cooker-pan-set-nonstick-cookware-set-gas-stove-set-gift-set-home-wedding-gifts-3-pc-set/p/5aijb3"
     },
     {
       name: "Smart Kitchen Scale",
       price: 2999,
       image: "https://images.meesho.com/images/products/118756349/lofhc_512.jpg",
       description: "Digital scale with multiple measurement units",
-      shopLink: "https://www.meesho.com/kitchen-scale/p/3u5i7o"
+      shopLink: "https://www.meesho.com/mini-digital-weighing-scale-kitchen-scale-electronic-scale-digital-kitchen-scale-kitchen-weighing-scale-digital-food-scale-weight-machine-kitchen-mini-scale-weight-scale-digital-multiweight-kitchen-scale/p/3t5ky3"
     },
     {
       name: "Silicone Cooking Spoons",
       price: 299,
       image: "https://images.meesho.com/images/products/59328764/vdqwt_512.jpg",
       description: "Heat-resistant non-stick cooking utensils",
-      shopLink: "https://www.meesho.com/silicone-spoons/p/9k1l3m"
+      shopLink: "https://www.meesho.com/silicon-spatula-and-serving-spoon-combo-set-of-4/p/4lbqql"
     },
     {
       name: "Kitchen Timer",
       price: 99,
       image: "https://images.meesho.com/images/products/31782945/sjgwz_512.jpg",
       description: "Manual timer for precise cooking time",
-      shopLink: "https://www.meesho.com/kitchen-timer/p/5v7b9n"
+      shopLink: "https://www.meesho.com/kitchen-timer-timer-digital-timer-for-kitchen-mini-timer-egg-timer-clock-alarm-timer-cooking-timer-tea-timer-countdown-timer-magnetic-timer-gym-timer-small-timer-with-alarm-manual-setting-1-pc/p/2j2e4f"
     }
   ],
   "Outdoor": [
@@ -353,28 +352,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 8999,
       image: "https://images.meesho.com/images/products/179063428/qwcsp_512.jpg",
       description: "Complete tent set for outdoor adventures",
-      shopLink: "https://www.meesho.com/camping-tent/p/2d4f6g"
+      shopLink: "https://www.meesho.com/picnic-camping-portable-waterproof-tent-for-4-persons-capacity-4-person-blue/p/1hmjsy"
     },
     {
       name: "Hiking Backpack",
       price: 3999,
       image: "https://images.meesho.com/images/products/125794680/fwesx_512.jpg",
       description: "Durable backpack with multiple compartments",
-      shopLink: "https://www.meesho.com/hiking-backpack/p/8j0k2l"
+      shopLink: "https://www.meesho.com/waterproof-hiking-backpack-unisex-trekking-rucksack-waterproof-rain-cover-bag-60-ltr-travel-backpack-hiking-climbing-bag-trekking-bag-outdoor-sport-bag/p/3fdskw"
     },
     {
       name: "Outdoor Torch Light",
       price: 499,
       image: "https://images.meesho.com/images/products/87623415/kbizg_512.jpg",
       description: "Waterproof torch for camping and night activities",
-      shopLink: "https://www.meesho.com/torch-light/p/4h6j8k"
+      shopLink: "https://www.meesho.com/led-outdoor-tactical-torch-light-with-super-bright-rechargeable-torch-waterproof-handheld-flashlight-torch-light-for-camping-hiking-outdoor-use-etc/p/2qkfv"
     },
     {
       name: "Portable Compass",
       price: 149,
       image: "https://images.meesho.com/images/products/46925738/jiszt_512.jpg",
       description: "Reliable compass for navigation outdoors",
-      shopLink: "https://www.meesho.com/compass/p/0m2n4b"
+      shopLink: "https://www.meesho.com/camping-compass-military-compass-directional-compass-travel-compass-hiking-compass-compass-for-kids-pocket-compass-mapping-compass-compass-for-direction-outdoor-equipment-multicolor-1-pcs/p/3pkcvr"
     }
   ],
   "Fitness": [
@@ -383,28 +382,28 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 24999,
       image: "https://images.meesho.com/images/products/174069853/esnkd_512.jpg",
       description: "Complete home workout equipment",
-      shopLink: "https://www.meesho.com/home-gym/p/1x3z5c"
+      shopLink: "https://www.meesho.com/home-gym-set-combo-of-3kg-x-2pcs-pvc-dumbbells-1-pair-of-push-up-bar-handle-with-1-pc-skipping-rope/p/2vvpyc"
     },
     {
       name: "Smart Scale",
       price: 5999,
       image: "https://images.meesho.com/images/products/151892047/xdfso_512.jpg",
       description: "Digital scale with body composition analysis",
-      shopLink: "https://www.meesho.com/smart-scale/p/7v9b1n"
+      shopLink: "https://www.meesho.com/mi-body-composition-smart-scale-2-white/p/48hvw9"
     },
     {
       name: "Jump Rope",
       price: 299,
       image: "https://images.meesho.com/images/products/48372651/lryns_512.jpg",
       description: "Adjustable rope for cardio workouts",
-      shopLink: "https://www.meesho.com/jump-rope/p/3g5h7j"
+      shopLink: "https://www.meesho.com/skipping-rope-for-men-women-and-kids-exercise-skipping-rope-jump-rope-for-fitness-weight-loss-with-counter-for-gym-adjustable-jump-rope-pack-1-black-multicolor/p/2jn1qh"
     },
     {
       name: "Fitness Gloves",
       price: 199,
       image: "https://images.meesho.com/images/products/95843762/wmhkl_512.jpg",
       description: "Protective gloves for weight training",
-      shopLink: "https://www.meesho.com/fitness-gloves/p/9q1w3e"
+      shopLink: "https://www.meesho.com/gym-gloves-weight-lifting-gloves-for-men-gym-exercise-gloves-workout-gloves-fitness-gloves-for-men-training-gloves-with-wrist-support-outdoor-sports-gloves-black-multi-large/p/4jzlnr"
     }
   ]
 };
@@ -412,34 +411,34 @@ const giftDatabase: Record<string, GiftSuggestion[]> = {
 // Website alternatives with Meesho links for different budget ranges
 const alternativeShops: Record<string, Record<string, string>> = {
   "Low Budget": { // Below 500
-    "Technology": "https://www.meesho.com/tech-accessories/pl/e7u9i0",
-    "Books": "https://www.meesho.com/books/pl/f5r2q1",
-    "Fashion": "https://www.meesho.com/budget-fashion/pl/j8m3n6",
-    "Music": "https://www.meesho.com/headphones-earphones/pl/p2o8i7",
-    "Gaming": "https://www.meesho.com/gaming-accessories/pl/c5v9b1",
-    "Beauty": "https://www.meesho.com/beauty-products/pl/z3x5c1",
-    "Sports": "https://www.meesho.com/fitness-accessories/pl/q3w7e9",
-    "Art": "https://www.meesho.com/stationery/pl/g5h8j2",
-    "Home Decor": "https://www.meesho.com/home-decor/pl/f4d6s1",
-    "Photography": "https://www.meesho.com/camera-accessories/pl/u8i2o4",
-    "Cooking": "https://www.meesho.com/kitchen-tools/pl/x3c7v9",
-    "Outdoor": "https://www.meesho.com/outdoor-accessories/pl/b4n8m2",
-    "Fitness": "https://www.meesho.com/fitness-equipment/pl/t7r3e9"
+    "Technology": "https://www.meesho.com/tech-accessories-under-500/s?searchType=suggested&searchData=tech-accessories-under-500",
+    "Books": "https://www.meesho.com/books-under-500/s?searchType=suggested&searchData=books-under-500",
+    "Fashion": "https://www.meesho.com/accessories-under-500/pl/j8m3n6",
+    "Music": "https://www.meesho.com/headphones-earphones-under-500/s?searchType=suggested&searchData=headphones-under-500",
+    "Gaming": "https://www.meesho.com/gaming-accessories-under-500/s?searchType=suggested&searchData=gaming-accessories-under-500",
+    "Beauty": "https://www.meesho.com/beauty-products-under-500/s?searchType=suggested&searchData=beauty-products-under-500",
+    "Sports": "https://www.meesho.com/fitness-accessories-under-500/s?searchType=suggested&searchData=fitness-accessories-under-500",
+    "Art": "https://www.meesho.com/stationery-under-500/s?searchType=suggested&searchData=stationery-under-500",
+    "Home Decor": "https://www.meesho.com/home-decor-under-500/s?searchType=suggested&searchData=home-decor-under-500",
+    "Photography": "https://www.meesho.com/camera-accessories-under-500/s?searchType=suggested&searchData=camera-accessories-under-500",
+    "Cooking": "https://www.meesho.com/kitchen-tools-under-500/s?searchType=suggested&searchData=kitchen-tools-under-500",
+    "Outdoor": "https://www.meesho.com/outdoor-accessories-under-500/s?searchType=suggested&searchData=outdoor-accessories-under-500",
+    "Fitness": "https://www.meesho.com/fitness-equipment-under-500/s?searchType=suggested&searchData=fitness-equipment-under-500"
   },
   "Medium Budget": { // 500-5000
-    "Technology": "https://www.meesho.com/electronics/pl/r5t8y1",
-    "Books": "https://www.meesho.com/premium-books/pl/w2e6r9",
-    "Fashion": "https://www.meesho.com/fashion/pl/a4s7d2",
-    "Music": "https://www.meesho.com/speakers-headphones/pl/z6x4c8",
-    "Gaming": "https://www.meesho.com/gaming/pl/q9w5e3",
+    "Technology": "https://www.meesho.com/electronic-devices/pl/r5t8y1",
+    "Books": "https://www.meesho.com/books-and-stationery/pl/w2e6r9",
+    "Fashion": "https://www.meesho.com/men-accessories/pl/a4s7d2",
+    "Music": "https://www.meesho.com/headphones-and-earphones/pl/z6x4c8",
+    "Gaming": "https://www.meesho.com/gaming-accessories/pl/q9w5e3",
     "Beauty": "https://www.meesho.com/beauty-products/pl/r4t6y2",
     "Sports": "https://www.meesho.com/sports-equipment/pl/f8g5h3",
     "Art": "https://www.meesho.com/art-supplies/pl/j9k3l7",
     "Home Decor": "https://www.meesho.com/home-furnishing/pl/p9o3i5",
-    "Photography": "https://www.meesho.com/photography/pl/l3k8j5",
+    "Photography": "https://www.meesho.com/camera-accessories/pl/l3k8j5",
     "Cooking": "https://www.meesho.com/kitchen-appliances/pl/t6r9e3",
-    "Outdoor": "https://www.meesho.com/camping-hiking/pl/c8v2b5",
-    "Fitness": "https://www.meesho.com/gym-equipment/pl/m2n5b7"
+    "Outdoor": "https://www.meesho.com/outdoor-equipment/pl/c8v2b5",
+    "Fitness": "https://www.meesho.com/fitness-equipment/pl/m2n5b7"
   }
 };
 
@@ -461,6 +460,7 @@ const occasions = [
   "Diwali", "Holi", "Raksha Bandhan", "Eid",
   "Navratri", "Durga Puja", "Ganesh Chaturthi",
   "Karwa Chauth", "Bhai Dooj", "Pongal",
+  
   "Onam", "Lohri", "Makar Sankranti",
   
   "Christmas", "New Year", "Valentine's Day",
@@ -666,23 +666,6 @@ const Dashboard = () => {
             <Gift className="w-8 h-8 text-white" />
             <h1 className="text-3xl font-bold text-white">Personalize Your Gifts</h1>
           </div>
-
-          {/* About this app section */}
-          <Card className="backdrop-blur-sm bg-white/80 mb-4">
-            <CardHeader>
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Info className="w-5 h-5 text-blue-500" />
-                About This App
-              </h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">
-                This gift suggestion app is built with React, TypeScript, Tailwind CSS, and Shadcn UI. 
-                It helps you find personalized gifts on Meesho within your budget by considering your 
-                interests and the occasion.
-              </p>
-            </CardContent>
-          </Card>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Interests selection */}
