@@ -149,6 +149,8 @@ const Dashboard = () => {
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredOccasions, setFilteredOccasions] = useState<string[]>(allOccasions);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+  const [cartItems, setCartItems] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -238,6 +240,46 @@ const Dashboard = () => {
         description: `Found ${newSuggestions.length} gift suggestions for you.`,
       });
     }
+  };
+
+  const handleAddToWishlist = (suggestion: GiftSuggestion) => {
+    setLikedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(suggestion.name)) {
+        newSet.delete(suggestion.name);
+        toast({
+          title: "Removed from wishlist",
+          description: `${suggestion.name} has been removed from your wishlist`
+        });
+      } else {
+        newSet.add(suggestion.name);
+        toast({
+          title: "Added to wishlist",
+          description: `${suggestion.name} has been added to your wishlist`
+        });
+      }
+      return newSet;
+    });
+  };
+
+  const handleAddToCart = (suggestion: GiftSuggestion) => {
+    setCartItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(suggestion.name)) {
+        newSet.delete(suggestion.name);
+        toast({
+          title: "Removed from cart",
+          description: `${suggestion.name} has been removed from your cart`
+        });
+      } else {
+        newSet.add(suggestion.name);
+        toast({
+          title: "Added to cart",
+          description: `${suggestion.name} has been added to your cart`
+        });
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -387,34 +429,69 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {suggestions.map((suggestion, index) => (
-                      <a 
-                        key={index}
-                        href={suggestion.shopLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex flex-col rounded-lg overflow-hidden border hover:shadow-xl transition-all duration-300 hover:scale-[1.03] hover:border-emerald-300 hover:bg-emerald-50/30"
-                      >
-                        <div className="relative h-48 overflow-hidden bg-gray-100">
-                          <img 
-                            src={suggestion.image}
-                            alt={suggestion.name}
-                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "https://images.meesho.com/images/products/207082345/jw3uy_512.jpg";
-                            }}
-                          />
-                          <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                            ₹{suggestion.price}
+                      <Card key={index} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
+                        <a href={suggestion.shopLink} target="_blank" rel="noopener noreferrer" className="block">
+                          <div className="relative h-48 overflow-hidden bg-gray-100">
+                            <img 
+                              src={suggestion.image}
+                              alt={suggestion.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              onError={(e) => {
+                                const imgs = [
+                                  "https://images.meesho.com/images/products/207082345/jw3uy_512.jpg",
+                                  "https://images.meesho.com/images/products/266650767/m33ea_512.jpg",
+                                  "https://images.meesho.com/images/products/288171825/qnl5p_512.jpg",
+                                  "https://images.meesho.com/images/products/219166248/wbqao_512.jpg"
+                                ];
+                                (e.target as HTMLImageElement).src = imgs[index % imgs.length];
+                              }}
+                            />
+                            <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                              ₹{suggestion.price}
+                            </div>
                           </div>
-                        </div>
-                        <div className="p-4 flex flex-col flex-grow">
+                        </a>
+                        <div className="p-4">
                           <h3 className="font-bold text-lg mb-2">{suggestion.name}</h3>
-                          <p className="text-gray-600 text-sm flex-grow">{suggestion.description}</p>
-                          <div className="mt-4 text-sm font-medium text-emerald-600 hover:underline">
-                            View on Meesho
+                          <p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
+                          <div className="flex justify-between items-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`${
+                                likedItems.has(suggestion.name) 
+                                  ? 'bg-rose-100 text-rose-600 border-rose-200' 
+                                  : 'text-gray-600'
+                              }`}
+                              onClick={() => handleAddToWishlist(suggestion)}
+                            >
+                              <Heart className={`${likedItems.has(suggestion.name) ? 'fill-current' : ''}`} />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={`${
+                                cartItems.has(suggestion.name)
+                                  ? 'bg-blue-100 text-blue-600 border-blue-200'
+                                  : 'text-gray-600'
+                              }`}
+                              onClick={() => handleAddToCart(suggestion)}
+                            >
+                              <ShoppingBag className={`${cartItems.has(suggestion.name) ? 'fill-current' : ''}`} />
+                            </Button>
+                            <a
+                              href={suggestion.shopLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center"
+                            >
+                              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                                Buy Now
+                              </Button>
+                            </a>
                           </div>
                         </div>
-                      </a>
+                      </Card>
                     ))}
                   </div>
                 </CardContent>
