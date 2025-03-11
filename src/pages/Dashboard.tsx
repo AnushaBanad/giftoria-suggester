@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,23 +17,186 @@ interface GiftSuggestion {
 }
 
 const giftDatabase: Record<string, GiftSuggestion[]> = {
-  // ... keep existing code (gift database content)
+  "Technology": [
+    {
+      name: "Wireless Earbuds",
+      price: 1200,
+      image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "High-quality wireless earbuds with noise cancellation",
+      shopLink: "https://www.meesho.com/tech"
+    },
+    {
+      name: "Smart Watch",
+      price: 2500,
+      image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Fitness tracking smart watch with heart rate monitor",
+      shopLink: "https://www.meesho.com/tech"
+    }
+  ],
+  "Books": [
+    {
+      name: "Best-selling Novel",
+      price: 350,
+      image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Award-winning fiction novel by a renowned author",
+      shopLink: "https://www.meesho.com/books"
+    },
+    {
+      name: "Self-Help Book",
+      price: 450,
+      image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Bestselling self-improvement book for personal growth",
+      shopLink: "https://www.meesho.com/books"
+    }
+  ],
+  "Fashion": [
+    {
+      name: "Designer Wallet",
+      price: 1200,
+      image: "https://images.unsplash.com/photo-1606159068539-43f36b99d1b2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Stylish leather wallet with multiple compartments",
+      shopLink: "https://www.meesho.com/fashion"
+    },
+    {
+      name: "Scarf Set",
+      price: 500,
+      image: "https://images.unsplash.com/photo-1601924351433-3d7a64899f1b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Elegant scarf set for all occasions",
+      shopLink: "https://www.meesho.com/fashion"
+    }
+  ],
+  "Music": [
+    {
+      name: "Portable Bluetooth Speaker",
+      price: 800,
+      image: "https://images.unsplash.com/photo-1589003077984-894e133f8885?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Compact speaker with excellent sound quality",
+      shopLink: "https://www.meesho.com/music"
+    },
+    {
+      name: "Vinyl Record Collection",
+      price: 1500,
+      image: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Curated collection of classic vinyl records",
+      shopLink: "https://www.meesho.com/music"
+    }
+  ],
+  "Gaming": [
+    {
+      name: "Gaming Mouse",
+      price: 750,
+      image: "https://images.unsplash.com/photo-1616588589676-62b3bd4ff6d2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "High-precision gaming mouse with RGB lighting",
+      shopLink: "https://www.meesho.com/gaming"
+    },
+    {
+      name: "Gaming Headset",
+      price: 1200,
+      image: "https://images.unsplash.com/photo-1591105575633-922c8897af9a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Comfortable headset with surround sound for immersive gaming",
+      shopLink: "https://www.meesho.com/gaming"
+    }
+  ],
+  "Beauty": [
+    {
+      name: "Luxury Skincare Set",
+      price: 1800,
+      image: "https://images.unsplash.com/photo-1615760134953-e9d1cc1cb1a0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Premium skincare collection for radiant skin",
+      shopLink: "https://www.meesho.com/beauty"
+    },
+    {
+      name: "Makeup Palette",
+      price: 900,
+      image: "https://images.unsplash.com/photo-1612878010854-1250dfc5000a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Versatile makeup palette with essential colors",
+      shopLink: "https://www.meesho.com/beauty"
+    }
+  ],
+  "Jewelry": [
+    {
+      name: "Silver Pendant Necklace",
+      price: 650,
+      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Elegant silver pendant on a delicate chain",
+      shopLink: "https://www.meesho.com/jewelry"
+    },
+    {
+      name: "Pearl Earrings",
+      price: 450,
+      image: "https://images.unsplash.com/photo-1619119069152-a2b331eb392a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Classic pearl earrings for any occasion",
+      shopLink: "https://www.meesho.com/jewelry"
+    },
+    {
+      name: "Birthstone Bracelet",
+      price: 350,
+      image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Personalized bracelet with birthstone charms",
+      shopLink: "https://www.meesho.com/jewelry"
+    }
+  ],
+  "Home Decor": [
+    {
+      name: "Scented Candle Set",
+      price: 600,
+      image: "https://images.unsplash.com/photo-1603913996638-c01100417b4a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Set of luxurious scented candles for a cozy atmosphere",
+      shopLink: "https://www.meesho.com/homedecor"
+    },
+    {
+      name: "Decorative Cushions",
+      price: 550,
+      image: "https://images.unsplash.com/photo-1540730930991-a9286a5f5020?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Set of stylish cushions to enhance your living space",
+      shopLink: "https://www.meesho.com/homedecor"
+    }
+  ]
 };
 
 const alternativeShops: Record<string, Record<string, string>> = {
-  // ... keep existing code (alternative shops content)
+  "Low Budget": {
+    "Technology": "https://www.meesho.com/tech-gadgets-under-500",
+    "Books": "https://www.meesho.com/books-under-500",
+    "Fashion": "https://www.meesho.com/fashion-under-500",
+    "Music": "https://www.meesho.com/music-under-500",
+    "Gaming": "https://www.meesho.com/gaming-under-500",
+    "Beauty": "https://www.meesho.com/beauty-under-500",
+    "Jewelry": "https://www.meesho.com/jewelry-under-500",
+    "Home Decor": "https://www.meesho.com/home-decor-under-500"
+  },
+  "Medium Budget": {
+    "Technology": "https://www.meesho.com/tech-gadgets-under-2000",
+    "Fashion": "https://www.meesho.com/fashion-under-2000",
+    "Home Decor": "https://www.meesho.com/home-decor-under-2000",
+    "Jewelry": "https://www.meesho.com/jewelry-under-2000"
+  },
+  "High Budget": {
+    "Technology": "https://www.meesho.com/premium-tech",
+    "Jewelry": "https://www.meesho.com/premium-jewelry",
+    "Fashion": "https://www.meesho.com/premium-fashion"
+  }
 };
 
 const interestToOccasions: Record<string, string[]> = {
-  // ... keep existing code (interest to occasions mapping)
+  "Technology": ["Birthday", "Anniversary", "Graduation", "Housewarming", "Corporate Gifts"],
+  "Books": ["Birthday", "Graduation", "Retirement", "Holiday", "Corporate Gifts"],
+  "Fashion": ["Birthday", "Anniversary", "Wedding", "Holiday", "Graduation"],
+  "Music": ["Birthday", "Anniversary", "Graduation", "Holiday"],
+  "Gaming": ["Birthday", "Graduation", "Holiday", "Friendship Day"],
+  "Beauty": ["Birthday", "Anniversary", "Valentine's Day", "Mother's Day", "Wedding"],
+  "Jewelry": ["Birthday", "Anniversary", "Valentine's Day", "Mother's Day", "Wedding"],
+  "Home Decor": ["Housewarming", "Wedding", "Anniversary", "Holiday", "Retirement"]
 };
 
 const interests = [
-  // ... keep existing code (interests array)
+  "Technology", "Books", "Fashion", "Music", "Gaming", "Beauty", "Jewelry", "Home Decor"
 ];
 
 const allOccasions = [
-  // ... keep existing code (occasions array)
+  "Birthday", "Anniversary", "Wedding", "Graduation", "Housewarming", 
+  "Valentine's Day", "Mother's Day", "Father's Day", "Holiday", 
+  "Retirement", "Corporate Gifts", "Friendship Day", "Baby Shower"
 ];
 
 // Enhanced gift image mapping based on categories and budget
@@ -62,6 +226,10 @@ const giftImagesByCategory: Record<string, Record<string, string[]>> = {
       "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     ],
+    "Jewelry": [
+      "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1535632787350-4e68ef0ac584?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    ],
     "default": [
       "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
@@ -79,6 +247,10 @@ const giftImagesByCategory: Record<string, Record<string, string[]>> = {
     "Home Decor": [
       "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    ],
+    "Jewelry": [
+      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     ],
     "default": [
       "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
@@ -150,7 +322,7 @@ const generateGiftSuggestions = (interests: string[], budget: number, occasion: 
         suggestions.push({
           name: `Affordable ${interest} Items`,
           price: budget,
-          image: `https://images.meesho.com/images/products/207082345/jw3uy_512.jpg`,
+          image: getRelevantGiftImage(budget, [interest]),
           description: `Find affordable ${interest.toLowerCase()} items within your budget`,
           shopLink: altShopLink
         });
@@ -179,7 +351,7 @@ const generateGiftSuggestions = (interests: string[], budget: number, occasion: 
           suggestions.push({
             name: `Budget-Friendly ${interest} Gift`,
             price: budget,
-            image: `https://images.meesho.com/images/products/98765432/kydpw_512.jpg`,
+            image: getRelevantGiftImage(budget, [interest]),
             description: `Special selection of ${interest.toLowerCase()} items within your budget range`,
             shopLink: alternativeShops[budgetCategory][interest]
           });
@@ -196,7 +368,7 @@ const generateGiftSuggestions = (interests: string[], budget: number, occasion: 
     return [{
       name: "Custom Gift Finder",
       price: budget,
-      image: "https://images.meesho.com/images/products/123456789/srzyx_512.jpg",
+      image: getRelevantGiftImage(budget, interests),
       description: `We'll help you find the perfect gift within your ₹${budget} budget`,
       shopLink: "https://www.meesho.com/gift-finder"
     }];
@@ -241,7 +413,7 @@ const Dashboard = () => {
 
       setFilteredOccasions(Array.from(relevantOccasions).sort());
     }
-  }, [selectedInterests]);
+  }, [selectedInterests, selectedOccasion]);
 
   const handleInterestClick = (interest: string) => {
     setSelectedInterests(prev =>
@@ -294,16 +466,11 @@ const Dashboard = () => {
 
     console.log("Generated suggestions:", newSuggestions);
     
-    // Apply relevant images to each suggestion
-    const suggestionsWithImages = newSuggestions.map(suggestion => ({
-      ...suggestion,
-      image: getRelevantGiftImage(suggestion.price, selectedInterests)
-    }));
-    
-    setSuggestions(suggestionsWithImages);
+    // Each suggestion already has its image properly set in generateGiftSuggestions
+    setSuggestions(newSuggestions);
     setShowSuggestions(true);
 
-    if (suggestionsWithImages.length === 0) {
+    if (newSuggestions.length === 0) {
       toast({
         variant: "destructive",
         title: "No exact matches found",
@@ -312,7 +479,7 @@ const Dashboard = () => {
     } else {
       toast({
         title: "Perfect gifts found!",
-        description: `Found ${suggestionsWithImages.length} gift suggestions for you.`,
+        description: `Found ${newSuggestions.length} gift suggestions for you.`,
       });
     }
   };
@@ -505,26 +672,24 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {suggestions.map((suggestion, index) => (
                       <Card key={index} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
-                        <a href={suggestion.shopLink} target="_blank" rel="noopener noreferrer" className="block">
-                          <div className="relative h-48 overflow-hidden bg-gray-100">
-                            <img 
-                              src={suggestion.image}
-                              alt={suggestion.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                              onError={(e) => {
-                                const fallbackImages = [
-                                  "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500",
-                                  "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500",
-                                  "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500"
-                                ];
-                                (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
-                              }}
-                            />
-                            <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                              ₹{suggestion.price}
-                            </div>
+                        <div className="relative h-48 overflow-hidden bg-gray-100">
+                          <img 
+                            src={suggestion.image}
+                            alt={suggestion.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              const fallbackImages = [
+                                "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500",
+                                "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500",
+                                "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500"
+                              ];
+                              (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
+                            }}
+                          />
+                          <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            ₹{suggestion.price}
                           </div>
-                        </a>
+                        </div>
                         <div className="p-4">
                           <h3 className="font-bold text-lg mb-2">{suggestion.name}</h3>
                           <p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
