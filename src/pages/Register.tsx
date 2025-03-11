@@ -12,6 +12,7 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -57,6 +58,14 @@ const Register = () => {
     e.preventDefault();
     
     if (validateForm()) {
+      // Save user data to localStorage
+      const userData = {
+        name: name,
+        email: email,
+        phone: phone || "+91 9876543210" // Use entered phone or default
+      };
+      localStorage.setItem('userData', JSON.stringify(userData));
+      
       toast({
         title: "Registration successful!",
         description: "Welcome to our gift recommendation platform.",
@@ -113,6 +122,17 @@ const Register = () => {
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="Enter your phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </div>
 
             <div className="space-y-2">

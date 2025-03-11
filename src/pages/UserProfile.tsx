@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,17 +69,56 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [userData, setUserData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+91 9876543210"
+  // Initialize with stored values from localStorage or default values
+  const [userData, setUserData] = useState(() => {
+    const storedData = localStorage.getItem('userData');
+    if (storedData) {
+      return JSON.parse(storedData);
+    }
+    return {
+      name: "",
+      email: "",
+      phone: ""
+    };
   });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUserData, setEditedUserData] = useState({...userData});
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
+
+  // Load user data from localStorage
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+      setEditedUserData(JSON.parse(storedUserData));
+    }
+  }, []);
+
+  // Handle editing profile data
+  const handleEditProfile = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveProfile = () => {
+    setUserData(editedUserData);
+    localStorage.setItem('userData', JSON.stringify(editedUserData));
+    setIsEditing(false);
+    toast({
+      title: "Profile updated",
+      description: "Your profile information has been updated successfully."
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditedUserData({...userData});
+    setIsEditing(false);
+  };
 
   const handlePasswordChange = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +157,9 @@ const UserProfile = () => {
     const confirmed = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
     
     if (confirmed) {
+      // Clear local storage
+      localStorage.removeItem('userData');
+      
       toast({
         title: "Account deleted",
         description: "Your account has been deleted successfully."
@@ -191,23 +234,62 @@ const UserProfile = () => {
                 </h2>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex flex-col space-y-1">
-                  <Label>Full Name</Label>
-                  <Input value={userData.name} readOnly className="bg-gray-50" />
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <Label>Email Address</Label>
-                  <Input value={userData.email} readOnly className="bg-gray-50" />
-                </div>
-                <div className="flex flex-col space-y-1">
-                  <Label>Phone Number</Label>
-                  <Input value={userData.phone} readOnly className="bg-gray-50" />
-                </div>
+                {isEditing ? (
+                  <>
+                    <div className="flex flex-col space-y-1">
+                      <Label>Full Name</Label>
+                      <Input 
+                        value={editedUserData.name} 
+                        onChange={(e) => setEditedUserData({...editedUserData, name: e.target.value})} 
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <Label>Email Address</Label>
+                      <Input 
+                        value={editedUserData.email} 
+                        onChange={(e) => setEditedUserData({...editedUserData, email: e.target.value})} 
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <Label>Phone Number</Label>
+                      <Input 
+                        value={editedUserData.phone} 
+                        onChange={(e) => setEditedUserData({...editedUserData, phone: e.target.value})} 
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col space-y-1">
+                      <Label>Full Name</Label>
+                      <Input value={userData.name || "Not provided"} readOnly className="bg-gray-50" />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <Label>Email Address</Label>
+                      <Input value={userData.email || "Not provided"} readOnly className="bg-gray-50" />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <Label>Phone Number</Label>
+                      <Input value={userData.phone || "Not provided"} readOnly className="bg-gray-50" />
+                    </div>
+                  </>
+                )}
               </CardContent>
-              <CardFooter className="flex justify-end">
-                <Button className="bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600">
-                  <Settings className="w-4 h-4 mr-2" /> Edit Profile
-                </Button>
+              <CardFooter className="flex justify-end gap-2">
+                {isEditing ? (
+                  <>
+                    <Button variant="outline" onClick={handleCancelEdit}>
+                      Cancel
+                    </Button>
+                    <Button className="bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600" onClick={handleSaveProfile}>
+                      Save Changes
+                    </Button>
+                  </>
+                ) : (
+                  <Button className="bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600" onClick={handleEditProfile}>
+                    <Settings className="w-4 h-4 mr-2" /> Edit Profile
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </TabsContent>

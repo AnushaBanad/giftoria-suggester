@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -49,6 +48,14 @@ const Login = () => {
         setTimeout(() => navigate("/register"), 2000);
         return;
       }
+
+      // Save user data to localStorage
+      const userData = {
+        name: "User", // Default name, could be improved with a real backend
+        email: email,
+        phone: "+91 9876543210" // Default phone
+      };
+      localStorage.setItem('userData', JSON.stringify(userData));
 
       toast({
         title: "Login successful!",
@@ -132,4 +139,3 @@ const Login = () => {
 };
 
 export default Login;
-
