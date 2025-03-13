@@ -17,53 +17,34 @@ import {
   ShoppingBag, 
   ChevronLeft,
   Settings,
-  Gift
+  Gift,
+  ExternalLink
 } from "lucide-react";
+import { giftDatabase } from "@/data/giftDatabase";
+import { 
+  getUserPreferences, 
+  getLikedItemsArray, 
+  getCartItemsArray, 
+  saveLikedItems, 
+  saveCartItems 
+} from "@/utils/userPreferences";
 
-const likedItems = [
-  {
-    id: 1,
-    name: "Smart Watch Pro",
-    price: 15999,
-    image: "https://images.meesho.com/images/products/266650767/m33ea_512.jpg",
-    link: "https://www.meesho.com/smart-watches-for-men/p/3b8w2r"
-  },
-  {
-    id: 2,
-    name: "Wireless Earbuds",
-    price: 8999,
-    image: "https://images.meesho.com/images/products/288171825/qnl5p_512.jpg",
-    link: "https://www.meesho.com/smart-wireless-true-bluetooth-51-earbuds-tws-with-mic-ipx4-waterproof/p/3jrwka"
+// Helper to find gift details by name across all categories
+const findGiftByName = (name: string) => {
+  for (const category in giftDatabase) {
+    const gift = giftDatabase[category].find(g => g.name === name);
+    if (gift) return gift;
   }
-];
-
-const cartItems = [
-  {
-    id: 3,
-    name: "Premium Book Collection",
-    price: 4999,
-    quantity: 1,
-    image: "https://images.meesho.com/images/products/219166248/wbqao_512.jpg",
-    link: "https://www.meesho.com/mindset-the-new-psychology-of-success-how-we-can-learn-to-fulfill-our-potential-book-by-carol-s-dweck-english-paperback/p/3c3mqj"
-  }
-];
-
-const orders = [
-  {
-    id: "ORD12345",
-    date: "2023-10-15",
-    items: [
-      {
-        name: "Digital Drawing Tablet",
-        price: 8999,
-        quantity: 1,
-        image: "https://images.meesho.com/images/products/128479541/gq7io_512.jpg"
-      }
-    ],
-    status: "Delivered",
-    total: 8999
-  }
-];
+  
+  // Default gift if not found
+  return {
+    name,
+    price: 0,
+    image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    description: "Item details not available",
+    shopLink: "https://www.meesho.com/gift-finder"
+  };
+};
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -84,6 +65,8 @@ const UserProfile = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedUserData, setEditedUserData] = useState({...userData});
+  const [likedItems, setLikedItems] = useState<string[]>([]);
+  const [cartItems, setCartItems] = useState<string[]>([]);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -91,13 +74,16 @@ const UserProfile = () => {
     confirmPassword: ""
   });
 
-  // Load user data from localStorage
+  // Load user data and saved items from localStorage
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
     if (storedUserData) {
       setUserData(JSON.parse(storedUserData));
       setEditedUserData(JSON.parse(storedUserData));
     }
+    
+    setLikedItems(getLikedItemsArray());
+    setCartItems(getCartItemsArray());
   }, []);
 
   // Handle editing profile data
@@ -178,14 +164,28 @@ const UserProfile = () => {
     navigate("/");
   };
 
-  const removeFromLiked = (id: number) => {
+  const removeFromLiked = (name: string) => {
+    const userPrefs = getUserPreferences();
+    const newLikedItems = new Set(userPrefs.likedItems);
+    newLikedItems.delete(name);
+    
+    saveLikedItems(newLikedItems);
+    setLikedItems(Array.from(newLikedItems));
+    
     toast({
       title: "Item removed",
       description: "Item removed from your liked items."
     });
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (name: string) => {
+    const userPrefs = getUserPreferences();
+    const newCartItems = new Set(userPrefs.cartItems);
+    newCartItems.delete(name);
+    
+    saveCartItems(newCartItems);
+    setCartItems(Array.from(newCartItems));
+    
     toast({
       title: "Item removed",
       description: "Item removed from your cart."
@@ -368,16 +368,64 @@ const UserProfile = () => {
                 </h2>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Heart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">Your wishlist is empty</h3>
-                  <p className="text-gray-500 mb-4">Save items you love by clicking the heart icon</p>
-                  <Link to="/dashboard">
-                    <Button variant="outline">
-                      Start Browsing
-                    </Button>
-                  </Link>
-                </div>
+                {likedItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Heart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">Your wishlist is empty</h3>
+                    <p className="text-gray-500 mb-4">Save items you love by clicking the heart icon</p>
+                    <Link to="/dashboard">
+                      <Button variant="outline">
+                        Start Browsing
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {likedItems.map((itemName, index) => {
+                      const gift = findGiftByName(itemName);
+                      return (
+                        <Card key={index} className="flex overflow-hidden hover:shadow-md transition-shadow">
+                          <div className="w-1/3 h-full">
+                            <img 
+                              src={gift.image} 
+                              alt={gift.name} 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500";
+                              }}
+                            />
+                          </div>
+                          <div className="flex flex-col justify-between w-2/3 p-3">
+                            <div>
+                              <h3 className="font-semibold">{gift.name}</h3>
+                              <p className="text-sm text-gray-500">{gift.price > 0 ? `₹${gift.price}` : "Price not available"}</p>
+                            </div>
+                            <div className="flex justify-between items-center mt-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="text-red-500 border-red-200 hover:bg-red-50"
+                                onClick={() => removeFromLiked(itemName)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1" /> Remove
+                              </Button>
+                              {gift.shopLink && (
+                                <a 
+                                  href={gift.shopLink} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 flex items-center hover:underline"
+                                >
+                                  View <ExternalLink className="w-3 h-3 ml-1" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -391,16 +439,85 @@ const UserProfile = () => {
                 </h2>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">Your cart is empty</h3>
-                  <p className="text-gray-500 mb-4">Add items to your cart to get started</p>
-                  <Link to="/dashboard">
-                    <Button variant="outline">
-                      Start Shopping
-                    </Button>
-                  </Link>
-                </div>
+                {cartItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">Your cart is empty</h3>
+                    <p className="text-gray-500 mb-4">Add items to your cart to get started</p>
+                    <Link to="/dashboard">
+                      <Button variant="outline">
+                        Start Shopping
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {cartItems.map((itemName, index) => {
+                      const gift = findGiftByName(itemName);
+                      return (
+                        <Card key={index} className="flex overflow-hidden">
+                          <div className="w-1/4 md:w-1/5">
+                            <img 
+                              src={gift.image} 
+                              alt={gift.name} 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500";
+                              }}
+                            />
+                          </div>
+                          <div className="flex flex-col justify-between w-3/4 md:w-4/5 p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                              <div>
+                                <h3 className="font-semibold text-lg">{gift.name}</h3>
+                                <p className="text-sm text-gray-600 mt-1">{gift.description}</p>
+                              </div>
+                              <div className="flex flex-col md:items-end mt-2 md:mt-0">
+                                <p className="font-bold text-lg">{gift.price > 0 ? `₹${gift.price}` : "Price not available"}</p>
+                                <div className="flex space-x-2 mt-2 md:mt-auto">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="text-red-500 border-red-200 hover:bg-red-50"
+                                    onClick={() => removeFromCart(itemName)}
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-1" /> Remove
+                                  </Button>
+                                  {gift.shopLink && (
+                                    <a href={gift.shopLink} target="_blank" rel="noopener noreferrer">
+                                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                                        Buy Now
+                                      </Button>
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                    
+                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mt-6">
+                      <div>
+                        <p className="text-lg font-semibold">Total:</p>
+                        <p className="text-gray-500 text-sm">({cartItems.length} items)</p>
+                      </div>
+                      <p className="text-2xl font-bold">
+                        ₹{cartItems.reduce((total, itemName) => {
+                          const gift = findGiftByName(itemName);
+                          return total + gift.price;
+                        }, 0)}
+                      </p>
+                    </div>
+                    
+                    <div className="flex justify-end mt-4">
+                      <Button className="bg-emerald-600 hover:bg-emerald-700">
+                        Proceed to Checkout
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
