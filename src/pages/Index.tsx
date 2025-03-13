@@ -1,8 +1,8 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Gift, Heart, Package } from "lucide-react";
+import { Gift, Heart, Package, Presentation } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -52,15 +52,27 @@ const Index = () => {
             Discover thoughtful gift ideas tailored to your interests and budget
           </p>
 
-          <Button
-            className="text-lg px-8 py-6 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-all duration-300 transform hover:scale-105"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onClick={() => navigate("/login")}
-          >
-            Get Started
-            <Heart className={`ml-2 ${isHovered ? 'text-theme-rose' : 'text-white'} transition-colors duration-300`} />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              className="text-lg px-8 py-6 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-all duration-300 transform hover:scale-105"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              onClick={() => navigate("/login")}
+            >
+              Get Started
+              <Heart className={`ml-2 ${isHovered ? 'text-theme-rose' : 'text-white'} transition-colors duration-300`} />
+            </Button>
+            
+            <Link to="/presentation">
+              <Button
+                variant="outline"
+                className="text-lg px-8 py-6 border-gray-800 text-gray-800 hover:bg-gray-100 rounded-full transition-all duration-300 transform hover:scale-105"
+              >
+                View Presentation
+                <Presentation className="ml-2 text-emerald-600" />
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Features Section */}
@@ -100,4 +112,3 @@ const Index = () => {
 };
 
 export default Index;
-
