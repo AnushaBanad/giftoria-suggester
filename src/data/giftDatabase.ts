@@ -323,4 +323,4 @@ export const giftDatabase: Record<string, GiftSuggestion[]> = {
     {
       name: "Silver Pendant Necklace",
       price: 650,
-      image: "https://images.unsplash.com/photo-1515562141207
+      image: "https://images.unsplash.com/photo-1515562141207-7a
