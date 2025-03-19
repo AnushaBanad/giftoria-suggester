@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,11 +10,7 @@ import { Link } from "react-router-dom";
 import { 
   interests, 
   interestToOccasions, 
-  allOccasions, 
-  giftDatabase, 
-  alternativeShops, 
-  getRelevantGiftImage,
-  getInterestBasedGiftSuggestions
+  allOccasions
 } from "@/data/giftDatabase";
 import { 
   getUserPreferences, 
@@ -22,110 +19,9 @@ import {
   saveCartItems,
   GiftSuggestion
 } from "@/utils/userPreferences";
+import { generateGiftSuggestions } from "@/utils/giftSuggestion";
 import { GiftSuggestionCard } from "@/components/GiftSuggestionCard";
-
-const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
-  console.log("Generating suggestions for:", { interests, budget, occasion });
-  let suggestions: GiftSuggestion[] = [];
-  const budgetCategory = budget < 500 ? "Low Budget" : (budget < 5000 ? "Medium Budget" : "High Budget");
-  
-  // First try to get highly relevant gifts based on the primary interest
-  if (interests.length > 0) {
-    const primaryInterest = interests[0];
-    const interestSuggestions = getInterestBasedGiftSuggestions(primaryInterest, budget);
-    if (interestSuggestions.length > 0) {
-      suggestions = [...interestSuggestions];
-      console.log(`Found ${interestSuggestions.length} suggestions for primary interest: ${primaryInterest}`);
-    }
-  }
-  
-  // If we didn't get enough suggestions from the primary interest, look at other interests
-  if (suggestions.length < 3 && interests.length > 1) {
-    for (let i = 1; i < interests.length; i++) {
-      const interest = interests[i];
-      const interestSuggestions = getInterestBasedGiftSuggestions(interest, budget);
-      if (interestSuggestions.length > 0) {
-        suggestions = [...suggestions, ...interestSuggestions];
-        console.log(`Added ${interestSuggestions.length} suggestions for interest: ${interest}`);
-      }
-      if (suggestions.length >= 6) break;
-    }
-  }
-
-  // If we still don't have enough suggestions, try the fallback approach
-  if (suggestions.length === 0) {
-    console.log("No interest-based suggestions found, adding generic suggestions");
-    
-    interests.forEach(interest => {
-      if (giftDatabase[interest]) {
-        console.log("Found gifts for interest:", interest);
-        const categoryGifts = giftDatabase[interest];
-        const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
-        
-        if (affordableGifts.length === 0 && alternativeShops[budgetCategory] && alternativeShops[budgetCategory][interest]) {
-          const altShopLink = alternativeShops[budgetCategory][interest];
-          suggestions.push({
-            name: `Affordable ${interest} Items`,
-            price: budget,
-            image: getRelevantGiftImage(budget, [interest]),
-            description: `Find affordable ${interest.toLowerCase()} items within your budget`,
-            shopLink: altShopLink
-          });
-        } else {
-          suggestions.push(...affordableGifts);
-        }
-      }
-    });
-
-    if (suggestions.length === 0) {
-      let foundAffordableGift = false;
-      Object.entries(giftDatabase).forEach(([category, categoryGifts]) => {
-        const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
-        if (affordableGifts.length > 0) {
-          foundAffordableGift = true;
-          suggestions.push(...affordableGifts);
-        }
-      });
-      
-      if (!foundAffordableGift) {
-        const randomInterests = Object.keys(alternativeShops[budgetCategory] || {}).slice(0, 3);
-        randomInterests.forEach(interest => {
-          if (alternativeShops[budgetCategory][interest]) {
-            suggestions.push({
-              name: `Budget-Friendly ${interest} Gift`,
-              price: budget,
-              image: getRelevantGiftImage(budget, [interest]),
-              description: `Special selection of ${interest.toLowerCase()} items within your budget range`,
-              shopLink: alternativeShops[budgetCategory][interest]
-            });
-          }
-        });
-      }
-    }
-  }
-
-  const uniqueSuggestions = Array.from(
-    new Map(suggestions.map(item => [item.name, item])).values()
-  );
-
-  if (uniqueSuggestions.length === 0) {
-    return [{
-      name: "Custom Gift Finder",
-      price: budget,
-      image: getRelevantGiftImage(budget, interests),
-      description: `We'll help you find the perfect gift within your ₹${budget} budget`,
-      shopLink: "https://www.meesho.com/gift-finder"
-    }];
-  }
-
-  const filteredSuggestions = uniqueSuggestions
-    .filter(gift => gift.price <= budget)
-    .sort((a, b) => a.price - b.price)
-    .slice(0, 6);
-
-  console.log("Final suggestions:", filteredSuggestions);
-  return filteredSuggestions;
-};
+import { Badge } from "@/components/ui/badge"; 
 
 const Dashboard = () => {
   // Load user preferences from localStorage
@@ -219,7 +115,6 @@ const Dashboard = () => {
 
     console.log("Generated suggestions:", newSuggestions);
     
-    // Each suggestion already has its image properly set in generateGiftSuggestions
     setSuggestions(newSuggestions);
     setShowSuggestions(true);
 
@@ -232,7 +127,7 @@ const Dashboard = () => {
     } else {
       toast({
         title: "Perfect gifts found!",
-        description: `Found ${newSuggestions.length} gift suggestions for you.`,
+        description: `Found ${newSuggestions.length} gift suggestions for ${selectedOccasion}`,
       });
     }
   };
@@ -329,7 +224,7 @@ const Dashboard = () => {
               <CardHeader>
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <Heart className="w-5 h-5 text-rose-500" />
-                  Select Your Interests
+                  Select Their Interests
                 </h2>
               </CardHeader>
               <CardContent>
@@ -382,7 +277,7 @@ const Dashboard = () => {
                   Select the Occasion
                   {selectedInterests.length > 0 && (
                     <span className="text-sm text-gray-500 font-normal">
-                      (filtered by your interests)
+                      (filtered by their interests)
                     </span>
                   )}
                 </h2>
@@ -420,10 +315,24 @@ const Dashboard = () => {
             <div className="mt-8">
               <Card className="backdrop-blur-sm bg-white/90">
                 <CardHeader>
-                  <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <ShoppingBag className="w-6 h-6 text-emerald-600" />
-                    Gift Suggestions
-                  </h2>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                      <ShoppingBag className="w-6 h-6 text-emerald-600" />
+                      Gift Ideas for {selectedOccasion}
+                    </h2>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        Budget: ₹{budget}
+                      </Badge>
+                      {selectedInterests.length > 0 && (
+                        <Badge variant="outline" className="bg-violet-50 text-violet-700">
+                          Interests: {selectedInterests.slice(0, 2).join(", ")}
+                          {selectedInterests.length > 2 && "..."}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
