@@ -6,6 +6,7 @@ export interface GiftSuggestion {
   image: string;
   description: string;
   shopLink: string;
+  additionalImages?: string[]; // Adding support for multiple images
 }
 
 // Get preferences from local storage
@@ -21,8 +22,8 @@ export const getUserPreferences = () => {
       selectedInterests: storedInterests ? JSON.parse(storedInterests) : [],
       budget: storedBudget || "",
       selectedOccasion: storedOccasion || "",
-      likedItems: storedLikedItems ? new Set(JSON.parse(storedLikedItems)) : new Set(),
-      cartItems: storedCartItems ? new Set(JSON.parse(storedCartItems)) : new Set()
+      likedItems: storedLikedItems ? new Set<string>(JSON.parse(storedLikedItems)) : new Set<string>(),
+      cartItems: storedCartItems ? new Set<string>(JSON.parse(storedCartItems)) : new Set<string>()
     };
   } catch (error) {
     console.error('Error loading preferences from localStorage:', error);
@@ -30,8 +31,8 @@ export const getUserPreferences = () => {
       selectedInterests: [],
       budget: "",
       selectedOccasion: "",
-      likedItems: new Set(),
-      cartItems: new Set()
+      likedItems: new Set<string>(),
+      cartItems: new Set<string>()
     };
   }
 };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,8 @@ import {
   allOccasions, 
   giftDatabase, 
   alternativeShops, 
-  getRelevantGiftImage 
+  getRelevantGiftImage,
+  getInterestBasedGiftSuggestions
 } from "@/data/giftDatabase";
 import { 
   getUserPreferences, 
@@ -22,58 +22,85 @@ import {
   saveCartItems,
   GiftSuggestion
 } from "@/utils/userPreferences";
+import { GiftSuggestionCard } from "@/components/GiftSuggestionCard";
 
 const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
   console.log("Generating suggestions for:", { interests, budget, occasion });
   let suggestions: GiftSuggestion[] = [];
   const budgetCategory = budget < 500 ? "Low Budget" : (budget < 5000 ? "Medium Budget" : "High Budget");
   
-  interests.forEach(interest => {
-    if (giftDatabase[interest]) {
-      console.log("Found gifts for interest:", interest);
-      const categoryGifts = giftDatabase[interest];
-      const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
-      
-      if (affordableGifts.length === 0 && alternativeShops[budgetCategory] && alternativeShops[budgetCategory][interest]) {
-        const altShopLink = alternativeShops[budgetCategory][interest];
-        suggestions.push({
-          name: `Affordable ${interest} Items`,
-          price: budget,
-          image: getRelevantGiftImage(budget, [interest]),
-          description: `Find affordable ${interest.toLowerCase()} items within your budget`,
-          shopLink: altShopLink
-        });
-      } else {
-        suggestions.push(...affordableGifts);
-      }
+  // First try to get highly relevant gifts based on the primary interest
+  if (interests.length > 0) {
+    const primaryInterest = interests[0];
+    const interestSuggestions = getInterestBasedGiftSuggestions(primaryInterest, budget);
+    if (interestSuggestions.length > 0) {
+      suggestions = [...interestSuggestions];
+      console.log(`Found ${interestSuggestions.length} suggestions for primary interest: ${primaryInterest}`);
     }
-  });
+  }
+  
+  // If we didn't get enough suggestions from the primary interest, look at other interests
+  if (suggestions.length < 3 && interests.length > 1) {
+    for (let i = 1; i < interests.length; i++) {
+      const interest = interests[i];
+      const interestSuggestions = getInterestBasedGiftSuggestions(interest, budget);
+      if (interestSuggestions.length > 0) {
+        suggestions = [...suggestions, ...interestSuggestions];
+        console.log(`Added ${interestSuggestions.length} suggestions for interest: ${interest}`);
+      }
+      if (suggestions.length >= 6) break;
+    }
+  }
 
+  // If we still don't have enough suggestions, try the fallback approach
   if (suggestions.length === 0) {
     console.log("No interest-based suggestions found, adding generic suggestions");
     
-    let foundAffordableGift = false;
-    Object.entries(giftDatabase).forEach(([category, categoryGifts]) => {
-      const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
-      if (affordableGifts.length > 0) {
-        foundAffordableGift = true;
-        suggestions.push(...affordableGifts);
-      }
-    });
-    
-    if (!foundAffordableGift) {
-      const randomInterests = Object.keys(alternativeShops[budgetCategory] || {}).slice(0, 3);
-      randomInterests.forEach(interest => {
-        if (alternativeShops[budgetCategory][interest]) {
+    interests.forEach(interest => {
+      if (giftDatabase[interest]) {
+        console.log("Found gifts for interest:", interest);
+        const categoryGifts = giftDatabase[interest];
+        const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
+        
+        if (affordableGifts.length === 0 && alternativeShops[budgetCategory] && alternativeShops[budgetCategory][interest]) {
+          const altShopLink = alternativeShops[budgetCategory][interest];
           suggestions.push({
-            name: `Budget-Friendly ${interest} Gift`,
+            name: `Affordable ${interest} Items`,
             price: budget,
             image: getRelevantGiftImage(budget, [interest]),
-            description: `Special selection of ${interest.toLowerCase()} items within your budget range`,
-            shopLink: alternativeShops[budgetCategory][interest]
+            description: `Find affordable ${interest.toLowerCase()} items within your budget`,
+            shopLink: altShopLink
           });
+        } else {
+          suggestions.push(...affordableGifts);
+        }
+      }
+    });
+
+    if (suggestions.length === 0) {
+      let foundAffordableGift = false;
+      Object.entries(giftDatabase).forEach(([category, categoryGifts]) => {
+        const affordableGifts = categoryGifts.filter(gift => gift.price <= budget);
+        if (affordableGifts.length > 0) {
+          foundAffordableGift = true;
+          suggestions.push(...affordableGifts);
         }
       });
+      
+      if (!foundAffordableGift) {
+        const randomInterests = Object.keys(alternativeShops[budgetCategory] || {}).slice(0, 3);
+        randomInterests.forEach(interest => {
+          if (alternativeShops[budgetCategory][interest]) {
+            suggestions.push({
+              name: `Budget-Friendly ${interest} Gift`,
+              price: budget,
+              image: getRelevantGiftImage(budget, [interest]),
+              description: `Special selection of ${interest.toLowerCase()} items within your budget range`,
+              shopLink: alternativeShops[budgetCategory][interest]
+            });
+          }
+        });
+      }
     }
   }
 
@@ -401,66 +428,14 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {suggestions.map((suggestion, index) => (
-                      <Card key={index} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
-                        <div className="relative h-48 overflow-hidden bg-gray-100">
-                          <img 
-                            src={suggestion.image}
-                            alt={suggestion.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              const fallbackImages = [
-                                "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500",
-                                "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500",
-                                "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500"
-                              ];
-                              (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
-                            }}
-                          />
-                          <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                            ₹{suggestion.price}
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <h3 className="font-bold text-lg mb-2">{suggestion.name}</h3>
-                          <p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
-                          <div className="flex justify-between items-center">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={`${
-                                likedItems.has(suggestion.name) 
-                                  ? 'bg-rose-100 text-rose-600 border-rose-200' 
-                                  : 'text-gray-600'
-                              }`}
-                              onClick={() => handleAddToWishlist(suggestion)}
-                            >
-                              <Heart className={`${likedItems.has(suggestion.name) ? 'fill-current' : ''}`} />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={`${
-                                cartItems.has(suggestion.name)
-                                  ? 'bg-blue-100 text-blue-600 border-blue-200'
-                                  : 'text-gray-600'
-                              }`}
-                              onClick={() => handleAddToCart(suggestion)}
-                            >
-                              <ShoppingBag className={`${cartItems.has(suggestion.name) ? 'fill-current' : ''}`} />
-                            </Button>
-                            <a
-                              href={suggestion.shopLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center"
-                            >
-                              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                                Buy Now
-                              </Button>
-                            </a>
-                          </div>
-                        </div>
-                      </Card>
+                      <GiftSuggestionCard
+                        key={`${suggestion.name}-${index}`}
+                        suggestion={suggestion}
+                        isLiked={likedItems.has(suggestion.name)}
+                        isInCart={cartItems.has(suggestion.name)}
+                        onAddToWishlist={handleAddToWishlist}
+                        onAddToCart={handleAddToCart}
+                      />
                     ))}
                   </div>
                 </CardContent>

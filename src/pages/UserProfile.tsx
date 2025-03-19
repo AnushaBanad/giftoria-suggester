@@ -1,550 +1,299 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { 
+  Heart, ShoppingBag, User, ArrowLeft, Gift, Trash2 
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { 
-  User, 
-  Lock, 
-  LogOut, 
-  Trash2, 
-  Heart, 
-  ShoppingCart, 
-  ShoppingBag, 
-  ChevronLeft,
-  Settings,
-  Gift,
-  ExternalLink
-} from "lucide-react";
-import { giftDatabase } from "@/data/giftDatabase";
-import { 
   getUserPreferences, 
-  getLikedItemsArray, 
-  getCartItemsArray, 
-  saveLikedItems, 
-  saveCartItems 
+  getLikedItemsArray,
+  getCartItemsArray,
+  saveLikedItems,
+  saveCartItems
 } from "@/utils/userPreferences";
-
-// Helper to find gift details by name across all categories
-const findGiftByName = (name: string) => {
-  for (const category in giftDatabase) {
-    const gift = giftDatabase[category].find(g => g.name === name);
-    if (gift) return gift;
-  }
-  
-  // Default gift if not found
-  return {
-    name,
-    price: 0,
-    image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    description: "Item details not available",
-    shopLink: "https://www.meesho.com/gift-finder"
-  };
-};
+import { giftDatabase } from "@/data/giftDatabase";
+import { GiftImageCarousel } from "@/components/GiftImageCarousel";
 
 const UserProfile = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set<string>());
+  const [likedItemsDetails, setLikedItemsDetails] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<Set<string>>(new Set<string>());
+  const [cartItemsDetails, setCartItemsDetails] = useState<any[]>([]);
 
-  // Initialize with stored values from localStorage or default values
-  const [userData, setUserData] = useState(() => {
-    const storedData = localStorage.getItem('userData');
-    if (storedData) {
-      return JSON.parse(storedData);
-    }
-    return {
-      name: "",
-      email: "",
-      phone: ""
-    };
-  });
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedUserData, setEditedUserData] = useState({...userData});
-  const [likedItems, setLikedItems] = useState<string[]>([]);
-  const [cartItems, setCartItems] = useState<string[]>([]);
-
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: ""
-  });
-
-  // Load user data and saved items from localStorage
   useEffect(() => {
-    const storedUserData = localStorage.getItem('userData');
-    if (storedUserData) {
-      setUserData(JSON.parse(storedUserData));
-      setEditedUserData(JSON.parse(storedUserData));
-    }
-    
-    setLikedItems(getLikedItemsArray());
-    setCartItems(getCartItemsArray());
+    // Load liked and cart items from localStorage
+    const userPrefs = getUserPreferences();
+    setLikedItems(userPrefs.likedItems);
+    setCartItems(userPrefs.cartItems);
+
+    // Find gift details for liked items
+    const likedItemsArray = getLikedItemsArray();
+    findGiftDetails(likedItemsArray, setLikedItemsDetails);
+
+    // Find gift details for cart items
+    const cartItemsArray = getCartItemsArray();
+    findGiftDetails(cartItemsArray, setCartItemsDetails);
   }, []);
 
-  // Handle editing profile data
-  const handleEditProfile = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveProfile = () => {
-    setUserData(editedUserData);
-    localStorage.setItem('userData', JSON.stringify(editedUserData));
-    setIsEditing(false);
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been updated successfully."
-    });
-  };
-
-  const handleCancelEdit = () => {
-    setEditedUserData({...userData});
-    setIsEditing(false);
-  };
-
-  const handlePasswordChange = (e: React.FormEvent) => {
-    e.preventDefault();
+  const findGiftDetails = (itemNames: string[], setDetailsFunction: React.Dispatch<React.SetStateAction<any[]>>) => {
+    const details: any[] = [];
     
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Passwords don't match",
-        description: "New password and confirm password must match."
+    itemNames.forEach(name => {
+      // Search each category in the gift database
+      Object.values(giftDatabase).forEach(categoryGifts => {
+        const found = categoryGifts.find(gift => gift.name === name);
+        if (found) {
+          details.push(found);
+        }
       });
-      return;
-    }
-    
-    if (passwordData.newPassword.length < 8) {
-      toast({
-        variant: "destructive",
-        title: "Password too short",
-        description: "Password must be at least 8 characters long."
-      });
-      return;
-    }
-    
-    toast({
-      title: "Password updated",
-      description: "Your password has been changed successfully."
     });
     
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: ""
-    });
+    setDetailsFunction(details);
   };
 
-  const handleDeleteAccount = () => {
-    const confirmed = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
-    
-    if (confirmed) {
-      // Clear local storage
-      localStorage.removeItem('userData');
+  const handleRemoveFromWishlist = (itemName: string) => {
+    setLikedItems(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(itemName);
+      saveLikedItems(newSet);
+      
+      // Update liked items details
+      setLikedItemsDetails(likedItemsDetails.filter(item => item.name !== itemName));
       
       toast({
-        title: "Account deleted",
-        description: "Your account has been deleted successfully."
+        title: "Removed from wishlist",
+        description: `${itemName} has been removed from your wishlist`
       });
       
-      navigate("/");
-    }
-  };
-
-  const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully."
-    });
-    
-    navigate("/");
-  };
-
-  const removeFromLiked = (name: string) => {
-    const userPrefs = getUserPreferences();
-    const newLikedItems = new Set(userPrefs.likedItems);
-    newLikedItems.delete(name);
-    
-    saveLikedItems(newLikedItems);
-    setLikedItems(Array.from(newLikedItems));
-    
-    toast({
-      title: "Item removed",
-      description: "Item removed from your liked items."
+      return newSet;
     });
   };
 
-  const removeFromCart = (name: string) => {
-    const userPrefs = getUserPreferences();
-    const newCartItems = new Set(userPrefs.cartItems);
-    newCartItems.delete(name);
-    
-    saveCartItems(newCartItems);
-    setCartItems(Array.from(newCartItems));
-    
-    toast({
-      title: "Item removed",
-      description: "Item removed from your cart."
+  const handleRemoveFromCart = (itemName: string) => {
+    setCartItems(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(itemName);
+      saveCartItems(newSet);
+      
+      // Update cart items details
+      setCartItemsDetails(cartItemsDetails.filter(item => item.name !== itemName));
+      
+      toast({
+        title: "Removed from cart",
+        description: `${itemName} has been removed from your cart`
+      });
+      
+      return newSet;
     });
+  };
+
+  const calculateTotal = () => {
+    return cartItemsDetails.reduce((total, item) => total + item.price, 0);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] py-8 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <div className="flex justify-between items-center mb-6">
-          <Link to="/dashboard" className="flex items-center text-white hover:text-gray-300 transition-colors">
-            <ChevronLeft className="w-5 h-5 mr-1" />
-            Back to Dashboard
+    <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] text-white">
+      <div className="container mx-auto max-w-4xl py-8">
+        <div className="flex items-center justify-between mb-8">
+          <Link 
+            to="/dashboard" 
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Dashboard</span>
           </Link>
-          <div className="flex items-center">
-            <User className="w-6 h-6 text-white mr-2" />
-            <h1 className="text-2xl font-bold text-white">My Profile</h1>
+          <div className="flex items-center space-x-4">
+            <Avatar className="w-12 h-12 border-2 border-white">
+              <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-blue-500">
+                <User className="w-6 h-6" />
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="text-xl font-bold">My Profile</h2>
+              <p className="text-white/70">Manage your saved items</p>
+            </div>
           </div>
         </div>
-        
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid grid-cols-5 mb-6">
-            <TabsTrigger value="profile" className="gap-2">
-              <User className="w-4 h-4" /> Profile
-            </TabsTrigger>
-            <TabsTrigger value="security" className="gap-2">
-              <Lock className="w-4 h-4" /> Security
-            </TabsTrigger>
-            <TabsTrigger value="wishlist" className="gap-2">
-              <Heart className="w-4 h-4" /> Wishlist
-            </TabsTrigger>
-            <TabsTrigger value="cart" className="gap-2">
-              <ShoppingCart className="w-4 h-4" /> Cart
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="gap-2">
-              <ShoppingBag className="w-4 h-4" /> Orders
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="profile">
-            <Card className="backdrop-blur-sm bg-white/90">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <User className="w-5 h-5 text-gray-600" />
-                  Personal Information
-                </h2>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isEditing ? (
-                  <>
-                    <div className="flex flex-col space-y-1">
-                      <Label>Full Name</Label>
-                      <Input 
-                        value={editedUserData.name} 
-                        onChange={(e) => setEditedUserData({...editedUserData, name: e.target.value})} 
-                      />
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <Label>Email Address</Label>
-                      <Input 
-                        value={editedUserData.email} 
-                        onChange={(e) => setEditedUserData({...editedUserData, email: e.target.value})} 
-                      />
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <Label>Phone Number</Label>
-                      <Input 
-                        value={editedUserData.phone} 
-                        onChange={(e) => setEditedUserData({...editedUserData, phone: e.target.value})} 
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex flex-col space-y-1">
-                      <Label>Full Name</Label>
-                      <Input value={userData.name || "Not provided"} readOnly className="bg-gray-50" />
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <Label>Email Address</Label>
-                      <Input value={userData.email || "Not provided"} readOnly className="bg-gray-50" />
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <Label>Phone Number</Label>
-                      <Input value={userData.phone || "Not provided"} readOnly className="bg-gray-50" />
-                    </div>
-                  </>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-end gap-2">
-                {isEditing ? (
-                  <>
-                    <Button variant="outline" onClick={handleCancelEdit}>
-                      Cancel
-                    </Button>
-                    <Button className="bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600" onClick={handleSaveProfile}>
-                      Save Changes
-                    </Button>
-                  </>
-                ) : (
-                  <Button className="bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-600 hover:to-emerald-600" onClick={handleEditProfile}>
-                    <Settings className="w-4 h-4 mr-2" /> Edit Profile
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="security">
-            <Card className="backdrop-blur-sm bg-white/90">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-gray-600" />
-                  Change Password
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handlePasswordChange} className="space-y-4">
-                  <div className="flex flex-col space-y-1">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input 
-                      id="current-password" 
-                      type="password" 
-                      value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col space-y-1">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input 
-                      id="new-password" 
-                      type="password" 
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col space-y-1">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <Input 
-                      id="confirm-password" 
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full">Update Password</Button>
-                </form>
-              </CardContent>
-              <CardFooter className="flex-col space-y-4">
-                <div className="w-full h-px bg-gray-200 my-2"></div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center gap-2 text-amber-600 border-amber-600 hover:bg-amber-50"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="w-4 h-4" /> Log Out
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
-                    onClick={handleDeleteAccount}
-                  >
-                    <Trash2 className="w-4 h-4" /> Delete Account
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="wishlist">
-            <Card className="backdrop-blur-sm bg-white/90">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-rose-500" />
-                  Liked Items
-                </h2>
-              </CardHeader>
-              <CardContent>
-                {likedItems.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Heart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-600 mb-2">Your wishlist is empty</h3>
-                    <p className="text-gray-500 mb-4">Save items you love by clicking the heart icon</p>
-                    <Link to="/dashboard">
-                      <Button variant="outline">
-                        Start Browsing
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {likedItems.map((itemName, index) => {
-                      const gift = findGiftByName(itemName);
-                      return (
-                        <Card key={index} className="flex overflow-hidden hover:shadow-md transition-shadow">
-                          <div className="w-1/3 h-full">
-                            <img 
-                              src={gift.image} 
-                              alt={gift.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500";
-                              }}
-                            />
-                          </div>
-                          <div className="flex flex-col justify-between w-2/3 p-3">
-                            <div>
-                              <h3 className="font-semibold">{gift.name}</h3>
-                              <p className="text-sm text-gray-500">{gift.price > 0 ? `₹${gift.price}` : "Price not available"}</p>
-                            </div>
-                            <div className="flex justify-between items-center mt-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="text-red-500 border-red-200 hover:bg-red-50"
-                                onClick={() => removeFromLiked(itemName)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-1" /> Remove
-                              </Button>
-                              {gift.shopLink && (
-                                <a 
-                                  href={gift.shopLink} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-blue-600 flex items-center hover:underline"
-                                >
-                                  View <ExternalLink className="w-3 h-3 ml-1" />
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="cart">
-            <Card className="backdrop-blur-sm bg-white/90">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5 text-blue-500" />
-                  Shopping Cart
-                </h2>
-              </CardHeader>
-              <CardContent>
-                {cartItems.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-600 mb-2">Your cart is empty</h3>
-                    <p className="text-gray-500 mb-4">Add items to your cart to get started</p>
-                    <Link to="/dashboard">
-                      <Button variant="outline">
-                        Start Shopping
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {cartItems.map((itemName, index) => {
-                      const gift = findGiftByName(itemName);
-                      return (
-                        <Card key={index} className="flex overflow-hidden">
-                          <div className="w-1/4 md:w-1/5">
-                            <img 
-                              src={gift.image} 
-                              alt={gift.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500";
-                              }}
-                            />
-                          </div>
-                          <div className="flex flex-col justify-between w-3/4 md:w-4/5 p-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
-                              <div>
-                                <h3 className="font-semibold text-lg">{gift.name}</h3>
-                                <p className="text-sm text-gray-600 mt-1">{gift.description}</p>
-                              </div>
-                              <div className="flex flex-col md:items-end mt-2 md:mt-0">
-                                <p className="font-bold text-lg">{gift.price > 0 ? `₹${gift.price}` : "Price not available"}</p>
-                                <div className="flex space-x-2 mt-2 md:mt-auto">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    className="text-red-500 border-red-200 hover:bg-red-50"
-                                    onClick={() => removeFromCart(itemName)}
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-1" /> Remove
-                                  </Button>
-                                  {gift.shopLink && (
-                                    <a href={gift.shopLink} target="_blank" rel="noopener noreferrer">
-                                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                                        Buy Now
-                                      </Button>
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      );
-                    })}
-                    
-                    <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg mt-6">
-                      <div>
-                        <p className="text-lg font-semibold">Total:</p>
-                        <p className="text-gray-500 text-sm">({cartItems.length} items)</p>
-                      </div>
-                      <p className="text-2xl font-bold">
-                        ₹{cartItems.reduce((total, itemName) => {
-                          const gift = findGiftByName(itemName);
-                          return total + gift.price;
-                        }, 0)}
-                      </p>
-                    </div>
-                    
-                    <div className="flex justify-end mt-4">
-                      <Button className="bg-emerald-600 hover:bg-emerald-700">
-                        Proceed to Checkout
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="orders">
-            <Card className="backdrop-blur-sm bg-white/90">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-purple-500" />
-                  My Orders
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Gift className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">No orders yet</h3>
-                  <p className="text-gray-500 mb-4">Your order history will appear here</p>
+
+        <Card className="backdrop-blur-sm bg-white/10 border-none text-white">
+          <Tabs defaultValue="wishlist" className="w-full">
+            <TabsList className="w-full grid grid-cols-2 bg-white/10 mb-6">
+              <TabsTrigger value="wishlist" className="data-[state=active]:bg-rose-500">
+                <Heart className="mr-2 h-4 w-4" />
+                Wishlist ({likedItemsDetails.length})
+              </TabsTrigger>
+              <TabsTrigger value="cart" className="data-[state=active]:bg-blue-500">
+                <ShoppingBag className="mr-2 h-4 w-4" />
+                Cart ({cartItemsDetails.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="wishlist" className="px-4 py-2">
+              {likedItemsDetails.length === 0 ? (
+                <div className="text-center py-12 opacity-60">
+                  <Heart className="mx-auto h-12 w-12 mb-4 opacity-40" />
+                  <h3 className="text-xl font-medium mb-2">Your wishlist is empty</h3>
+                  <p className="mb-4">Explore gift suggestions and add items you like!</p>
                   <Link to="/dashboard">
-                    <Button variant="outline">
-                      Start Shopping
+                    <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white/20">
+                      <Gift className="mr-2 h-4 w-4" />
+                      Find Gifts
                     </Button>
                   </Link>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {likedItemsDetails.map((item) => (
+                    <Card key={item.name} className="bg-white/10 backdrop-blur-sm overflow-hidden group border-none">
+                      {item.additionalImages ? (
+                        <GiftImageCarousel
+                          images={[item.image, ...(item.additionalImages || [])]}
+                          name={item.name}
+                          price={item.price}
+                        />
+                      ) : (
+                        <div className="relative h-48 overflow-hidden">
+                          <img 
+                            src={item.image} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-2 right-2 bg-rose-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            ₹{item.price}
+                          </div>
+                        </div>
+                      )}
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-lg mb-1">{item.name}</h3>
+                        <p className="text-white/70 text-sm mb-4 line-clamp-2">{item.description}</p>
+                        <div className="flex justify-between">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-transparent border-white/20 text-white hover:bg-white/20"
+                            onClick={() => handleRemoveFromWishlist(item.name)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remove
+                          </Button>
+                          <a 
+                            href={item.shopLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <Button 
+                              size="sm" 
+                              className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600"
+                            >
+                              Buy Now
+                            </Button>
+                          </a>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="cart" className="px-4 py-2">
+              {cartItemsDetails.length === 0 ? (
+                <div className="text-center py-12 opacity-60">
+                  <ShoppingBag className="mx-auto h-12 w-12 mb-4 opacity-40" />
+                  <h3 className="text-xl font-medium mb-2">Your cart is empty</h3>
+                  <p className="mb-4">Add items to your cart to purchase later!</p>
+                  <Link to="/dashboard">
+                    <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white/20">
+                      <Gift className="mr-2 h-4 w-4" />
+                      Find Gifts
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {cartItemsDetails.map((item) => (
+                      <Card key={item.name} className="bg-white/10 backdrop-blur-sm overflow-hidden group border-none">
+                        {item.additionalImages ? (
+                          <GiftImageCarousel
+                            images={[item.image, ...(item.additionalImages || [])]}
+                            name={item.name}
+                            price={item.price}
+                          />
+                        ) : (
+                          <div className="relative h-48 overflow-hidden">
+                            <img 
+                              src={item.image} 
+                              alt={item.name} 
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                              ₹{item.price}
+                            </div>
+                          </div>
+                        )}
+                        <CardContent className="p-4">
+                          <h3 className="font-bold text-lg mb-1">{item.name}</h3>
+                          <p className="text-white/70 text-sm mb-4 line-clamp-2">{item.description}</p>
+                          <div className="flex justify-between">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-transparent border-white/20 text-white hover:bg-white/20"
+                              onClick={() => handleRemoveFromCart(item.name)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Remove
+                            </Button>
+                            <a 
+                              href={item.shopLink} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                            >
+                              <Button 
+                                size="sm" 
+                                className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600"
+                              >
+                                Buy Now
+                              </Button>
+                            </a>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  <Card className="bg-white/20 backdrop-blur-sm border-none">
+                    <CardHeader className="pb-2">
+                      <h3 className="text-lg font-semibold">Cart Summary</h3>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Subtotal ({cartItemsDetails.length} items):</span>
+                          <span>₹{calculateTotal()}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg pt-2 border-t border-white/20">
+                          <span>Total:</span>
+                          <span>₹{calculateTotal()}</span>
+                        </div>
+                        <Button className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600">
+                          Checkout
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </Card>
       </div>
     </div>
   );

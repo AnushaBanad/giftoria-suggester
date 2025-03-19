@@ -1,11 +1,4 @@
-
-export interface GiftSuggestion {
-  name: string;
-  price: number;
-  image: string;
-  description: string;
-  shopLink: string;
-}
+import { GiftSuggestion } from "@/utils/userPreferences";
 
 // Expanded list of interests
 export const interests = [
@@ -149,7 +142,7 @@ export const giftImagesByCategory: Record<string, Record<string, string[]>> = {
   }
 };
 
-// Gift database with expanded options
+// Gift database with expanded options and multiple images
 export const giftDatabase: Record<string, GiftSuggestion[]> = {
   "Technology": [
     {
@@ -157,21 +150,33 @@ export const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 1200,
       image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       description: "High-quality wireless earbuds with noise cancellation",
-      shopLink: "https://www.meesho.com/tech"
+      shopLink: "https://www.meesho.com/tech",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1598331668826-20cecc596b86?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
     },
     {
       name: "Smart Watch",
       price: 2500,
       image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       description: "Fitness tracking smart watch with heart rate monitor",
-      shopLink: "https://www.meesho.com/tech"
+      shopLink: "https://www.meesho.com/tech",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
     },
     {
       name: "Tech Accessory Bundle",
       price: 499,
       image: "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       description: "Affordable bundle of tech accessories including cables and adapters",
-      shopLink: "https://www.meesho.com/tech-accessories"
+      shopLink: "https://www.meesho.com/tech-accessories",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1600080971135-5c76b6bbe76f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
     }
   ],
   "Books": [
@@ -196,14 +201,44 @@ export const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 1200,
       image: "https://images.unsplash.com/photo-1606159068539-43f36b99d1b2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       description: "Stylish leather wallet with multiple compartments",
-      shopLink: "https://www.meesho.com/fashion"
+      shopLink: "https://www.meesho.com/fashion",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1585504156745-95a1e1f49cfe?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1559478405-583afdc82291?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
     },
     {
       name: "Scarf Set",
       price: 500,
       image: "https://images.unsplash.com/photo-1601924351433-3d7a64899f1b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       description: "Elegant scarf set for all occasions",
-      shopLink: "https://www.meesho.com/fashion"
+      shopLink: "https://www.meesho.com/fashion",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1586953936333-366880552526?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1520903920243-53111ea4f7ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Trendy Sunglasses",
+      price: 450,
+      image: "https://images.unsplash.com/photo-1577803645773-f96470509666?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Fashion-forward sunglasses with UV protection",
+      shopLink: "https://www.meesho.com/fashion/accessories",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1550686041-366ad85a1355?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Designer Watch",
+      price: 1800,
+      image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Elegant timepiece for the fashion-conscious individual",
+      shopLink: "https://www.meesho.com/fashion/watches",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1619134778706-7015bea8e407?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
     }
   ],
   "Music": [
@@ -244,116 +279,48 @@ export const giftDatabase: Record<string, GiftSuggestion[]> = {
       price: 1800,
       image: "https://images.unsplash.com/photo-1615760134953-e9d1cc1cb1a0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       description: "Premium skincare collection for radiant skin",
-      shopLink: "https://www.meesho.com/beauty"
+      shopLink: "https://www.meesho.com/beauty",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
     },
     {
       name: "Makeup Palette",
       price: 900,
       image: "https://images.unsplash.com/photo-1612878010854-1250dfc5000a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
       description: "Versatile makeup palette with essential colors",
-      shopLink: "https://www.meesho.com/beauty"
+      shopLink: "https://www.meesho.com/beauty",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1596704017254-9759221a48f3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Fragrance Collection",
+      price: 1200,
+      image: "https://images.unsplash.com/photo-1617897903246-719242758050?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Exquisite collection of premium fragrances",
+      shopLink: "https://www.meesho.com/beauty/fragrance",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1592842232655-e5d3dff2496c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1558386619-d39e4a28518b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Premium Hair Care Kit",
+      price: 850,
+      image: "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Complete hair care regimen for healthy, shiny hair",
+      shopLink: "https://www.meesho.com/beauty/hair",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1643704329576-e479d718ad21?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
     }
   ],
   "Jewelry": [
     {
       name: "Silver Pendant Necklace",
       price: 650,
-      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      description: "Elegant silver pendant on a delicate chain",
-      shopLink: "https://www.meesho.com/jewelry"
-    },
-    {
-      name: "Pearl Earrings",
-      price: 450,
-      image: "https://images.unsplash.com/photo-1619119069152-a2b331eb392a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      description: "Classic pearl earrings for any occasion",
-      shopLink: "https://www.meesho.com/jewelry"
-    },
-    {
-      name: "Birthstone Bracelet",
-      price: 350,
-      image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      description: "Personalized bracelet with birthstone charms",
-      shopLink: "https://www.meesho.com/jewelry"
-    },
-    {
-      name: "Gemstone Ring",
-      price: 250,
-      image: "https://images.unsplash.com/photo-1603050927325-baf630505e27?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      description: "Affordable gemstone ring with elegant design",
-      shopLink: "https://www.meesho.com/jewelry/rings"
-    },
-    {
-      name: "Beaded Necklace",
-      price: 180,
-      image: "https://images.unsplash.com/photo-1576022162028-7808c0a9d6bf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      description: "Colorful beaded necklace for casual wear",
-      shopLink: "https://www.meesho.com/jewelry/necklaces"
-    }
-  ],
-  "Home Decor": [
-    {
-      name: "Scented Candle Set",
-      price: 600,
-      image: "https://images.unsplash.com/photo-1603913996638-c01100417b4a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      description: "Set of luxurious scented candles for a cozy atmosphere",
-      shopLink: "https://www.meesho.com/homedecor"
-    },
-    {
-      name: "Decorative Cushions",
-      price: 550,
-      image: "https://images.unsplash.com/photo-1540730930991-a9286a5f5020?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      description: "Set of stylish cushions to enhance your living space",
-      shopLink: "https://www.meesho.com/homedecor"
-    }
-  ]
-};
-
-// Alternative shops based on budget
-export const alternativeShops: Record<string, Record<string, string>> = {
-  "Low Budget": {
-    "Technology": "https://www.meesho.com/tech-gadgets-under-500",
-    "Books": "https://www.meesho.com/books-under-500",
-    "Fashion": "https://www.meesho.com/fashion-under-500",
-    "Music": "https://www.meesho.com/music-under-500",
-    "Gaming": "https://www.meesho.com/gaming-under-500",
-    "Beauty": "https://www.meesho.com/beauty-under-500",
-    "Jewelry": "https://www.meesho.com/jewelry-under-500",
-    "Home Decor": "https://www.meesho.com/home-decor-under-500",
-    "Sports": "https://www.meesho.com/sports-under-500",
-    "Cooking": "https://www.meesho.com/cooking-under-500"
-  },
-  "Medium Budget": {
-    "Technology": "https://www.meesho.com/tech-gadgets-under-2000",
-    "Fashion": "https://www.meesho.com/fashion-under-2000",
-    "Home Decor": "https://www.meesho.com/home-decor-under-2000",
-    "Jewelry": "https://www.meesho.com/jewelry-under-2000"
-  },
-  "High Budget": {
-    "Technology": "https://www.meesho.com/premium-tech",
-    "Jewelry": "https://www.meesho.com/premium-jewelry",
-    "Fashion": "https://www.meesho.com/premium-fashion"
-  }
-};
-
-// Helper function to get relevant gift image based on budget and category
-export const getRelevantGiftImage = (price: number, interests: string[]): string => {
-  const budgetCategory = price < 500 ? "Low Budget" : (price < 5000 ? "Medium Budget" : "High Budget");
-  
-  // Try to find a matching image for the first matching interest
-  for (const interest of interests) {
-    if (giftImagesByCategory[budgetCategory]?.[interest]) {
-      const images = giftImagesByCategory[budgetCategory][interest];
-      return images[Math.floor(Math.random() * images.length)];
-    }
-  }
-  
-  // If no matching interest, use the default for the budget category
-  if (giftImagesByCategory[budgetCategory]?.["default"]) {
-    const defaultImages = giftImagesByCategory[budgetCategory]["default"];
-    return defaultImages[Math.floor(Math.random() * defaultImages.length)];
-  }
-  
-  // Ultimate fallback
-  return giftImagesByCategory["default"]["default"][0];
-};
+      image: "https://images.unsplash.com/photo-1515562141207
