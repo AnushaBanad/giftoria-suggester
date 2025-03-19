@@ -1,3 +1,4 @@
+
 import { GiftSuggestion } from "@/utils/userPreferences";
 
 // Expanded list of interests
@@ -323,4 +324,142 @@ export const giftDatabase: Record<string, GiftSuggestion[]> = {
     {
       name: "Silver Pendant Necklace",
       price: 650,
-      image: "https://images.unsplash.com/photo-1515562141207-7a
+      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Elegant silver pendant necklace for everyday wear",
+      shopLink: "https://www.meesho.com/jewelry",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Gold Bracelet",
+      price: 1800,
+      image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Luxurious gold bracelet with intricate design",
+      shopLink: "https://www.meesho.com/jewelry",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1635767798638-3e25273a8236?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Diamond Earrings",
+      price: 3500,
+      image: "https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Stunning diamond earrings for special occasions",
+      shopLink: "https://www.meesho.com/jewelry/earrings",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1629224316810-9d8805b95e76?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1631982690223-8aa5d2f5938a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    }
+  ],
+  "Home Decor": [
+    {
+      name: "Decorative Cushions",
+      price: 850,
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Set of decorative cushions to enhance your living space",
+      shopLink: "https://www.meesho.com/home-decor",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Scented Candles",
+      price: 550,
+      image: "https://images.unsplash.com/photo-1602523961854-d8a71e243222?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Aromatic scented candles for a warm and inviting ambiance",
+      shopLink: "https://www.meesho.com/home-decor/candles",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1608181831718-c9ffd8387166?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1631083247260-40e5b1cb9ef4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    }
+  ],
+  "Sports": [
+    {
+      name: "Fitness Tracker",
+      price: 1600,
+      image: "https://images.unsplash.com/photo-1576243345690-4e4b79b63288?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Advanced fitness tracker to monitor your workouts and health",
+      shopLink: "https://www.meesho.com/sports/fitness",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1510771463146-e89e6e86560e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1575311373937-040b8e1fd6b0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    },
+    {
+      name: "Sports Water Bottle",
+      price: 350,
+      image: "https://images.unsplash.com/photo-1595348020949-87cdfbb44174?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      description: "Durable and leak-proof sports water bottle",
+      shopLink: "https://www.meesho.com/sports/accessories",
+      additionalImages: [
+        "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1555484422-f794e1ee6fa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+      ]
+    }
+  ]
+};
+
+// Helper function to get interest-based gift suggestions
+export const getInterestBasedGiftSuggestions = (interest: string, budget: number): GiftSuggestion[] => {
+  // Get gifts for the specified interest category that are within budget
+  if (!giftDatabase[interest]) return [];
+  
+  return giftDatabase[interest]
+    .filter(gift => gift.price <= budget)
+    .slice(0, 3); // Return at most 3 suggestions per interest
+};
+
+// Get alternative shopping options for different budgets and interests
+export const alternativeShops: Record<string, Record<string, string>> = {
+  "Low Budget": {
+    "Technology": "https://www.meesho.com/tech-accessories",
+    "Fashion": "https://www.meesho.com/fashion/budget",
+    "Beauty": "https://www.meesho.com/beauty/essentials",
+    "Books": "https://www.meesho.com/books/paperbacks",
+    "Home Decor": "https://www.meesho.com/home-decor/budget",
+    "Jewelry": "https://www.meesho.com/jewelry/budget"
+  },
+  "Medium Budget": {
+    "Technology": "https://www.meesho.com/electronics",
+    "Fashion": "https://www.meesho.com/fashion/trending",
+    "Beauty": "https://www.meesho.com/beauty/sets",
+    "Jewelry": "https://www.meesho.com/jewelry/silver",
+    "Home Decor": "https://www.meesho.com/home-decor/premium"
+  },
+  "High Budget": {
+    "Technology": "https://www.meesho.com/premium-electronics",
+    "Jewelry": "https://www.meesho.com/jewelry/gold",
+    "Fashion": "https://www.meesho.com/fashion/designer",
+    "Beauty": "https://www.meesho.com/beauty/luxury"
+  }
+};
+
+// Helper function to get relevant images based on budget and interests
+export const getRelevantGiftImage = (budget: number, interests: string[]): string => {
+  const budgetCategory = budget < 500 ? "Low Budget" : (budget < 5000 ? "Medium Budget" : "High Budget");
+  
+  // Try to match the first interest
+  if (interests.length > 0 && 
+      giftImagesByCategory[budgetCategory] && 
+      giftImagesByCategory[budgetCategory][interests[0]]) {
+    const images = giftImagesByCategory[budgetCategory][interests[0]];
+    return images[Math.floor(Math.random() * images.length)];
+  }
+  
+  // Fallback to default images in the budget category
+  if (giftImagesByCategory[budgetCategory] && 
+      giftImagesByCategory[budgetCategory]["default"]) {
+    const defaultImages = giftImagesByCategory[budgetCategory]["default"];
+    return defaultImages[Math.floor(Math.random() * defaultImages.length)];
+  }
+  
+  // Ultimate fallback
+  const defaultImages = giftImagesByCategory["default"]["default"];
+  return defaultImages[Math.floor(Math.random() * defaultImages.length)];
+};
