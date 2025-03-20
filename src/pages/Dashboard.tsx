@@ -10,7 +10,8 @@ import { Link } from "react-router-dom";
 import { 
   interests, 
   interestToOccasions, 
-  allOccasions
+  allOccasions,
+  getInterestBasedGiftSuggestions
 } from "@/data/giftDatabase";
 import { 
   getUserPreferences, 
@@ -22,13 +23,14 @@ import {
 import { generateGiftSuggestions } from "@/utils/giftSuggestion";
 import { GiftSuggestionCard } from "@/components/GiftSuggestionCard";
 import { Badge } from "@/components/ui/badge"; 
+import { Slider } from "@/components/ui/slider";
 
 const Dashboard = () => {
   // Load user preferences from localStorage
   const userPrefs = getUserPreferences();
   
   const [selectedInterests, setSelectedInterests] = useState<string[]>(userPrefs.selectedInterests);
-  const [budget, setBudget] = useState(userPrefs.budget);
+  const [budget, setBudget] = useState(userPrefs.budget || "1000");
   const [selectedOccasion, setSelectedOccasion] = useState(userPrefs.selectedOccasion);
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -107,11 +109,21 @@ const Dashboard = () => {
       return;
     }
 
-    const newSuggestions = generateGiftSuggestions(
-      selectedInterests,
-      Number(budget),
-      selectedOccasion
-    );
+    // Get interest-specific suggestions directly first
+    let directSuggestions: GiftSuggestion[] = [];
+    selectedInterests.forEach(interest => {
+      const interestSuggestions = getInterestBasedGiftSuggestions(
+        interest, 
+        Number(budget), 
+        selectedOccasion
+      );
+      directSuggestions = [...directSuggestions, ...interestSuggestions];
+    });
+
+    // If we don't have enough direct suggestions, use the fallback generator
+    const newSuggestions = directSuggestions.length >= 3 
+      ? directSuggestions 
+      : generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
 
     console.log("Generated suggestions:", newSuggestions);
     
@@ -176,8 +188,14 @@ const Dashboard = () => {
     });
   };
 
+  // Handle budget slider changes
+  const handleBudgetSliderChange = (value: number[]) => {
+    setBudget(value[0].toString());
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] relative overflow-hidden">
+      {/* Background animation elements */}
       {[...Array(20)].map((_, i) => (
         <div
           key={i}
@@ -256,16 +274,28 @@ const Dashboard = () => {
                 </h2>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col space-y-2">
-                  <Label htmlFor="budget">Budget (in ₹)</Label>
-                  <Input
-                    id="budget"
-                    type="number"
-                    placeholder="Enter your budget"
-                    value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
-                    className="focus:ring-2 focus:ring-emerald-500 transition-all hover:border-emerald-300"
-                  />
+                <div className="flex flex-col space-y-6">
+                  <div>
+                    <Label htmlFor="budget" className="mb-2 block">Budget (in ₹): {budget}</Label>
+                    <Slider 
+                      value={[Number(budget)]} 
+                      onValueChange={handleBudgetSliderChange} 
+                      max={10000} 
+                      step={100}
+                      className="my-4"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="budgetInput">Or enter exact amount:</Label>
+                    <Input
+                      id="budgetInput"
+                      type="number"
+                      placeholder="Enter your budget"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                      className="focus:ring-2 focus:ring-emerald-500 transition-all hover:border-emerald-300 mt-2"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -335,7 +365,7 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {suggestions.map((suggestion, index) => (
                       <GiftSuggestionCard
                         key={`${suggestion.name}-${index}`}

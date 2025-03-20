@@ -28,7 +28,7 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
     : [suggestion.image];
 
   return (
-    <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative">
+    <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
       <div className="absolute top-2 left-2 z-10">
         <Badge variant="secondary" className="bg-violet-100 text-violet-800 flex items-center gap-1">
           <Gift className="w-3 h-3" />
@@ -36,15 +36,17 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
         </Badge>
       </div>
       
-      <GiftImageCarousel 
-        images={carouselImages} 
-        name={suggestion.name} 
-        price={suggestion.price} 
-      />
+      <div className="w-full">
+        <GiftImageCarousel 
+          images={carouselImages} 
+          name={suggestion.name} 
+          price={suggestion.price} 
+        />
+      </div>
       
-      <div className="p-4">
-        <h3 className="font-bold text-lg mb-2">{suggestion.name}</h3>
-        <p className="text-gray-600 text-sm mb-4">{suggestion.description}</p>
+      <div className="p-4 flex-grow flex flex-col">
+        <h3 className="font-bold text-lg mb-2 line-clamp-2">{suggestion.name}</h3>
+        <p className="text-gray-600 text-sm mb-4 line-clamp-3">{suggestion.description}</p>
         
         <div className="flex flex-wrap gap-2 mb-4">
           <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -57,7 +59,7 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
           )}
         </div>
         
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-auto">
           <Button
             variant="outline"
             size="sm"
@@ -68,7 +70,7 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
             }`}
             onClick={() => onAddToWishlist(suggestion)}
           >
-            <Heart className={`${isLiked ? 'fill-current' : ''} mr-1`} />
+            <Heart className={`${isLiked ? 'fill-current' : ''} mr-1`} size={16} />
             <span className="text-xs">Save</span>
           </Button>
           
@@ -82,7 +84,7 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
             }`}
             onClick={() => onAddToCart(suggestion)}
           >
-            <ShoppingBag className={`${isInCart ? 'fill-current' : ''} mr-1`} />
+            <ShoppingBag className={`${isInCart ? 'fill-current' : ''} mr-1`} size={16} />
             <span className="text-xs">Cart</span>
           </Button>
           

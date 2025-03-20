@@ -1,4 +1,3 @@
-
 import { GiftSuggestion } from "@/utils/userPreferences";
 
 // Expanded list of interests
@@ -48,10 +47,34 @@ export const allOccasions = [
 export const getInterestBasedGiftSuggestions = (interest: string, budget: number, occasion: string): GiftSuggestion[] => {
   if (!giftDatabase[interest]) return [];
   
-  return giftDatabase[interest].filter(gift => 
+  const matchingSuggestions = giftDatabase[interest].filter(gift => 
     gift.price <= budget && 
     interestToOccasions[interest]?.includes(occasion)
   );
+  
+  // Ensure each suggestion has additionalImages
+  return matchingSuggestions.map(suggestion => {
+    // If additionalImages already exist, return as is
+    if (suggestion.additionalImages && suggestion.additionalImages.length > 0) {
+      return suggestion;
+    }
+    
+    // Otherwise, generate additionalImages based on category
+    const budgetCategory = budget < 500 ? "Low Budget" : (budget < 5000 ? "Medium Budget" : "High Budget");
+    let additionalImagesArray = [];
+    
+    // Try to get images from the gift image category
+    if (giftImagesByCategory[budgetCategory]?.[interest]?.length > 0) {
+      additionalImagesArray = giftImagesByCategory[budgetCategory][interest].slice(0, 2);
+    } else if (giftImagesByCategory["default"]?.["default"]?.length > 0) {
+      additionalImagesArray = giftImagesByCategory["default"]["default"].slice(0, 2);
+    }
+    
+    return {
+      ...suggestion,
+      additionalImages: additionalImagesArray
+    };
+  });
 };
 
 // Helper function to get relevant gift images based on budget and interests

@@ -1,12 +1,14 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface GiftImageCarouselProps {
   images: string[];
@@ -19,6 +21,8 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   name,
   price,
 }) => {
+  const [api, setApi] = React.useState<CarouselApi>();
+  
   // If there are no additional images, ensure we at least have the main image
   const allImages = images.length > 0 ? images : [
     "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500"
@@ -31,13 +35,24 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500"
   ];
 
+  // Set up auto-rotation for the carousel
+  useEffect(() => {
+    if (!api || allImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      api.scrollNext();
+    }, 3000); // Switch images every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [api, allImages.length]);
+
   return (
     <div className="relative">
-      <Carousel className="w-full">
+      <Carousel className="w-full" setApi={setApi} opts={{ loop: true }}>
         <CarouselContent>
           {allImages.map((image, index) => (
             <CarouselItem key={index}>
-              <div className="relative h-48 overflow-hidden bg-gray-100">
+              <AspectRatio ratio={4/3} className="bg-gray-100">
                 <img
                   src={image}
                   alt={`${name} - image ${index + 1}`}
@@ -46,7 +61,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
                     (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
                   }}
                 />
-              </div>
+              </AspectRatio>
             </CarouselItem>
           ))}
         </CarouselContent>
