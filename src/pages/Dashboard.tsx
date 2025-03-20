@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,20 +81,12 @@ const Dashboard = () => {
       occasion: selectedOccasion
     });
     
-    if (!selectedOccasion) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select an occasion",
-      });
-      return;
-    }
-
+    // Allow any budget value, even very low ones
     if (!budget || Number(budget) <= 0) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please enter a valid budget",
+        description: "Please enter a valid budget (must be greater than 0)",
       });
       return;
     }
@@ -109,21 +100,23 @@ const Dashboard = () => {
       return;
     }
 
-    // Get interest-specific suggestions directly first
-    let directSuggestions: GiftSuggestion[] = [];
-    selectedInterests.forEach(interest => {
-      const interestSuggestions = getInterestBasedGiftSuggestions(
-        interest, 
-        Number(budget), 
-        selectedOccasion
-      );
-      directSuggestions = [...directSuggestions, ...interestSuggestions];
-    });
-
-    // If we don't have enough direct suggestions, use the fallback generator
-    const newSuggestions = directSuggestions.length >= 3 
-      ? directSuggestions 
-      : generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
+    // For very low budgets, use our enhanced gift suggestions
+    const parsedBudget = Number(budget);
+    console.log("Parsed budget:", parsedBudget);
+    
+    // Prioritize key interests even if occasion is not selected
+    let effectiveOccasion = selectedOccasion;
+    if (!effectiveOccasion && selectedInterests.some(i => ["Technology", "Books", "Fashion", "Music", "Gaming"].includes(i))) {
+      effectiveOccasion = "Birthday"; // Use a default occasion if not specified
+      console.log("Using default occasion for key interests:", effectiveOccasion);
+    }
+    
+    // Generate suggestions directly using our enhanced algorithm
+    const newSuggestions = generateGiftSuggestions(
+      selectedInterests, 
+      parsedBudget,
+      effectiveOccasion || "Birthday"
+    );
 
     console.log("Generated suggestions:", newSuggestions);
     
@@ -139,7 +132,7 @@ const Dashboard = () => {
     } else {
       toast({
         title: "Perfect gifts found!",
-        description: `Found ${newSuggestions.length} gift suggestions for ${selectedOccasion}`,
+        description: `Found ${newSuggestions.length} gift suggestions${selectedOccasion ? ` for ${selectedOccasion}` : ""}`,
       });
     }
   };
@@ -195,7 +188,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] relative overflow-hidden">
-      {/* Background animation elements */}
       {[...Array(20)].map((_, i) => (
         <div
           key={i}

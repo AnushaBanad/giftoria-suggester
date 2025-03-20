@@ -28,21 +28,22 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500"
   ];
 
-  // Fallback images in case of loading errors - use product-specific images
+  // Fallback images in case of loading errors - more product-specific fallbacks
   const fallbackImages = [
     "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500",
     "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500",
     "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500"
   ];
 
-  // Set up auto-rotation for the carousel with a faster transition time
+  // Set up auto-rotation with faster transition for the carousel
   useEffect(() => {
     if (!api || allImages.length <= 1) return;
 
     const interval = setInterval(() => {
       api.scrollNext();
-    }, 3000); // Switch images every 3 seconds
+    }, 2500); // Switch images every 2.5 seconds for a more engaging experience
 
+    // Make sure to clear the interval when component unmounts
     return () => clearInterval(interval);
   }, [api, allImages.length]);
 
@@ -58,6 +59,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
                   alt={`${name} - image ${index + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
+                    // Use more varied fallback images for different product types
                     (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
                   }}
                 />
