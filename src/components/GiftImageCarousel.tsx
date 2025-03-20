@@ -28,14 +28,14 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500"
   ];
 
-  // Fallback images in case of loading errors
+  // Fallback images in case of loading errors - use product-specific images
   const fallbackImages = [
-    "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500",
+    "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500",
     "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500",
-    "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500"
+    "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500"
   ];
 
-  // Set up auto-rotation for the carousel
+  // Set up auto-rotation for the carousel with a faster transition time
   useEffect(() => {
     if (!api || allImages.length <= 1) return;
 
@@ -47,7 +47,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   }, [api, allImages.length]);
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden group">
       <Carousel className="w-full" setApi={setApi} opts={{ loop: true }}>
         <CarouselContent>
           {allImages.map((image, index) => (
@@ -56,7 +56,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
                 <img
                   src={image}
                   alt={`${name} - image ${index + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
                   }}
@@ -67,8 +67,8 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
         </CarouselContent>
         {allImages.length > 1 && (
           <>
-            <CarouselPrevious className="left-2 bg-white/80" />
-            <CarouselNext className="right-2 bg-white/80" />
+            <CarouselPrevious className="left-2 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CarouselNext className="right-2 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity" />
           </>
         )}
         <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
