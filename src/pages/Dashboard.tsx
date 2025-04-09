@@ -60,30 +60,79 @@ const Dashboard = () => {
       return;
     }
 
+    // Prioritize Technology, Books, and Fashion interests if they are selected
+    const prioritizedInterests = [...selectedInterests];
+    ["Technology", "Books", "Fashion"].forEach(priorityInterest => {
+      if (selectedInterests.includes(priorityInterest)) {
+        // Remove from current position
+        const index = prioritizedInterests.indexOf(priorityInterest);
+        prioritizedInterests.splice(index, 1);
+        // Add to front of array
+        prioritizedInterests.unshift(priorityInterest);
+      }
+    });
+    
     // For very low budgets, use our enhanced gift suggestions
     const parsedBudget = Number(budget);
     console.log("Parsed budget:", parsedBudget);
     
     // Prioritize key interests even if occasion is not selected
     let effectiveOccasion = selectedOccasion;
-    if (!effectiveOccasion && selectedInterests.some(i => ["Technology", "Books", "Fashion", "Music", "Gaming"].includes(i))) {
+    if (!effectiveOccasion && selectedInterests.some(i => ["Technology", "Books", "Fashion"].includes(i))) {
       effectiveOccasion = "Birthday"; // Use a default occasion if not specified
       console.log("Using default occasion for key interests:", effectiveOccasion);
     }
     
-    // Generate suggestions directly using our enhanced algorithm
+    // Generate suggestions directly using our enhanced algorithm with prioritized interests
     const newSuggestions = generateGiftSuggestions(
-      selectedInterests, 
+      prioritizedInterests, 
       parsedBudget,
       effectiveOccasion || "Birthday"
     );
 
     console.log("Generated suggestions:", newSuggestions);
     
-    setSuggestions(newSuggestions);
+    // Ensure we have at least 3 suggestions for primary interests (Tech, Books, Fashion)
+    let enhancedSuggestions = [...newSuggestions];
+    const primaryInterests = ["Technology", "Books", "Fashion"].filter(interest => 
+      selectedInterests.includes(interest)
+    );
+    
+    // Count suggestions by interest category
+    const suggestionsByCategory: Record<string, number> = {};
+    primaryInterests.forEach(interest => {
+      suggestionsByCategory[interest] = newSuggestions.filter(s => 
+        s.description.toLowerCase().includes(interest.toLowerCase()) || 
+        s.name.toLowerCase().includes(interest.toLowerCase())
+      ).length;
+    });
+    
+    // If we don't have enough suggestions for the primary interests, generate more
+    if (primaryInterests.length > 0 && enhancedSuggestions.length < Math.min(6, primaryInterests.length * 2)) {
+      // This will trigger the fallback logic in generateGiftSuggestions for specific interests
+      const additionalSuggestions = generateGiftSuggestions(
+        primaryInterests, 
+        parsedBudget,
+        effectiveOccasion || "Birthday"
+      );
+      
+      // Add unique suggestions that aren't already in our list
+      additionalSuggestions.forEach(suggestion => {
+        if (!enhancedSuggestions.some(s => s.name === suggestion.name)) {
+          enhancedSuggestions.push(suggestion);
+        }
+      });
+    }
+    
+    // Limit to 6 total suggestions, prioritizing diversity across selected interests
+    if (enhancedSuggestions.length > 6) {
+      enhancedSuggestions = enhancedSuggestions.slice(0, 6);
+    }
+    
+    setSuggestions(enhancedSuggestions);
     setShowSuggestions(true);
 
-    if (newSuggestions.length === 0) {
+    if (enhancedSuggestions.length === 0) {
       toast({
         variant: "destructive",
         title: "No exact matches found",
@@ -92,7 +141,7 @@ const Dashboard = () => {
     } else {
       toast({
         title: "Perfect gifts found!",
-        description: `Found ${newSuggestions.length} gift suggestions${selectedOccasion ? ` for ${selectedOccasion}` : ""}`,
+        description: `Found ${enhancedSuggestions.length} gift suggestions${selectedOccasion ? ` for ${selectedOccasion}` : ""}`,
       });
     }
   };
