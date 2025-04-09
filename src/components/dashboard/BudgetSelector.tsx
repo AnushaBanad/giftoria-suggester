@@ -1,10 +1,8 @@
 
-import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DollarSign } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
 
 interface BudgetSelectorProps {
   budget: string;
@@ -12,10 +10,6 @@ interface BudgetSelectorProps {
 }
 
 export const BudgetSelector = ({ budget, onBudgetChange }: BudgetSelectorProps) => {
-  const handleBudgetSliderChange = (value: number[]) => {
-    onBudgetChange(value[0].toString());
-  };
-
   return (
     <Card className="backdrop-blur-sm bg-white/80">
       <CardHeader>
@@ -27,17 +21,7 @@ export const BudgetSelector = ({ budget, onBudgetChange }: BudgetSelectorProps) 
       <CardContent>
         <div className="flex flex-col space-y-6">
           <div>
-            <Label htmlFor="budget" className="mb-2 block">Budget (in ₹): {budget}</Label>
-            <Slider 
-              value={[Number(budget)]} 
-              onValueChange={handleBudgetSliderChange} 
-              max={10000} 
-              step={100}
-              className="my-4"
-            />
-          </div>
-          <div>
-            <Label htmlFor="budgetInput">Or enter exact amount:</Label>
+            <Label htmlFor="budgetInput">Enter your budget (in ₹):</Label>
             <Input
               id="budgetInput"
               type="number"
