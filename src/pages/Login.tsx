@@ -3,12 +3,17 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 const Login = () => {
-  const [supersetId] = useState("6128347");
-  const [password] = useState("••••••");
-  const [passkey] = useState("327908");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Login attempt with:", { email, password });
+    // Login logic would go here
+  };
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
@@ -28,46 +33,38 @@ const Login = () => {
             <h2 className="text-xl font-medium">Login</h2>
           </div>
           
-          <div className="space-y-4">
-            <div className="grid grid-cols-3 items-center">
-              <span className="text-sm text-gray-600">Superset ID</span>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <Input 
-                value={supersetId} 
-                readOnly 
-                className="col-span-2 bg-gray-50" 
+                id="email"
+                type="email" 
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
             
-            <div className="grid grid-cols-3 items-center">
-              <span className="text-sm text-gray-600">Password</span>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
               <Input 
+                id="password"
                 type="password" 
-                value={password} 
-                readOnly 
-                className="col-span-2 bg-gray-50" 
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
-            </div>
-            
-            <div className="grid grid-cols-3 items-center">
-              <span className="text-sm text-gray-600">Passkey</span>
-              <Input 
-                value={passkey} 
-                readOnly 
-                className="col-span-2 bg-gray-50" 
-              />
-            </div>
-            
-            <div className="bg-amber-100 border border-amber-300 rounded-md p-2 flex items-center text-sm text-amber-800">
-              <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-              <p>You are not allowed to take this assessment.</p>
             </div>
             
             <Button 
+              type="submit"
               className="w-full bg-blue-800 hover:bg-blue-700 text-white"
             >
-              Start Assessment
+              Login
             </Button>
-          </div>
+          </form>
         </div>
       </Card>
       
