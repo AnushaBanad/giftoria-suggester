@@ -27,23 +27,12 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
     ? [suggestion.image, ...suggestion.additionalImages]
     : [suggestion.image];
 
-  // Extract interest category from description if present
-  const getCategory = () => {
-    const categories = ["Art", "Photography", "Stationery", "Technology", "Books", "Music", "Fashion", "Gaming", "Beauty"];
-    for (const category of categories) {
-      if (suggestion.description.includes(category) || suggestion.name.includes(category)) {
-        return category;
-      }
-    }
-    return "Gift";
-  };
-
   return (
     <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
       <div className="absolute top-2 left-2 z-10">
         <Badge variant="secondary" className="bg-violet-100 text-violet-800 flex items-center gap-1">
           <Gift className="w-3 h-3" />
-          {getCategory()}
+          Gift Idea
         </Badge>
       </div>
       
