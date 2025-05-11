@@ -9,6 +9,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { prepareCarouselImages, getDefaultImage } from "@/components/gift/ImageUtils";
 
 interface GiftImageCarouselProps {
   images: string[];
@@ -25,20 +26,11 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   
-  // Make sure we always have valid images
-  const defaultImages = [
-    "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop"
-  ];
-
-  // If there are no additional images, ensure we use the default images
-  const allImages = images && images.length > 0 
-    ? images.filter(img => img && img.length > 0) // Filter out empty strings
-    : defaultImages;
-  
-  // If we filtered out all images, use defaults
-  const finalImages = allImages.length > 0 ? allImages : defaultImages;
+  // Process the images to ensure we have valid ones
+  const finalImages = prepareCarouselImages(
+    images[0],
+    images.slice(1)
+  );
 
   // Initialize the imagesLoaded state with false for each image
   useEffect(() => {
@@ -83,8 +75,8 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     const target = e.target as HTMLImageElement;
     console.log(`Image failed to load: ${target.src}`);
     
-    // Use a specific default image from our array based on the index
-    target.src = defaultImages[index % defaultImages.length];
+    // Use a fallback image
+    target.src = getDefaultImage(index);
     
     // Force a retry with the fallback image and prevent infinite retries
     target.onerror = null;
