@@ -7,6 +7,7 @@ import { GiftImageCarousel } from "./GiftImageCarousel";
 import { Badge } from "@/components/ui/badge";
 import { GiftBadges } from "./gift/GiftBadges";
 import { GiftCardActions } from "./gift/GiftCardActions";
+import { prepareCarouselImages } from "./gift/ImageUtils";
 
 interface GiftSuggestionCardProps {
   suggestion: GiftSuggestion;
@@ -23,16 +24,16 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
   onAddToWishlist,
   onAddToCart,
 }) => {
-  // Ensure we have valid images for the carousel
-  const mainImage = suggestion.image || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop";
-  
-  // Prepare images for carousel - ensure additionalImages is valid
-  const additionalImages = suggestion.additionalImages && suggestion.additionalImages.length > 0
-    ? suggestion.additionalImages.filter(img => img && img.length > 0)
-    : ["https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop"];
-
-  const carouselImages = [mainImage, ...additionalImages];
+  // Determine if this is a collection
   const isCollection = suggestion.name.includes("Collection");
+  
+  // Prepare images for the carousel using our utility function
+  const carouselImages = prepareCarouselImages(suggestion.image, suggestion.additionalImages);
+
+  // Extract special offers from description if available
+  const specialOffers = suggestion.description?.includes("Special Offer")
+    ? ["Special Offer"]
+    : [];
 
   return (
     <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
@@ -55,7 +56,12 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
         <h3 className="font-bold text-base md:text-lg mb-1 md:mb-2 line-clamp-2">{suggestion.name}</h3>
         <p className="text-gray-600 text-xs md:text-sm mb-2 md:mb-4 line-clamp-3">{suggestion.description}</p>
         
-        <GiftBadges isCollection={isCollection} price={suggestion.price} />
+        <GiftBadges 
+          isCollection={isCollection} 
+          price={suggestion.price}
+          specialOffers={specialOffers}
+          category={suggestion.category}
+        />
         
         <GiftCardActions
           suggestion={suggestion}
@@ -63,6 +69,7 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
           isInCart={isInCart}
           onAddToWishlist={onAddToWishlist}
           onAddToCart={onAddToCart}
+          size="default"
         />
       </div>
     </Card>

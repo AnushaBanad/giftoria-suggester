@@ -9,7 +9,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { prepareCarouselImages, getDefaultImage } from "@/components/gift/ImageUtils";
+import { prepareCarouselImages, getDefaultImage, formatCurrency } from "@/components/gift/ImageUtils";
 
 interface GiftImageCarouselProps {
   images: string[];
@@ -67,13 +67,11 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     const newImagesLoaded = [...imagesLoaded];
     newImagesLoaded[index] = true;
     setImagesLoaded(newImagesLoaded);
-    console.log(`Image loaded successfully: ${finalImages[index]}`);
   };
 
   // Handle image load error
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, index: number) => {
     const target = e.target as HTMLImageElement;
-    console.log(`Image failed to load: ${target.src}`);
     
     // Use a fallback image
     target.src = getDefaultImage(index);
@@ -92,7 +90,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
                 <img
                   src={image}
                   alt={`${name} - image ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onLoad={() => handleImageLoad(index)}
                   onError={(e) => handleImageError(e, index)}
                   loading="lazy"
@@ -108,9 +106,22 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
           </>
         )}
         <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
-          ₹{price}
+          {formatCurrency(price)}
         </div>
       </Carousel>
+      {finalImages.length > 1 && (
+        <div className="flex justify-center mt-2 gap-1">
+          {finalImages.map((_, index) => (
+            <button
+              key={index}
+              className={`w-2 h-2 rounded-full ${
+                index === currentImageIndex ? "bg-emerald-600" : "bg-gray-300"
+              }`}
+              onClick={() => api?.scrollTo(index)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
