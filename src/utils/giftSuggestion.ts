@@ -8,30 +8,37 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
   let suggestions: GiftSuggestion[] = [];
   const budgetCategory = budget < 500 ? "Low Budget" : (budget < 5000 ? "Medium Budget" : "High Budget");
   
-  // First try to get highly relevant gifts based on the primary interest and occasion
-  if (interests.length > 0) {
-    const primaryInterest = interests[0];
-    const interestSuggestions = getInterestBasedGiftSuggestions(primaryInterest, budget, occasion);
-    if (interestSuggestions.length > 0) {
-      suggestions = [...interestSuggestions];
-      console.log(`Found ${interestSuggestions.length} suggestions for primary interest: ${primaryInterest}`);
-    }
-  }
+  // Process primary interests first: Technology, Books, and Fashion
+  const priorityInterests = ["Technology", "Books", "Fashion"];
+  const primaryInterests = interests.filter(interest => priorityInterests.includes(interest));
+  const otherInterests = interests.filter(interest => !priorityInterests.includes(interest));
   
-  // If we didn't get enough suggestions from the primary interest, look at other interests
-  if (suggestions.length < 4 && interests.length > 1) {
-    for (let i = 1; i < interests.length; i++) {
-      const interest = interests[i];
+  // Combined ordered interests list with priority interests first
+  const orderedInterests = [...primaryInterests, ...otherInterests];
+  
+  // First try to get highly relevant gifts based on the ordered interests and occasion
+  if (orderedInterests.length > 0) {
+    for (const interest of orderedInterests) {
+      console.log(`Looking for suggestions for interest: ${interest}, budget: ${budget}, occasion: ${occasion}`);
       const interestSuggestions = getInterestBasedGiftSuggestions(interest, budget, occasion);
-      if (interestSuggestions.length > 0) {
-        // Add a relevance indicator to the description
+      
+      if (interestSuggestions && interestSuggestions.length > 0) {
+        console.log(`Found ${interestSuggestions.length} suggestions for interest: ${interest}`);
+        // Ensure we have images for each suggestion
         const enhancedSuggestions = interestSuggestions.map(suggestion => ({
           ...suggestion,
-          description: `Based on ${interest} interest: ${suggestion.description}`
+          // Ensure image exists, fallback to getRelevantGiftImage if not
+          image: suggestion.image || getRelevantGiftImage(budget, [interest]),
+          // Make sure we have additional images
+          additionalImages: suggestion.additionalImages && suggestion.additionalImages.length > 0 
+            ? suggestion.additionalImages 
+            : [getRelevantGiftImage(budget, [interest]), getRelevantGiftImage(budget, [interest])]
         }));
+        
         suggestions = [...suggestions, ...enhancedSuggestions];
-        console.log(`Added ${interestSuggestions.length} suggestions for interest: ${interest}`);
       }
+      
+      // Break once we have enough suggestions
       if (suggestions.length >= 6) break;
     }
   }
@@ -40,15 +47,15 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
   if (suggestions.length === 0) {
     console.log("No interest-based suggestions found, adding generic suggestions");
     
-    interests.forEach(interest => {
+    orderedInterests.forEach(interest => {
       if (alternativeShops[budgetCategory]?.[interest]) {
         console.log(`Adding alternative shop suggestion for ${interest}`);
         suggestions.push({
           name: `${interest} Gift Collection`,
-          price: budget,
+          price: budget * 0.9, // Slightly less than budget to make it attractive
           image: getRelevantGiftImage(budget, [interest]),
           description: `Specially curated ${interest.toLowerCase()} items perfect for ${occasion}`,
-          shopLink: alternativeShops[budgetCategory][interest],
+          shopLink: alternativeShops[budgetCategory][interest] || "https://www.meesho.com/gift-finder",
           additionalImages: [
             getRelevantGiftImage(budget, [interest]),
             getRelevantGiftImage(budget, [interest])
@@ -74,7 +81,7 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
       // Add a gift card option as a safe fallback
       suggestions.push({
         name: "Premium Gift Card",
-        price: budget,
+        price: budget * 0.95,
         image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
         description: `Let them choose their perfect gift for ${occasion}`,
         shopLink: "https://www.meesho.com/gift-cards",
@@ -108,7 +115,7 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
 
   // Filter by budget and sort by relevance
   const filteredSuggestions = uniqueSuggestions
-    .filter(gift => gift.price <= budget)
+    .filter(gift => gift.price <= budget * 1.1) // Allow slightly over budget to show more options
     .sort((a, b) => {
       // Sort by price proximity to budget (closer to budget = higher relevance)
       const aPriceScore = 1 - Math.abs(budget - a.price) / budget;

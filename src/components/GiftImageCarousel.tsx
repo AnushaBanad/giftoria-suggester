@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -22,9 +22,11 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   price,
 }) => {
   const [api, setApi] = React.useState<CarouselApi>();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   
   // If there are no additional images, ensure we at least have the main image
-  const allImages = images.length > 0 ? images : [
+  const allImages = images && images.length > 0 ? images : [
     "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500"
   ];
 
@@ -34,6 +36,11 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500",
     "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=500"
   ];
+
+  // Initialize the imagesLoaded state with false for each image
+  useEffect(() => {
+    setImagesLoaded(new Array(allImages.length).fill(false));
+  }, [allImages.length]);
 
   // Set up auto-rotation for the carousel
   useEffect(() => {
@@ -46,20 +53,36 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     return () => clearInterval(interval);
   }, [api, allImages.length]);
 
+  // Handle image load success
+  const handleImageLoad = (index: number) => {
+    const newImagesLoaded = [...imagesLoaded];
+    newImagesLoaded[index] = true;
+    setImagesLoaded(newImagesLoaded);
+  };
+
+  // Handle image load error
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, index: number) => {
+    const target = e.target as HTMLImageElement;
+    console.log(`Image failed to load: ${target.src}`);
+    target.src = fallbackImages[index % fallbackImages.length];
+    // Force a retry with the fallback image
+    target.onerror = null;
+  };
+
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Carousel className="w-full" setApi={setApi} opts={{ loop: true }}>
         <CarouselContent>
           {allImages.map((image, index) => (
             <CarouselItem key={index}>
-              <AspectRatio ratio={4/3} className="bg-gray-100">
+              <AspectRatio ratio={4/3} className="bg-gray-100 overflow-hidden">
                 <img
                   src={image}
                   alt={`${name} - image ${index + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = fallbackImages[index % fallbackImages.length];
-                  }}
+                  className="w-full h-full object-cover transition-transform duration-500"
+                  onLoad={() => handleImageLoad(index)}
+                  onError={(e) => handleImageError(e, index)}
+                  loading="lazy"
                 />
               </AspectRatio>
             </CarouselItem>
@@ -67,8 +90,8 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
         </CarouselContent>
         {allImages.length > 1 && (
           <>
-            <CarouselPrevious className="left-2 bg-white/80" />
-            <CarouselNext className="right-2 bg-white/80" />
+            <CarouselPrevious className="left-1 -translate-y-1/2 bg-white/80 shadow-md md:left-2" />
+            <CarouselNext className="right-1 -translate-y-1/2 bg-white/80 shadow-md md:right-2" />
           </>
         )}
         <div className="absolute top-2 right-2 bg-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
