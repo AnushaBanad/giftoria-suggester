@@ -138,6 +138,16 @@
   .embla__next {
     transform: scale(0.8);
   }
+  
+  /* Better button spacing on mobile */
+  .flex.justify-between.gap-1 {
+    gap: 0.25rem;
+  }
+  
+  /* Reduce padding on cards for mobile */
+  .card-content {
+    padding: 0.75rem;
+  }
 }
 
 /* Fix for image loading issues */
@@ -147,7 +157,30 @@ img {
   object-fit: cover;
 }
 
+/* Fix for carousel navigation */
+.carousel-prev,
+.carousel-next {
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
+  opacity: 1;
+}
+
+/* Fix for badges in mobile view */
+.badge {
+  white-space: nowrap;
+}
+
 /* Fix for some specific UI elements that need to maintain position */
 .fixed-badge {
   position: fixed !important;
+}
+
+/* Improve card rendering */
+.card {
+  backface-visibility: hidden;
+  will-change: transform;
 }

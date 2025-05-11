@@ -22,10 +22,15 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
   onAddToWishlist,
   onAddToCart,
 }) => {
-  // Prepare images for carousel - use additionalImages if available or just the main image
-  const carouselImages = suggestion.additionalImages && suggestion.additionalImages.length > 0
-    ? [suggestion.image, ...suggestion.additionalImages]
-    : [suggestion.image];
+  // Ensure we have valid images for the carousel
+  const mainImage = suggestion.image || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop";
+  
+  // Prepare images for carousel - ensure additionalImages is valid
+  const additionalImages = suggestion.additionalImages && suggestion.additionalImages.length > 0
+    ? suggestion.additionalImages.filter(img => img && img.length > 0)
+    : ["https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop"];
+
+  const carouselImages = [mainImage, ...additionalImages];
 
   return (
     <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
