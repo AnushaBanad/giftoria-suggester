@@ -1,225 +1,40 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Gift, Search, Heart, ShoppingBag, DollarSign, User } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { Search, User } from "lucide-react";
+import { Gift } from "lucide-react";
 import { Link } from "react-router-dom";
-import { 
-  interests, 
-  interestToOccasions, 
-  allOccasions,
-  getInterestBasedGiftSuggestions
-} from "@/data/giftDatabase";
-import { 
-  getUserPreferences, 
-  saveUserPreferences, 
-  saveLikedItems, 
-  saveCartItems,
-  GiftSuggestion
-} from "@/utils/userPreferences";
-import { generateGiftSuggestions } from "@/utils/giftSuggestion";
-import { GiftSuggestionCard } from "@/components/GiftSuggestionCard";
-import { Badge } from "@/components/ui/badge"; 
-import { Slider } from "@/components/ui/slider";
+import { useDashboard } from "@/hooks/useDashboard";
+import { BackgroundAnimation } from "@/components/dashboard/BackgroundAnimation";
+import { InterestSelection } from "@/components/dashboard/InterestSelection";
+import { BudgetSection } from "@/components/dashboard/BudgetSection";
+import { OccasionSelection } from "@/components/dashboard/OccasionSelection";
+import { GiftSuggestionResults } from "@/components/dashboard/GiftSuggestionResults";
 
 const Dashboard = () => {
-  // Load user preferences from localStorage
-  const userPrefs = getUserPreferences();
-  
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(userPrefs.selectedInterests);
-  const [budget, setBudget] = useState(userPrefs.budget || "1000");
-  const [selectedOccasion, setSelectedOccasion] = useState(userPrefs.selectedOccasion);
-  const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredOccasions, setFilteredOccasions] = useState<string[]>(allOccasions);
-  const [likedItems, setLikedItems] = useState<Set<string>>(userPrefs.likedItems);
-  const [cartItems, setCartItems] = useState<Set<string>>(userPrefs.cartItems);
-  const { toast } = useToast();
-
-  // Save current selections to localStorage whenever they change
-  useEffect(() => {
-    saveUserPreferences(selectedInterests, budget, selectedOccasion, likedItems, cartItems);
-  }, [selectedInterests, budget, selectedOccasion, likedItems, cartItems]);
-
-  // Filter occasions based on selected interests
-  useEffect(() => {
-    if (selectedInterests.length === 0) {
-      setFilteredOccasions(allOccasions);
-    } else {
-      let relevantOccasions = new Set<string>();
-      selectedInterests.forEach(interest => {
-        if (interestToOccasions[interest]) {
-          interestToOccasions[interest].forEach(occasion => {
-            relevantOccasions.add(occasion);
-          });
-        }
-      });
-
-      if (selectedOccasion && !relevantOccasions.has(selectedOccasion)) {
-        setSelectedOccasion("");
-      }
-
-      setFilteredOccasions(Array.from(relevantOccasions).sort());
-    }
-  }, [selectedInterests, selectedOccasion]);
-
-  const handleInterestClick = (interest: string) => {
-    setSelectedInterests(prev =>
-      prev.includes(interest)
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
-    );
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted with:", {
-      interests: selectedInterests,
-      budget,
-      occasion: selectedOccasion
-    });
-    
-    if (!selectedOccasion) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select an occasion",
-      });
-      return;
-    }
-
-    if (!budget || Number(budget) <= 0) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please enter a valid budget",
-      });
-      return;
-    }
-
-    if (selectedInterests.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select at least one interest",
-      });
-      return;
-    }
-
-    // Get interest-specific suggestions directly first
-    let directSuggestions: GiftSuggestion[] = [];
-    selectedInterests.forEach(interest => {
-      const interestSuggestions = getInterestBasedGiftSuggestions(
-        interest, 
-        Number(budget), 
-        selectedOccasion
-      );
-      directSuggestions = [...directSuggestions, ...interestSuggestions];
-    });
-
-    // If we don't have enough direct suggestions, use the fallback generator
-    const newSuggestions = directSuggestions.length >= 3 
-      ? directSuggestions 
-      : generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
-
-    console.log("Generated suggestions:", newSuggestions);
-    
-    setSuggestions(newSuggestions);
-    setShowSuggestions(true);
-
-    if (newSuggestions.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No exact matches found",
-        description: "We're showing alternative shopping options within your budget",
-      });
-    } else {
-      toast({
-        title: "Perfect gifts found!",
-        description: `Found ${newSuggestions.length} gift suggestions for ${selectedOccasion}`,
-      });
-    }
-  };
-
-  const handleAddToWishlist = (suggestion: GiftSuggestion) => {
-    setLikedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(suggestion.name)) {
-        newSet.delete(suggestion.name);
-        toast({
-          title: "Removed from wishlist",
-          description: `${suggestion.name} has been removed from your wishlist`
-        });
-      } else {
-        newSet.add(suggestion.name);
-        toast({
-          title: "Added to wishlist",
-          description: `${suggestion.name} has been added to your wishlist`
-        });
-      }
-      // Save the updated liked items to localStorage
-      saveLikedItems(newSet);
-      return newSet;
-    });
-  };
-
-  const handleAddToCart = (suggestion: GiftSuggestion) => {
-    setCartItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(suggestion.name)) {
-        newSet.delete(suggestion.name);
-        toast({
-          title: "Removed from cart",
-          description: `${suggestion.name} has been removed from your cart`
-        });
-      } else {
-        newSet.add(suggestion.name);
-        toast({
-          title: "Added to cart",
-          description: `${suggestion.name} has been added to your cart`
-        });
-      }
-      // Save the updated cart items to localStorage
-      saveCartItems(newSet);
-      return newSet;
-    });
-  };
-
-  // Handle budget slider changes
-  const handleBudgetSliderChange = (value: number[]) => {
-    setBudget(value[0].toString());
-  };
+  const {
+    selectedInterests,
+    budget,
+    selectedOccasion,
+    suggestions,
+    showSuggestions,
+    filteredOccasions,
+    likedItems,
+    cartItems,
+    interests,
+    handleInterestClick,
+    handleBudgetSliderChange,
+    handleBudgetInputChange,
+    handleOccasionClick,
+    handleSubmit,
+    handleAddToWishlist,
+    handleAddToCart
+  } = useDashboard();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] relative overflow-hidden">
       {/* Background animation elements */}
-      {[...Array(20)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute animate-float"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animation: `float ${8 + Math.random() * 12}s infinite`,
-            animationDelay: `${Math.random() * 5}s`,
-          }}
-        >
-          <div 
-            className={`w-8 h-8 rounded-lg opacity-20`}
-            style={{
-              transform: `rotate(${Math.random() * 360}deg)`,
-              backgroundColor: [
-                "#FFE4E6", "#E7EFE6", "#FFF1E6", "#E5DEFF", 
-                "#FFDEE2", "#FDE1D3", "#D3E4FD", "#F2FCE2",
-                "#FEF7CD", "#FEC6A1", "#F1F0FB"
-              ][i % 11]
-            }}>
-          </div>
-        </div>
-      ))}
+      <BackgroundAnimation />
 
       <div className="container mx-auto max-w-4xl relative z-10">
         <div className="flex flex-col space-y-6 py-8">
@@ -238,100 +53,27 @@ const Dashboard = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            <Card className="backdrop-blur-sm bg-white/80">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-rose-500" />
-                  Select Their Interests
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {interests.map((interest) => (
-                    <Button
-                      key={interest}
-                      type="button"
-                      variant={selectedInterests.includes(interest) ? "default" : "outline"}
-                      onClick={() => handleInterestClick(interest)}
-                      className={`rounded-full transition-all hover:scale-105 ${
-                        selectedInterests.includes(interest)
-                          ? "bg-emerald-600 text-white"
-                          : ""
-                      }`}
-                    >
-                      {interest}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Interest Selection Component */}
+            <InterestSelection 
+              selectedInterests={selectedInterests}
+              interests={interests}
+              onInterestClick={handleInterestClick}
+            />
 
-            <Card className="backdrop-blur-sm bg-white/80">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-emerald-600" />
-                  Set Your Budget
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col space-y-6">
-                  <div>
-                    <Label htmlFor="budget" className="mb-2 block">Budget (in ₹): {budget}</Label>
-                    <Slider 
-                      value={[Number(budget)]} 
-                      onValueChange={handleBudgetSliderChange} 
-                      max={10000} 
-                      step={100}
-                      className="my-4"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="budgetInput">Or enter exact amount:</Label>
-                    <Input
-                      id="budgetInput"
-                      type="number"
-                      placeholder="Enter your budget"
-                      value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
-                      className="focus:ring-2 focus:ring-emerald-500 transition-all hover:border-emerald-300 mt-2"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Budget Selection Component */}
+            <BudgetSection 
+              budget={budget}
+              onBudgetSliderChange={handleBudgetSliderChange}
+              onBudgetInputChange={handleBudgetInputChange}
+            />
 
-            <Card className="backdrop-blur-sm bg-white/80">
-              <CardHeader>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Gift className="w-5 h-5 text-violet-500" />
-                  Select the Occasion
-                  {selectedInterests.length > 0 && (
-                    <span className="text-sm text-gray-500 font-normal">
-                      (filtered by their interests)
-                    </span>
-                  )}
-                </h2>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {filteredOccasions.map((occasion) => (
-                    <Button
-                      key={occasion}
-                      type="button"
-                      variant={selectedOccasion === occasion ? "default" : "outline"}
-                      onClick={() => setSelectedOccasion(occasion)}
-                      className={`transition-all hover:scale-105 ${
-                        selectedOccasion === occasion
-                          ? "bg-violet-600 text-white"
-                          : ""
-                      }`}
-                    >
-                      {occasion}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Occasion Selection Component */}
+            <OccasionSelection 
+              selectedOccasion={selectedOccasion}
+              filteredOccasions={filteredOccasions}
+              selectedInterests={selectedInterests}
+              onOccasionClick={handleOccasionClick}
+            />
 
             <Button 
               type="submit" 
@@ -341,45 +83,18 @@ const Dashboard = () => {
             </Button>
           </form>
 
+          {/* Gift Suggestion Results Component */}
           {showSuggestions && (
-            <div className="mt-8">
-              <Card className="backdrop-blur-sm bg-white/90">
-                <CardHeader>
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                      <ShoppingBag className="w-6 h-6 text-emerald-600" />
-                      Gift Ideas for {selectedOccasion}
-                    </h2>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                        Budget: ₹{budget}
-                      </Badge>
-                      {selectedInterests.length > 0 && (
-                        <Badge variant="outline" className="bg-violet-50 text-violet-700">
-                          Interests: {selectedInterests.slice(0, 2).join(", ")}
-                          {selectedInterests.length > 2 && "..."}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {suggestions.map((suggestion, index) => (
-                      <GiftSuggestionCard
-                        key={`${suggestion.name}-${index}`}
-                        suggestion={suggestion}
-                        isLiked={likedItems.has(suggestion.name)}
-                        isInCart={cartItems.has(suggestion.name)}
-                        onAddToWishlist={handleAddToWishlist}
-                        onAddToCart={handleAddToCart}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <GiftSuggestionResults 
+              suggestions={suggestions}
+              selectedOccasion={selectedOccasion}
+              budget={budget}
+              selectedInterests={selectedInterests}
+              likedItems={likedItems}
+              cartItems={cartItems}
+              onAddToWishlist={handleAddToWishlist}
+              onAddToCart={handleAddToCart}
+            />
           )}
         </div>
       </div>
