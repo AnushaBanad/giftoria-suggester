@@ -76,3 +76,29 @@ export const formatCurrency = (amount: number | undefined): string => {
   }
   return `₹${amount.toLocaleString('en-IN')}`;
 };
+
+// Check if an image is accessible
+export const checkImageUrl = async (url: string): Promise<boolean> => {
+  if (!isValidImageUrl(url)) return false;
+  
+  try {
+    // Create a promise that can be resolved or rejected with a timeout
+    const timeoutPromise = new Promise<boolean>((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout')), 5000);
+    });
+    
+    const fetchPromise = new Promise<boolean>(async (resolve) => {
+      try {
+        const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+        resolve(true);
+      } catch (e) {
+        resolve(false);
+      }
+    });
+    
+    return await Promise.race([fetchPromise, timeoutPromise]) as boolean;
+  } catch (error) {
+    console.error('Error checking image URL:', url, error);
+    return false;
+  }
+};
