@@ -44,7 +44,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
     if (!api || finalImages.length <= 1 || hasError) return;
 
     const interval = setInterval(() => {
-      api?.scrollNext();
+      api.scrollNext();
     }, 3000); // Switch images every 3 seconds
 
     return () => clearInterval(interval);

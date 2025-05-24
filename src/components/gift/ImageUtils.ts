@@ -9,10 +9,10 @@ export const prepareCarouselImages = (mainImage: string | undefined, additionalI
   ];
 
   // Sanitize inputs to ensure we don't have undefined or empty arrays
-  const safeMain = mainImage && typeof mainImage === 'string' ? mainImage : defaultImages[0];
+  const safeMain = mainImage || defaultImages[0];
   const safeAdditional = Array.isArray(additionalImages) ? additionalImages : [];
   
-  // Filter out any invalid values and make sure we have non-empty strings
+  // Filter out any invalid values
   const validMainImage = isValidImageUrl(safeMain) ? safeMain : defaultImages[0];
   const validAdditionalImages = safeAdditional
     .filter(img => img && typeof img === 'string' && isValidImageUrl(img));
@@ -37,7 +37,11 @@ export const prepareCarouselImages = (mainImage: string | undefined, additionalI
   }
 
   // Ensure we have at least one image
-  return finalImages.length > 0 ? finalImages : [defaultImages[0]];
+  if (finalImages.length === 0) {
+    return [defaultImages[0]];
+  }
+
+  return finalImages;
 };
 
 export const getDefaultImage = (index: number): string => {
@@ -50,15 +54,15 @@ export const getDefaultImage = (index: number): string => {
   ];
   
   // Make sure we have a valid index
-  const safeIndex = typeof index === 'number' && !isNaN(index) ? Math.abs(index) % defaultImages.length : 0;
-  return defaultImages[safeIndex];
+  const safeIndex = typeof index === 'number' && !isNaN(index) ? index : 0;
+  return defaultImages[Math.abs(safeIndex) % defaultImages.length];
 };
 
 // Helper to check if an image URL is valid
 export const isValidImageUrl = (url: string | undefined): boolean => {
-  if (!url || typeof url !== 'string' || url.trim() === '') return false;
+  if (!url || typeof url !== 'string') return false;
   
-  return (
+  return url.length > 0 && (
     url.startsWith('http://') || 
     url.startsWith('https://') || 
     url.startsWith('data:image/')
@@ -71,30 +75,4 @@ export const formatCurrency = (amount: number | undefined): string => {
     return "₹0"; // Default value for invalid amounts
   }
   return `₹${amount.toLocaleString('en-IN')}`;
-};
-
-// Check if an image is accessible
-export const checkImageUrl = async (url: string): Promise<boolean> => {
-  if (!isValidImageUrl(url)) return false;
-  
-  try {
-    // Create a promise that can be resolved or rejected with a timeout
-    const timeoutPromise = new Promise<boolean>((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout')), 5000);
-    });
-    
-    const fetchPromise = new Promise<boolean>(async (resolve) => {
-      try {
-        const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
-        resolve(true);
-      } catch (e) {
-        resolve(false);
-      }
-    });
-    
-    return await Promise.race([fetchPromise, timeoutPromise]) as boolean;
-  } catch (error) {
-    console.error('Error checking image URL:', url, error);
-    return false;
-  }
 };

@@ -1,21 +1,17 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Gift, AlertTriangle } from "lucide-react";
+import { Gift } from "lucide-react";
 import { GiftSuggestion } from "@/utils/userPreferences";
 import { GiftImageCarousel } from "./GiftImageCarousel";
 import { Badge } from "@/components/ui/badge";
 import { GiftBadges } from "./gift/GiftBadges";
 import { GiftCardActions } from "./gift/GiftCardActions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface GiftSuggestionCardProps {
   suggestion: GiftSuggestion;
   isLiked: boolean;
   isInCart: boolean;
-  isLoading?: boolean;
-  hasError?: boolean;
   onAddToWishlist: (suggestion: GiftSuggestion) => void;
   onAddToCart: (suggestion: GiftSuggestion) => void;
 }
@@ -24,59 +20,23 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
   suggestion,
   isLiked,
   isInCart,
-  isLoading = false,
-  hasError = false,
   onAddToWishlist,
   onAddToCart,
 }) => {
-  if (isLoading) {
-    return (
-      <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
-        <div className="w-full">
-          <Skeleton className="h-48 w-full" />
-        </div>
-        <div className="p-3 md:p-4 flex-grow flex flex-col">
-          <Skeleton className="h-6 w-3/4 mb-2" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-5/6 mb-4" />
-          <div className="flex gap-2 mt-2 mb-4">
-            <Skeleton className="h-6 w-16" />
-            <Skeleton className="h-6 w-16" />
-          </div>
-          <div className="flex justify-between mt-auto pt-4">
-            <Skeleton className="h-10 w-20" />
-            <Skeleton className="h-10 w-20" />
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  if (hasError || !suggestion) {
-    return (
-      <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full p-4">
-        <Alert variant="destructive" className="mb-4">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Unable to load gift suggestion. Please try again later.
-          </AlertDescription>
-        </Alert>
-        <div className="w-full bg-gray-100 h-48 flex items-center justify-center">
-          <AlertTriangle className="h-12 w-12 text-gray-400" />
-        </div>
-      </Card>
-    );
+  if (!suggestion) {
+    console.error("Missing suggestion data in GiftSuggestionCard");
+    return null;
   }
 
   // Ensure we have valid suggestion data
   const safeData = {
-    name: suggestion?.name || "Gift Item",
-    price: typeof suggestion?.price === 'number' ? suggestion.price : 0,
-    description: suggestion?.description || "No description available",
-    image: suggestion?.image || "",
-    additionalImages: Array.isArray(suggestion?.additionalImages) ? suggestion.additionalImages : [],
-    category: suggestion?.category || "",
-    shopLink: suggestion?.shopLink || "https://www.meesho.com/gift-finder"
+    name: suggestion.name || "Gift Item",
+    price: typeof suggestion.price === 'number' ? suggestion.price : 0,
+    description: suggestion.description || "",
+    image: suggestion.image || "",
+    additionalImages: Array.isArray(suggestion.additionalImages) ? suggestion.additionalImages : [],
+    category: suggestion.category || "",
+    shopLink: suggestion.shopLink || "https://www.meesho.com/gift-finder"
   };
   
   // Determine if this is a collection
