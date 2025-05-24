@@ -9,11 +9,11 @@ export const prepareCarouselImages = (mainImage: string | undefined, additionalI
   ];
 
   // Ensure we have a valid main image
-  const validMainImage = mainImage && mainImage.length > 0 ? mainImage : defaultImages[0];
+  const validMainImage = isValidImageUrl(mainImage) ? mainImage : defaultImages[0];
   
-  // Filter out any empty strings from additionalImages
+  // Filter out any empty or invalid strings from additionalImages
   const validAdditionalImages = additionalImages && additionalImages.length > 0
-    ? additionalImages.filter(img => img && img.length > 0)
+    ? additionalImages.filter(img => isValidImageUrl(img))
     : [defaultImages[1]];
 
   // Build the final array of images, ensuring no duplicates
@@ -62,5 +62,8 @@ export const isValidImageUrl = (url: string | undefined): boolean => {
 
 // Format currency values consistently
 export const formatCurrency = (amount: number): string => {
+  if (isNaN(amount) || amount === undefined) {
+    return "₹0"; // Default value for invalid amounts
+  }
   return `₹${amount.toLocaleString('en-IN')}`;
 };

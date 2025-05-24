@@ -25,6 +25,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   const [api, setApi] = React.useState<CarouselApi>();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
+  const [hasError, setHasError] = useState(false);
   
   // Process the images to ensure we have valid ones
   const finalImages = prepareCarouselImages(
@@ -35,18 +36,19 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   // Initialize the imagesLoaded state with false for each image
   useEffect(() => {
     setImagesLoaded(new Array(finalImages.length).fill(false));
+    setHasError(false);
   }, [finalImages.length]);
 
   // Set up auto-rotation for the carousel
   useEffect(() => {
-    if (!api || finalImages.length <= 1) return;
+    if (!api || finalImages.length <= 1 || hasError) return;
 
     const interval = setInterval(() => {
       api.scrollNext();
     }, 3000); // Switch images every 3 seconds
 
     return () => clearInterval(interval);
-  }, [api, finalImages.length]);
+  }, [api, finalImages.length, hasError]);
 
   // Track current slide
   useEffect(() => {
@@ -72,12 +74,19 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   // Handle image load error
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, index: number) => {
     const target = e.target as HTMLImageElement;
+    setHasError(true);
     
     // Use a fallback image
     target.src = getDefaultImage(index);
     
     // Force a retry with the fallback image and prevent infinite retries
     target.onerror = null;
+    
+    // Log the error for debugging
+    console.log(`Image error loading ${index}:`, e);
+    
+    // Mark as loaded to prevent loading indicators
+    handleImageLoad(index);
   };
 
   return (
@@ -99,7 +108,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
             </CarouselItem>
           ))}
         </CarouselContent>
-        {finalImages.length > 1 && (
+        {finalImages.length > 1 && !hasError && (
           <>
             <CarouselPrevious className="left-1 -translate-y-1/2 bg-white/80 shadow-md md:left-2" />
             <CarouselNext className="right-1 -translate-y-1/2 bg-white/80 shadow-md md:right-2" />
@@ -109,7 +118,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
           {formatCurrency(price)}
         </div>
       </Carousel>
-      {finalImages.length > 1 && (
+      {finalImages.length > 1 && !hasError && (
         <div className="flex justify-center mt-2 gap-1">
           {finalImages.map((_, index) => (
             <button

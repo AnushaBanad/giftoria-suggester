@@ -1,12 +1,12 @@
-
 // Types for gift-related data
 export interface GiftSuggestion {
   name: string;
   price: number;
   image: string;
   description: string;
-  shopLink: string;
-  additionalImages?: string[]; // Adding support for multiple images
+  shopLink?: string;
+  additionalImages?: string[];
+  category?: string;  // Add the category property as optional
 }
 
 // Get preferences from local storage

@@ -20,7 +20,7 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
     
     if (interestSuggestions && interestSuggestions.length > 0) {
       console.log(`Found ${interestSuggestions.length} suggestions for interest: ${interest}`);
-      // Ensure we have valid images for each suggestion
+      // Ensure we have valid images and categories for each suggestion
       const enhancedSuggestions = interestSuggestions.map(suggestion => ({
         ...suggestion,
         // Ensure image exists, fallback to getRelevantGiftImage if not
@@ -31,7 +31,9 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
           : [
               getRelevantGiftImage(budget, [interest]), 
               getRelevantGiftImage(budget, [interest])
-            ]
+            ],
+        // Ensure category exists, default to interest if not provided
+        category: suggestion.category || interest
       }));
       
       suggestions = [...suggestions, ...enhancedSuggestions];
@@ -57,7 +59,8 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
           additionalImages: [
             getRelevantGiftImage(budget, [interest]),
             getRelevantGiftImage(budget, [interest])
-          ]
+          ],
+          category: interest // Set the category to the interest
         });
       }
     });
@@ -102,7 +105,8 @@ const getGenericSuggestions = (budget: number, occasion: string): GiftSuggestion
       additionalImages: [
         "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop"
-      ]
+      ],
+      category: "Gift Experience"
     },
     {
       name: "Premium Gift Card",
@@ -113,7 +117,8 @@ const getGenericSuggestions = (budget: number, occasion: string): GiftSuggestion
       additionalImages: [
         "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop"
-      ]
+      ],
+      category: "Gift Card"
     },
     {
       name: "Luxury Gift Basket",
@@ -124,7 +129,8 @@ const getGenericSuggestions = (budget: number, occasion: string): GiftSuggestion
       additionalImages: [
         "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop"
-      ]
+      ],
+      category: "Gift Basket"
     }
   ];
 };
