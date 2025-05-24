@@ -1,36 +1,42 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { 
-  interests, 
-  interestToOccasions, 
-  allOccasions,
-  getInterestBasedGiftSuggestions
-} from "@/data/giftDatabase";
-import { 
-  getUserPreferences, 
-  saveUserPreferences, 
-  saveLikedItems, 
-  saveCartItems,
-  GiftSuggestion
-} from "@/utils/userPreferences";
-import { generateGiftSuggestions } from "@/utils/giftSuggestion";
+import { saveUserPreferences } from "@/utils/userPreferences";
+import { useInterests } from "./useInterests";
+import { useBudget } from "./useBudget";
+import { useOccasions } from "./useOccasions";
+import { useGiftSuggestions } from "./useGiftSuggestions";
+import { useUserPreferences } from "./useUserPreferences";
 
 export const useDashboard = () => {
   // Load user preferences from localStorage
   const userPrefs = getUserPreferences();
   
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(userPrefs.selectedInterests || []);
-  const [budget, setBudget] = useState(userPrefs.budget || "1000");
-  const [selectedOccasion, setSelectedOccasion] = useState(userPrefs.selectedOccasion || "");
-  const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredOccasions, setFilteredOccasions] = useState<string[]>(allOccasions);
-  const [likedItems, setLikedItems] = useState<Set<string>>(userPrefs.likedItems || new Set());
-  const [cartItems, setCartItems] = useState<Set<string>>(userPrefs.cartItems || new Set());
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  // Use our new hooks to manage state
+  const { selectedInterests, handleInterestClick, availableInterests } = 
+    useInterests(userPrefs.selectedInterests || []);
+    
+  const { budget, handleBudgetSliderChange, handleBudgetInputChange } = 
+    useBudget(userPrefs.budget || "1000");
+    
+  const { selectedOccasion, filteredOccasions, handleOccasionClick } = 
+    useOccasions(selectedInterests, userPrefs.selectedOccasion || "");
+    
+  const { likedItems, cartItems, setLikedItems, setCartItems } = 
+    useUserPreferences();
+    
+  const { 
+    suggestions, 
+    showSuggestions, 
+    isLoading, 
+    hasError, 
+    errorMessage,
+    setShowSuggestions,
+    generateSuggestions,
+    handleAddToWishlist: baseHandleAddToWishlist,
+    handleAddToCart: baseHandleAddToCart
+  } = useGiftSuggestions(likedItems, cartItems);
+
   const { toast } = useToast();
 
   // Save current selections to localStorage whenever they change
@@ -38,54 +44,16 @@ export const useDashboard = () => {
     saveUserPreferences(selectedInterests, budget, selectedOccasion, likedItems, cartItems);
   }, [selectedInterests, budget, selectedOccasion, likedItems, cartItems]);
 
-  // Filter occasions based on selected interests
-  useEffect(() => {
-    if (selectedInterests.length === 0) {
-      setFilteredOccasions(allOccasions);
-    } else {
-      let relevantOccasions = new Set<string>();
-      selectedInterests.forEach(interest => {
-        if (interestToOccasions[interest]) {
-          interestToOccasions[interest].forEach(occasion => {
-            relevantOccasions.add(occasion);
-          });
-        }
-      });
-
-      if (selectedOccasion && !relevantOccasions.has(selectedOccasion)) {
-        setSelectedOccasion("");
-      }
-
-      setFilteredOccasions(Array.from(relevantOccasions).sort());
-    }
-  }, [selectedInterests, selectedOccasion]);
-
-  const handleInterestClick = (interest: string) => {
-    setSelectedInterests(prev =>
-      prev.includes(interest)
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
-    );
+  const handleAddToWishlist = (suggestion) => {
+    baseHandleAddToWishlist(suggestion, setLikedItems);
   };
 
-  const handleBudgetSliderChange = (value: number[]) => {
-    setBudget(value[0].toString());
-  };
-
-  const handleBudgetInputChange = (value: string) => {
-    setBudget(value);
-  };
-
-  const handleOccasionClick = (occasion: string) => {
-    setSelectedOccasion(occasion);
+  const handleAddToCart = (suggestion) => {
+    baseHandleAddToCart(suggestion, setCartItems);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Reset states
-    setHasError(false);
-    setErrorMessage("");
     
     // Validate form inputs
     if (!selectedOccasion) {
@@ -121,171 +89,8 @@ export const useDashboard = () => {
       occasion: selectedOccasion
     });
     
-    // Show loading state
-    setIsLoading(true);
-    setShowSuggestions(true);
-    setSuggestions([]);
-    
-    try {
-      // Simulate network delay to show loading state (remove in production)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Get interest-specific suggestions directly first
-      let directSuggestions: GiftSuggestion[] = [];
-      selectedInterests.forEach(interest => {
-        try {
-          const interestSuggestions = getInterestBasedGiftSuggestions(
-            interest, 
-            Number(budget), 
-            selectedOccasion
-          );
-          if (Array.isArray(interestSuggestions) && interestSuggestions.length > 0) {
-            directSuggestions = [...directSuggestions, ...interestSuggestions];
-          }
-        } catch (error) {
-          console.error(`Error getting suggestions for ${interest}:`, error);
-        }
-      });
-
-      // If we don't have enough direct suggestions, use the fallback generator
-      let newSuggestions: GiftSuggestion[] = [];
-      
-      try {
-        newSuggestions = directSuggestions.length >= 3 
-          ? directSuggestions 
-          : generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
-        
-        // Validate suggestions to ensure they're properly formatted
-        newSuggestions = newSuggestions.filter(suggestion => 
-          suggestion && 
-          typeof suggestion === 'object' && 
-          suggestion.name && 
-          typeof suggestion.price === 'number'
-        );
-      } catch (error) {
-        console.error("Error generating suggestions:", error);
-        setHasError(true);
-        setErrorMessage("Failed to generate suggestions. Please try different criteria.");
-        
-        toast({
-          variant: "destructive",
-          title: "Error generating suggestions",
-          description: "Please try different criteria or try again later.",
-        });
-        
-        // Even with error, try to show any direct suggestions we managed to get
-        newSuggestions = directSuggestions;
-      }
-
-      console.log("Generated suggestions:", newSuggestions);
-      
-      setSuggestions(newSuggestions);
-
-      if (newSuggestions.length === 0) {
-        toast({
-          variant: "destructive",
-          title: "No exact matches found",
-          description: "We're showing alternative shopping options within your budget",
-        });
-      } else {
-        toast({
-          title: "Perfect gifts found!",
-          description: `Found ${newSuggestions.length} gift suggestions for ${selectedOccasion}`,
-        });
-      }
-    } catch (error) {
-      console.error("Error in gift suggestion process:", error);
-      setHasError(true);
-      setErrorMessage("An unexpected error occurred. Please try again later.");
-      
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load gift suggestions. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleAddToWishlist = (suggestion: GiftSuggestion) => {
-    if (!suggestion || !suggestion.name) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid gift item",
-      });
-      return;
-    }
-
-    try {
-      setLikedItems(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(suggestion.name)) {
-          newSet.delete(suggestion.name);
-          toast({
-            title: "Removed from wishlist",
-            description: `${suggestion.name} has been removed from your wishlist`
-          });
-        } else {
-          newSet.add(suggestion.name);
-          toast({
-            title: "Added to wishlist",
-            description: `${suggestion.name} has been added to your wishlist`
-          });
-        }
-        // Save the updated liked items to localStorage
-        saveLikedItems(newSet);
-        return newSet;
-      });
-    } catch (error) {
-      console.error("Error updating wishlist:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update wishlist. Please try again.",
-      });
-    }
-  };
-
-  const handleAddToCart = (suggestion: GiftSuggestion) => {
-    if (!suggestion || !suggestion.name) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid gift item",
-      });
-      return;
-    }
-
-    try {
-      setCartItems(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(suggestion.name)) {
-          newSet.delete(suggestion.name);
-          toast({
-            title: "Removed from cart",
-            description: `${suggestion.name} has been removed from your cart`
-          });
-        } else {
-          newSet.add(suggestion.name);
-          toast({
-            title: "Added to cart",
-            description: `${suggestion.name} has been added to your cart`
-          });
-        }
-        // Save the updated cart items to localStorage
-        saveCartItems(newSet);
-        return newSet;
-      });
-    } catch (error) {
-      console.error("Error updating cart:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update cart. Please try again.",
-      });
-    }
+    // Generate suggestions
+    await generateSuggestions(selectedInterests, budget, selectedOccasion);
   };
 
   return {
@@ -297,7 +102,7 @@ export const useDashboard = () => {
     filteredOccasions,
     likedItems,
     cartItems,
-    interests,
+    interests: availableInterests,
     isLoading,
     hasError,
     errorMessage,
@@ -310,3 +115,6 @@ export const useDashboard = () => {
     handleAddToCart
   };
 };
+
+// Fix missing import
+import { getUserPreferences } from "@/utils/userPreferences";
