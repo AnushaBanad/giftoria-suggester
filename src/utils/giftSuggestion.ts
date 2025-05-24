@@ -16,27 +16,31 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
   // Process each interest to get suggestions
   for (const interest of interests) {
     console.log(`Looking for suggestions for interest: ${interest}, budget: ${budget}, occasion: ${occasion}`);
-    const interestSuggestions = getInterestBasedGiftSuggestions(interest, budget, occasion);
-    
-    if (interestSuggestions && interestSuggestions.length > 0) {
-      console.log(`Found ${interestSuggestions.length} suggestions for interest: ${interest}`);
-      // Ensure we have valid images and categories for each suggestion
-      const enhancedSuggestions = interestSuggestions.map(suggestion => ({
-        ...suggestion,
-        // Ensure image exists, fallback to getRelevantGiftImage if not
-        image: suggestion.image || getRelevantGiftImage(budget, [interest]),
-        // Make sure we have valid additional images
-        additionalImages: (suggestion.additionalImages && suggestion.additionalImages.length > 0) 
-          ? suggestion.additionalImages.filter(img => img && img.length > 0)
-          : [
-              getRelevantGiftImage(budget, [interest]), 
-              getRelevantGiftImage(budget, [interest])
-            ],
-        // Ensure category exists, default to interest if not provided
-        category: suggestion.category || interest
-      }));
+    try {
+      const interestSuggestions = getInterestBasedGiftSuggestions(interest, budget, occasion);
       
-      suggestions = [...suggestions, ...enhancedSuggestions];
+      if (interestSuggestions && Array.isArray(interestSuggestions) && interestSuggestions.length > 0) {
+        console.log(`Found ${interestSuggestions.length} suggestions for interest: ${interest}`);
+        // Ensure we have valid images and categories for each suggestion
+        const enhancedSuggestions = interestSuggestions.map(suggestion => ({
+          ...suggestion,
+          // Ensure image exists, fallback to getRelevantGiftImage if not
+          image: suggestion.image || getRelevantGiftImage(budget, [interest]),
+          // Make sure we have valid additional images
+          additionalImages: (suggestion.additionalImages && Array.isArray(suggestion.additionalImages) && suggestion.additionalImages.length > 0) 
+            ? suggestion.additionalImages.filter(img => img && typeof img === 'string' && img.length > 0)
+            : [
+                getRelevantGiftImage(budget, [interest]), 
+                getRelevantGiftImage(budget, [interest])
+              ],
+          // Ensure category exists, default to interest if not provided
+          category: suggestion.category || interest
+        }));
+        
+        suggestions = [...suggestions, ...enhancedSuggestions];
+      }
+    } catch (error) {
+      console.error(`Error getting suggestions for interest ${interest}:`, error);
     }
     
     // Break once we have enough suggestions
@@ -73,9 +77,17 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
     suggestions = [...suggestions, ...genericSuggestions];
   }
 
+  // Ensure suggestions are valid objects
+  const validSuggestions = suggestions.filter(suggestion => 
+    suggestion && 
+    typeof suggestion === 'object' && 
+    suggestion.name && 
+    typeof suggestion.price === 'number'
+  );
+
   // Ensure suggestions are unique
   const uniqueSuggestions = Array.from(
-    new Map(suggestions.map(item => [item.name, item])).values()
+    new Map(validSuggestions.map(item => [item.name, item])).values()
   );
 
   // Filter by budget and sort by relevance

@@ -41,7 +41,7 @@ export const GiftSuggestionResults: React.FC<GiftSuggestionResultsProps> = ({
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <ShoppingBag className="w-6 h-6 text-emerald-600" />
-              Gift Ideas for {selectedOccasion}
+              Gift Ideas for {selectedOccasion || "Your Occasion"}
               {isLoading && (
                 <Loader className="w-5 h-5 ml-2 animate-spin text-emerald-600" />
               )}
@@ -49,7 +49,7 @@ export const GiftSuggestionResults: React.FC<GiftSuggestionResultsProps> = ({
             
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                Budget: ₹{budget}
+                Budget: ₹{budget || "0"}
               </Badge>
               {selectedInterests.length > 0 && (
                 <Badge variant="outline" className="bg-violet-50 text-violet-700">
@@ -75,7 +75,12 @@ export const GiftSuggestionResults: React.FC<GiftSuggestionResultsProps> = ({
               {Array.from({ length: 3 }).map((_, index) => (
                 <GiftSuggestionCard
                   key={`loading-${index}`}
-                  suggestion={{} as GiftSuggestion}
+                  suggestion={{
+                    name: "",
+                    price: 0,
+                    image: "",
+                    description: ""
+                  }}
                   isLiked={false}
                   isInCart={false}
                   isLoading={true}

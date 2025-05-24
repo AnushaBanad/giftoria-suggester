@@ -70,13 +70,13 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
 
   // Ensure we have valid suggestion data
   const safeData = {
-    name: suggestion.name || "Gift Item",
-    price: typeof suggestion.price === 'number' ? suggestion.price : 0,
-    description: suggestion.description || "",
-    image: suggestion.image || "",
-    additionalImages: Array.isArray(suggestion.additionalImages) ? suggestion.additionalImages : [],
-    category: suggestion.category || "",
-    shopLink: suggestion.shopLink || "https://www.meesho.com/gift-finder"
+    name: suggestion?.name || "Gift Item",
+    price: typeof suggestion?.price === 'number' ? suggestion.price : 0,
+    description: suggestion?.description || "No description available",
+    image: suggestion?.image || "",
+    additionalImages: Array.isArray(suggestion?.additionalImages) ? suggestion.additionalImages : [],
+    category: suggestion?.category || "",
+    shopLink: suggestion?.shopLink || "https://www.meesho.com/gift-finder"
   };
   
   // Determine if this is a collection
@@ -133,4 +133,3 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
     </Card>
   );
 };
-

@@ -9,10 +9,10 @@ export const prepareCarouselImages = (mainImage: string | undefined, additionalI
   ];
 
   // Sanitize inputs to ensure we don't have undefined or empty arrays
-  const safeMain = mainImage || defaultImages[0];
+  const safeMain = mainImage && typeof mainImage === 'string' ? mainImage : defaultImages[0];
   const safeAdditional = Array.isArray(additionalImages) ? additionalImages : [];
   
-  // Filter out any invalid values
+  // Filter out any invalid values and make sure we have non-empty strings
   const validMainImage = isValidImageUrl(safeMain) ? safeMain : defaultImages[0];
   const validAdditionalImages = safeAdditional
     .filter(img => img && typeof img === 'string' && isValidImageUrl(img));
@@ -37,11 +37,7 @@ export const prepareCarouselImages = (mainImage: string | undefined, additionalI
   }
 
   // Ensure we have at least one image
-  if (finalImages.length === 0) {
-    return [defaultImages[0]];
-  }
-
-  return finalImages;
+  return finalImages.length > 0 ? finalImages : [defaultImages[0]];
 };
 
 export const getDefaultImage = (index: number): string => {
@@ -54,15 +50,15 @@ export const getDefaultImage = (index: number): string => {
   ];
   
   // Make sure we have a valid index
-  const safeIndex = typeof index === 'number' && !isNaN(index) ? index : 0;
-  return defaultImages[Math.abs(safeIndex) % defaultImages.length];
+  const safeIndex = typeof index === 'number' && !isNaN(index) ? Math.abs(index) % defaultImages.length : 0;
+  return defaultImages[safeIndex];
 };
 
 // Helper to check if an image URL is valid
 export const isValidImageUrl = (url: string | undefined): boolean => {
-  if (!url || typeof url !== 'string') return false;
+  if (!url || typeof url !== 'string' || url.trim() === '') return false;
   
-  return url.length > 0 && (
+  return (
     url.startsWith('http://') || 
     url.startsWith('https://') || 
     url.startsWith('data:image/')

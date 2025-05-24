@@ -20,14 +20,14 @@ export const useDashboard = () => {
   // Load user preferences from localStorage
   const userPrefs = getUserPreferences();
   
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(userPrefs.selectedInterests);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(userPrefs.selectedInterests || []);
   const [budget, setBudget] = useState(userPrefs.budget || "1000");
-  const [selectedOccasion, setSelectedOccasion] = useState(userPrefs.selectedOccasion);
+  const [selectedOccasion, setSelectedOccasion] = useState(userPrefs.selectedOccasion || "");
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredOccasions, setFilteredOccasions] = useState<string[]>(allOccasions);
-  const [likedItems, setLikedItems] = useState<Set<string>>(userPrefs.likedItems);
-  const [cartItems, setCartItems] = useState<Set<string>>(userPrefs.cartItems);
+  const [likedItems, setLikedItems] = useState<Set<string>>(userPrefs.likedItems || new Set());
+  const [cartItems, setCartItems] = useState<Set<string>>(userPrefs.cartItems || new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -139,7 +139,9 @@ export const useDashboard = () => {
             Number(budget), 
             selectedOccasion
           );
-          directSuggestions = [...directSuggestions, ...interestSuggestions];
+          if (Array.isArray(interestSuggestions) && interestSuggestions.length > 0) {
+            directSuggestions = [...directSuggestions, ...interestSuggestions];
+          }
         } catch (error) {
           console.error(`Error getting suggestions for ${interest}:`, error);
         }
@@ -152,6 +154,14 @@ export const useDashboard = () => {
         newSuggestions = directSuggestions.length >= 3 
           ? directSuggestions 
           : generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
+        
+        // Validate suggestions to ensure they're properly formatted
+        newSuggestions = newSuggestions.filter(suggestion => 
+          suggestion && 
+          typeof suggestion === 'object' && 
+          suggestion.name && 
+          typeof suggestion.price === 'number'
+        );
       } catch (error) {
         console.error("Error generating suggestions:", error);
         setHasError(true);
@@ -199,6 +209,15 @@ export const useDashboard = () => {
   };
 
   const handleAddToWishlist = (suggestion: GiftSuggestion) => {
+    if (!suggestion || !suggestion.name) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Invalid gift item",
+      });
+      return;
+    }
+
     try {
       setLikedItems(prev => {
         const newSet = new Set(prev);
@@ -230,6 +249,15 @@ export const useDashboard = () => {
   };
 
   const handleAddToCart = (suggestion: GiftSuggestion) => {
+    if (!suggestion || !suggestion.name) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Invalid gift item",
+      });
+      return;
+    }
+
     try {
       setCartItems(prev => {
         const newSet = new Set(prev);
