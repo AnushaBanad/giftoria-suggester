@@ -18,9 +18,9 @@ interface GiftImageCarouselProps {
 }
 
 export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
-  images,
-  name,
-  price,
+  images = [],
+  name = "Gift Item",
+  price = 0,
 }) => {
   const [api, setApi] = React.useState<CarouselApi>();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -29,8 +29,8 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   
   // Process the images to ensure we have valid ones
   const finalImages = prepareCarouselImages(
-    images[0],
-    images.slice(1)
+    Array.isArray(images) && images.length > 0 ? images[0] : undefined,
+    Array.isArray(images) && images.length > 1 ? images.slice(1) : []
   );
 
   // Initialize the imagesLoaded state with false for each image
@@ -73,17 +73,14 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
 
   // Handle image load error
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, index: number) => {
+    console.log(`Image error loading at index ${index}:`, e);
     const target = e.target as HTMLImageElement;
-    setHasError(true);
     
     // Use a fallback image
     target.src = getDefaultImage(index);
     
     // Force a retry with the fallback image and prevent infinite retries
     target.onerror = null;
-    
-    // Log the error for debugging
-    console.log(`Image error loading ${index}:`, e);
     
     // Mark as loaded to prevent loading indicators
     handleImageLoad(index);
@@ -94,7 +91,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
       <Carousel className="w-full" setApi={setApi} opts={{ loop: true }}>
         <CarouselContent>
           {finalImages.map((image, index) => (
-            <CarouselItem key={index}>
+            <CarouselItem key={`image-${index}-${image.substring(0, 20)}`}>
               <AspectRatio ratio={4/3} className="bg-gray-100 overflow-hidden">
                 <img
                   src={image}
@@ -108,7 +105,7 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
             </CarouselItem>
           ))}
         </CarouselContent>
-        {finalImages.length > 1 && !hasError && (
+        {finalImages.length > 1 && (
           <>
             <CarouselPrevious className="left-1 -translate-y-1/2 bg-white/80 shadow-md md:left-2" />
             <CarouselNext className="right-1 -translate-y-1/2 bg-white/80 shadow-md md:right-2" />
@@ -118,15 +115,16 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
           {formatCurrency(price)}
         </div>
       </Carousel>
-      {finalImages.length > 1 && !hasError && (
+      {finalImages.length > 1 && (
         <div className="flex justify-center mt-2 gap-1">
           {finalImages.map((_, index) => (
             <button
-              key={index}
+              key={`dot-${index}`}
               className={`w-2 h-2 rounded-full ${
                 index === currentImageIndex ? "bg-emerald-600" : "bg-gray-300"
               }`}
               onClick={() => api?.scrollTo(index)}
+              aria-label={`View image ${index + 1}`}
             />
           ))}
         </div>

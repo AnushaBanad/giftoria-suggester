@@ -8,31 +8,37 @@ export const prepareCarouselImages = (mainImage: string | undefined, additionalI
     "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop"
   ];
 
-  // Ensure we have a valid main image
-  const validMainImage = isValidImageUrl(mainImage) ? mainImage : defaultImages[0];
+  // Sanitize inputs to ensure we don't have undefined or empty arrays
+  const safeMain = mainImage || defaultImages[0];
+  const safeAdditional = Array.isArray(additionalImages) ? additionalImages : [];
   
-  // Filter out any empty or invalid strings from additionalImages
-  const validAdditionalImages = additionalImages && additionalImages.length > 0
-    ? additionalImages.filter(img => isValidImageUrl(img))
-    : [defaultImages[1]];
-
+  // Filter out any invalid values
+  const validMainImage = isValidImageUrl(safeMain) ? safeMain : defaultImages[0];
+  const validAdditionalImages = safeAdditional
+    .filter(img => img && typeof img === 'string' && isValidImageUrl(img));
+  
   // Build the final array of images, ensuring no duplicates
   const finalImages = [validMainImage];
   
   // Add additional images but avoid duplicates
-  validAdditionalImages.forEach(img => {
+  for (const img of validAdditionalImages) {
     if (!finalImages.includes(img)) {
       finalImages.push(img);
     }
-  });
+  }
 
   // If we still need more images, add from defaults
   if (finalImages.length < 2) {
-    defaultImages.forEach(img => {
+    for (const img of defaultImages) {
       if (!finalImages.includes(img) && finalImages.length < 3) {
         finalImages.push(img);
       }
-    });
+    }
+  }
+
+  // Ensure we have at least one image
+  if (finalImages.length === 0) {
+    return [defaultImages[0]];
   }
 
   return finalImages;
@@ -47,12 +53,15 @@ export const getDefaultImage = (index: number): string => {
     "https://images.unsplash.com/photo-1493962853295-0fd70327578a?w=500&auto=format&fit=crop"
   ];
   
-  return defaultImages[index % defaultImages.length];
+  // Make sure we have a valid index
+  const safeIndex = typeof index === 'number' && !isNaN(index) ? index : 0;
+  return defaultImages[Math.abs(safeIndex) % defaultImages.length];
 };
 
 // Helper to check if an image URL is valid
 export const isValidImageUrl = (url: string | undefined): boolean => {
-  if (!url) return false;
+  if (!url || typeof url !== 'string') return false;
+  
   return url.length > 0 && (
     url.startsWith('http://') || 
     url.startsWith('https://') || 
@@ -61,8 +70,8 @@ export const isValidImageUrl = (url: string | undefined): boolean => {
 };
 
 // Format currency values consistently
-export const formatCurrency = (amount: number): string => {
-  if (isNaN(amount) || amount === undefined) {
+export const formatCurrency = (amount: number | undefined): string => {
+  if (amount === undefined || isNaN(amount)) {
     return "₹0"; // Default value for invalid amounts
   }
   return `₹${amount.toLocaleString('en-IN')}`;

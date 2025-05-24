@@ -1,3 +1,4 @@
+
 // Types for gift-related data
 export interface GiftSuggestion {
   name: string;
@@ -6,7 +7,7 @@ export interface GiftSuggestion {
   description: string;
   shopLink?: string;
   additionalImages?: string[];
-  category?: string;  // Add the category property as optional
+  category?: string;
 }
 
 // Get preferences from local storage
