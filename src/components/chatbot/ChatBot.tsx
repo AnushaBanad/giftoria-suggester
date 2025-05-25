@@ -111,17 +111,17 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onToggle }) => {
   if (!isOpen) return null;
 
   return (
-    <Card className="fixed bottom-4 right-4 w-80 h-96 z-50 shadow-2xl border-2 border-gray-200">
+    <Card className="fixed bottom-4 right-4 w-80 h-96 z-50 shadow-2xl border-2 border-gray-200 sm:w-72 sm:h-80 md:w-80 md:h-96">
       <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-t-lg">
         <div className="flex items-center gap-2">
           <Bot className="w-5 h-5" />
-          <span className="font-semibold">Gift Assistant</span>
+          <span className="font-semibold text-sm sm:text-base">Gift Assistant</span>
         </div>
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={onToggle}
-          className="text-white hover:bg-white/20"
+          className="text-white hover:bg-white/20 p-1"
         >
           <X className="w-4 h-4" />
         </Button>
@@ -140,7 +140,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onToggle }) => {
               >
                 <div
                   className={cn(
-                    "max-w-[80%] p-2 rounded-lg text-sm",
+                    "max-w-[80%] p-2 rounded-lg text-xs sm:text-sm",
                     message.isBot
                       ? "bg-gray-100 text-gray-800"
                       : "bg-emerald-500 text-white"
@@ -153,7 +153,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onToggle }) => {
             
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-800 p-2 rounded-lg text-sm">
+                <div className="bg-gray-100 text-gray-800 p-2 rounded-lg text-xs sm:text-sm">
                   <span className="inline-flex items-center gap-1">
                     Typing
                     <span className="animate-pulse">...</span>
@@ -172,14 +172,14 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onToggle }) => {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about gifts..."
-              className="flex-1 text-sm"
+              className="flex-1 text-xs sm:text-sm"
             />
             <Button 
               onClick={handleSendMessage}
               size="sm"
-              className="bg-emerald-500 hover:bg-emerald-600"
+              className="bg-emerald-500 hover:bg-emerald-600 px-2 sm:px-3"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           </div>
         </div>
