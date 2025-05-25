@@ -148,6 +148,23 @@
   .card-content {
     padding: 0.75rem;
   }
+
+  /* Chatbot responsive adjustments */
+  .chatbot-container {
+    width: calc(100vw - 2rem);
+    max-width: 320px;
+    bottom: 1rem;
+    right: 1rem;
+    height: 70vh;
+    max-height: 500px;
+  }
+
+  .chatbot-toggle {
+    bottom: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+  }
 }
 
 /* Fix for image loading issues */
@@ -183,4 +200,22 @@ img {
 .card {
   backface-visibility: hidden;
   will-change: transform;
+}
+
+/* Chatbot specific styles */
+.chatbot-container {
+  @apply fixed bottom-4 right-4 z-50 shadow-2xl border-2 border-gray-200;
+  width: 320px;
+  height: 384px;
+}
+
+@media (max-width: 640px) {
+  .chatbot-container {
+    width: calc(100vw - 2rem);
+    max-width: 320px;
+    bottom: 1rem;
+    right: 1rem;
+    height: 70vh;
+    max-height: 500px;
+  }
 }

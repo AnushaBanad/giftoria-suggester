@@ -11,6 +11,9 @@ import Dashboard from "./pages/Dashboard";
 import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 import ProjectPresentation from "./pages/ProjectPresentation";
+import { ChatBot } from "./components/chatbot/ChatBot";
+import { ChatBotToggle } from "./components/chatbot/ChatBotToggle";
+import { useChatBot } from "./hooks/useChatBot";
 
 // Create a client with default options
 const queryClient = new QueryClient({
@@ -23,21 +26,35 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppContent = () => {
+  const { isOpen, toggleChatBot } = useChatBot();
+
+  return (
+    <div className="relative">
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/presentation" element={<ProjectPresentation />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      
+      {/* Chatbot Components */}
+      <ChatBotToggle onClick={toggleChatBot} isOpen={isOpen} />
+      <ChatBot isOpen={isOpen} onToggle={toggleChatBot} />
+    </div>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/presentation" element={<ProjectPresentation />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppContent />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
