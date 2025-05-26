@@ -81,84 +81,85 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-theme-warm to-white p-4">
-      <Card className="w-full max-w-md p-8 backdrop-blur-sm bg-white/80 shadow-xl animate-fadeIn">
-        <div className="flex flex-col items-center space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-theme-warm to-white p-4 sm:p-6 lg:p-8">
+      <Card className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 backdrop-blur-sm bg-white/80 shadow-xl animate-fadeIn">
+        <div className="flex flex-col items-center space-y-4 sm:space-y-6">
           <div className="rounded-full bg-theme-rose p-3">
-            <Gift className="w-6 h-6 text-gray-800" />
+            <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
           </div>
           
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
-            <p className="text-gray-600 mt-2">Join us to find perfect gifts</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Create Account</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Join us to find perfect gifts</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="w-full space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+          <form onSubmit={handleSubmit} className="w-full space-y-3 sm:space-y-4">
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="name" className="text-sm sm:text-base">Full Name</Label>
               <Input
                 id="name"
                 type="text"
                 placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`w-full ${errors.name ? 'border-red-500' : ''}`}
+                className={`w-full text-sm sm:text-base ${errors.name ? 'border-red-500' : ''}`}
               />
               {errors.name && (
-                <p className="text-sm text-red-500">{errors.name}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.name}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full ${errors.email ? 'border-red-500' : ''}`}
+                className={`w-full text-sm sm:text-base ${errors.email ? 'border-red-500' : ''}`}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.email}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="phone" className="text-sm sm:text-base">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
                 placeholder="Enter your phone number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                className="text-sm sm:text-base"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full ${errors.password ? 'border-red-500' : ''}`}
+                className={`w-full text-sm sm:text-base ${errors.password ? 'border-red-500' : ''}`}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.password}</p>
               )}
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-gray-800 hover:bg-gray-700 text-white"
+              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 sm:py-3 text-sm sm:text-base"
             >
               Register
             </Button>
           </form>
 
-          <p className="text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600 text-center">
             Already have an account?{" "}
             <Link
               to="/login"

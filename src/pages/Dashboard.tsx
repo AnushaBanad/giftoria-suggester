@@ -36,23 +36,24 @@ const Dashboard = () => {
       {/* Background animation elements */}
       <BackgroundAnimation />
 
-      <div className="container mx-auto max-w-4xl relative z-10">
-        <div className="flex flex-col space-y-6 py-8">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-4">
-              <Gift className="w-8 h-8 text-white" />
-              <h1 className="text-3xl font-bold text-white">Personalize Your Gifts</h1>
+      <div className="container mx-auto max-w-4xl relative z-10 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col space-y-4 sm:space-y-6 py-4 sm:py-6 lg:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 lg:mb-8 gap-4">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <Gift className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+              <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-white">Personalize Your Gifts</h1>
             </div>
             <Link 
               to="/profile" 
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-colors"
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full transition-colors text-sm sm:text-base"
             >
-              <User className="w-5 h-5" />
-              <span>My Profile</span>
+              <User className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">My Profile</span>
+              <span className="sm:hidden">Profile</span>
             </Link>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
             {/* Interest Selection Component */}
             <InterestSelection 
               selectedInterests={selectedInterests}
@@ -77,9 +78,9 @@ const Dashboard = () => {
 
             <Button 
               type="submit" 
-              className="w-full py-6 text-lg bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 transition-all hover:scale-[1.02] shadow-lg"
+              className="w-full py-4 sm:py-5 lg:py-6 text-base sm:text-lg bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 transition-all hover:scale-[1.02] shadow-lg"
             >
-              <Search className="mr-2" /> Find Perfect Gifts
+              <Search className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Find Perfect Gifts
             </Button>
           </form>
 

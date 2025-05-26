@@ -28,21 +28,21 @@ export const GiftSuggestionResults: React.FC<GiftSuggestionResultsProps> = ({
   onAddToCart
 }) => {
   return (
-    <div className="mt-8">
+    <div className="mt-6 sm:mt-8">
       <Card className="backdrop-blur-sm bg-white/90">
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <ShoppingBag className="w-6 h-6 text-emerald-600" />
-              Gift Ideas for {selectedOccasion}
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
+              <span className="break-words">Gift Ideas for {selectedOccasion}</span>
             </h2>
             
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs sm:text-sm">
                 Budget: ₹{budget}
               </Badge>
               {selectedInterests.length > 0 && (
-                <Badge variant="outline" className="bg-violet-50 text-violet-700">
+                <Badge variant="outline" className="bg-violet-50 text-violet-700 text-xs sm:text-sm">
                   Interests: {selectedInterests.slice(0, 2).join(", ")}
                   {selectedInterests.length > 2 && "..."}
                 </Badge>
@@ -50,8 +50,8 @@ export const GiftSuggestionResults: React.FC<GiftSuggestionResultsProps> = ({
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {suggestions.map((suggestion, index) => (
               <GiftSuggestionCard
                 key={`${suggestion.name}-${index}`}
