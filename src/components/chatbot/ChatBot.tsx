@@ -111,7 +111,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onToggle }) => {
   if (!isOpen) return null;
 
   return (
-    <Card className="fixed bottom-4 right-4 w-80 h-96 z-50 shadow-2xl border-2 border-gray-200 sm:w-72 sm:h-80 md:w-80 md:h-96">
+    <Card className="fixed bottom-20 right-4 w-80 h-96 z-50 shadow-2xl border-2 border-gray-200 sm:bottom-16 sm:right-4 sm:w-72 sm:h-80 md:w-80 md:h-96 chatbot-container">
       <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-t-lg">
         <div className="flex items-center gap-2">
           <Bot className="w-5 h-5" />
