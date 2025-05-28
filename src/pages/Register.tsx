@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Gift } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -14,6 +15,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -54,29 +56,65 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      // Save user data to localStorage
-      const userData = {
-        name: name,
-        email: email,
-        phone: phone || "+91 9876543210" // Use entered phone or default
-      };
-      localStorage.setItem('userData', JSON.stringify(userData));
-      
-      toast({
-        title: "Registration successful!",
-        description: "Welcome to our gift recommendation platform.",
-      });
-      navigate("/dashboard");
-    } else {
+    if (!validateForm()) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Please check the form for errors.",
       });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+            phone: phone || null
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes("already registered")) {
+          toast({
+            variant: "destructive",
+            title: "Account already exists",
+            description: "An account with this email already exists. Please try logging in instead.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Registration failed",
+            description: error.message,
+          });
+        }
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Registration successful!",
+          description: "Welcome to our gift recommendation platform.",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,6 +141,7 @@ const Register = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className={`w-full text-sm sm:text-base ${errors.name ? 'border-red-500' : ''}`}
+                disabled={isLoading}
               />
               {errors.name && (
                 <p className="text-xs sm:text-sm text-red-500">{errors.name}</p>
@@ -118,6 +157,7 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full text-sm sm:text-base ${errors.email ? 'border-red-500' : ''}`}
+                disabled={isLoading}
               />
               {errors.email && (
                 <p className="text-xs sm:text-sm text-red-500">{errors.email}</p>
@@ -133,6 +173,7 @@ const Register = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="text-sm sm:text-base"
+                disabled={isLoading}
               />
             </div>
 
@@ -145,6 +186,7 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`w-full text-sm sm:text-base ${errors.password ? 'border-red-500' : ''}`}
+                disabled={isLoading}
               />
               {errors.password && (
                 <p className="text-xs sm:text-sm text-red-500">{errors.password}</p>
@@ -154,8 +196,9 @@ const Register = () => {
             <Button
               type="submit"
               className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 sm:py-3 text-sm sm:text-base"
+              disabled={isLoading}
             >
-              Register
+              {isLoading ? "Creating Account..." : "Register"}
             </Button>
           </form>
 

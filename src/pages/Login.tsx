@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Gift } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -34,41 +36,65 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      // Simulate checking if user exists
-      // In a real app, this would be an API call
-      if (email === "nonexistent@example.com") {
-        toast({
-          variant: "destructive",
-          title: "Account not found",
-          description: "No account found with this email. Please register first.",
-        });
-        setTimeout(() => navigate("/register"), 2000);
-        return;
-      }
-
-      // Save user data to localStorage
-      const userData = {
-        name: "User", // Default name, could be improved with a real backend
-        email: email,
-        phone: "+91 9876543210" // Default phone
-      };
-      localStorage.setItem('userData', JSON.stringify(userData));
-
-      toast({
-        title: "Login successful!",
-        description: "Welcome back to our gift recommendation platform.",
-      });
-      navigate("/dashboard");
-    } else {
+    if (!validateForm()) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Please check the form for errors.",
       });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast({
+            variant: "destructive",
+            title: "Login failed",
+            description: "Invalid email or password. Please check your credentials and try again.",
+          });
+        } else if (error.message.includes("Email not confirmed")) {
+          toast({
+            variant: "destructive",
+            title: "Email not confirmed",
+            description: "Please check your email and confirm your account before logging in.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Login failed",
+            description: error.message,
+          });
+        }
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Login successful!",
+          description: "Welcome back to our gift recommendation platform.",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -95,6 +121,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full text-sm sm:text-base ${errors.email ? 'border-red-500' : ''}`}
+                disabled={isLoading}
               />
               {errors.email && (
                 <p className="text-xs sm:text-sm text-red-500">{errors.email}</p>
@@ -110,6 +137,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`w-full text-sm sm:text-base ${errors.password ? 'border-red-500' : ''}`}
+                disabled={isLoading}
               />
               {errors.password && (
                 <p className="text-xs sm:text-sm text-red-500">{errors.password}</p>
@@ -119,8 +147,9 @@ const Login = () => {
             <Button
               type="submit"
               className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 sm:py-3 text-sm sm:text-base"
+              disabled={isLoading}
             >
-              Log In
+              {isLoading ? "Logging in..." : "Log In"}
             </Button>
           </form>
 
