@@ -1,6 +1,6 @@
 
 import { GiftSuggestion } from "@/utils/userPreferences";
-import { getInterestBasedGiftSuggestions, alternativeShops, getRelevantGiftImage } from "@/data/giftDatabase";
+import { getInterestBasedGiftSuggestions, getRelevantGiftImage } from "@/data/giftDatabase";
 
 // Enhanced gift suggestion algorithm with better relevance
 export const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
@@ -9,8 +9,8 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
   
   // Handle empty interests array
   if (!interests || interests.length === 0) {
-    console.log("No interests provided, using generic suggestions");
-    return getGenericSuggestions(budget, occasion);
+    console.log("No interests provided, returning empty array");
+    return [];
   }
   
   // Process each interest to get suggestions
@@ -43,36 +43,6 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
     if (suggestions.length >= 6) break;
   }
 
-  // If we don't have enough suggestions, add some from alternative shops
-  if (suggestions.length < 3) {
-    console.log("Not enough interest-based suggestions, adding from alternative shops");
-    const budgetCategory = budget < 500 ? "Low Budget" : (budget < 5000 ? "Medium Budget" : "High Budget");
-    
-    interests.forEach(interest => {
-      if (alternativeShops[budgetCategory]?.[interest]) {
-        suggestions.push({
-          name: `${interest} Gift Collection`,
-          price: budget * 0.9, // Slightly less than budget to make it attractive
-          image: getRelevantGiftImage(budget, [interest]),
-          description: `Specially curated ${interest.toLowerCase()} items perfect for ${occasion}`,
-          shopLink: alternativeShops[budgetCategory][interest] || "https://www.meesho.com/gift-finder",
-          additionalImages: [
-            getRelevantGiftImage(budget, [interest]),
-            getRelevantGiftImage(budget, [interest])
-          ],
-          category: interest // Set the category to the interest
-        });
-      }
-    });
-  }
-
-  // If we still don't have enough suggestions, add generic gifts
-  if (suggestions.length < 3) {
-    console.log("Still not enough suggestions, adding generic gifts");
-    const genericSuggestions = getGenericSuggestions(budget, occasion);
-    suggestions = [...suggestions, ...genericSuggestions];
-  }
-
   // Ensure suggestions are unique
   const uniqueSuggestions = Array.from(
     new Map(suggestions.map(item => [item.name, item])).values()
@@ -91,46 +61,4 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
 
   console.log("Final suggestions:", filteredSuggestions);
   return filteredSuggestions;
-};
-
-// Helper function to generate generic suggestions
-const getGenericSuggestions = (budget: number, occasion: string): GiftSuggestion[] => {
-  return [
-    {
-      name: "Personalized Gift Experience",
-      price: budget * 0.95,
-      image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop",
-      description: `Custom gift experience for ${occasion}`,
-      shopLink: "https://www.meesho.com/gift-finder",
-      additionalImages: [
-        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop"
-      ],
-      category: "Gift Experience"
-    },
-    {
-      name: "Premium Gift Card",
-      price: budget * 0.9,
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop",
-      description: `Let them choose their perfect gift for ${occasion}`,
-      shopLink: "https://www.meesho.com/gift-cards",
-      additionalImages: [
-        "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop"
-      ],
-      category: "Gift Card"
-    },
-    {
-      name: "Luxury Gift Basket",
-      price: budget,
-      image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop",
-      description: `Curated luxury items perfect for ${occasion}`,
-      shopLink: "https://www.meesho.com/gift-baskets",
-      additionalImages: [
-        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=500&auto=format&fit=crop"
-      ],
-      category: "Gift Basket"
-    }
-  ];
 };

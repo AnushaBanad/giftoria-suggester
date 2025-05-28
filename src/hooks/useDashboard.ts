@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -112,21 +111,8 @@ export const useDashboard = () => {
       return;
     }
 
-    // Get interest-specific suggestions directly first
-    let directSuggestions: GiftSuggestion[] = [];
-    selectedInterests.forEach(interest => {
-      const interestSuggestions = getInterestBasedGiftSuggestions(
-        interest, 
-        Number(budget), 
-        selectedOccasion
-      );
-      directSuggestions = [...directSuggestions, ...interestSuggestions];
-    });
-
-    // If we don't have enough direct suggestions, use the fallback generator
-    const newSuggestions = directSuggestions.length >= 3 
-      ? directSuggestions 
-      : generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
+    // Get interest-specific suggestions only
+    const newSuggestions = generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
 
     console.log("Generated suggestions:", newSuggestions);
     
@@ -136,8 +122,8 @@ export const useDashboard = () => {
     if (newSuggestions.length === 0) {
       toast({
         variant: "destructive",
-        title: "No exact matches found",
-        description: "We're showing alternative shopping options within your budget",
+        title: "No gifts found",
+        description: "No gift suggestions found for the selected interests and budget. Try adjusting your selections or increasing your budget.",
       });
     } else {
       toast({
