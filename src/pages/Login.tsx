@@ -14,6 +14,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -98,6 +101,101 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!forgotPasswordEmail.trim() || !/\S+@\S+\.\S+/.test(forgotPasswordEmail)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    setIsResettingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Reset email sent!",
+          description: "Check your email for password reset instructions.",
+        });
+        setShowForgotPassword(false);
+        setForgotPasswordEmail("");
+      }
+    } catch (error) {
+      console.error("Password reset error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-theme-warm to-white p-4 sm:p-6 lg:p-8">
+        <Card className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 backdrop-blur-sm bg-white/80 shadow-xl animate-fadeIn">
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6">
+            <div className="rounded-full bg-theme-sage p-3">
+              <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
+            </div>
+            
+            <div className="text-center">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Reset Password</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-2">Enter your email to reset your password</p>
+            </div>
+
+            <form onSubmit={handleForgotPassword} className="w-full space-y-3 sm:space-y-4">
+              <div className="space-y-1 sm:space-y-2">
+                <Label htmlFor="forgot-email" className="text-sm sm:text-base">Email</Label>
+                <Input
+                  id="forgot-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={forgotPasswordEmail}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  className="w-full text-sm sm:text-base"
+                  disabled={isResettingPassword}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 sm:py-3 text-sm sm:text-base"
+                disabled={isResettingPassword}
+              >
+                {isResettingPassword ? "Sending..." : "Send Reset Email"}
+              </Button>
+            </form>
+
+            <Button
+              variant="outline"
+              onClick={() => setShowForgotPassword(false)}
+              className="w-full text-sm sm:text-base"
+            >
+              Back to Login
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-theme-warm to-white p-4 sm:p-6 lg:p-8">
       <Card className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 backdrop-blur-sm bg-white/80 shadow-xl animate-fadeIn">
@@ -153,15 +251,25 @@ const Login = () => {
             </Button>
           </form>
 
-          <p className="text-xs sm:text-sm text-gray-600 text-center">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="text-gray-800 hover:text-gray-600 underline transition-colors"
+          <div className="text-center space-y-2">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-xs sm:text-sm text-gray-600 hover:text-gray-800 underline transition-colors"
             >
-              Register
-            </Link>
-          </p>
+              Forgot your password?
+            </button>
+            
+            <p className="text-xs sm:text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="text-gray-800 hover:text-gray-600 underline transition-colors"
+              >
+                Register
+              </Link>
+            </p>
+          </div>
         </div>
       </Card>
     </div>

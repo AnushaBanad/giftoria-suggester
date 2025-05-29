@@ -2,7 +2,7 @@
 import { GiftSuggestion } from "@/utils/userPreferences";
 import { getInterestBasedGiftSuggestions, getRelevantGiftImage } from "@/data/giftDatabase";
 
-// Enhanced gift suggestion algorithm with minimum 4 cards guarantee
+// Enhanced gift suggestion algorithm with minimum 6 cards guarantee
 export const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
   console.log("Generating suggestions for:", { interests, budget, occasion });
   let suggestions: GiftSuggestion[] = [];
@@ -55,9 +55,9 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
       return bPriceScore - aPriceScore;
     });
 
-  // Ensure we have at least 4 suggestions, up to 8 maximum
-  const minSuggestions = 4;
-  const maxSuggestions = 8;
+  // Ensure we have at least 6 suggestions, up to 10 maximum
+  const minSuggestions = 6;
+  const maxSuggestions = 10;
   
   if (filteredSuggestions.length < minSuggestions) {
     // If we don't have enough, duplicate some suggestions with slight variations

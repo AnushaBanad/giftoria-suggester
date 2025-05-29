@@ -22,60 +22,66 @@ export const GiftCardActions: React.FC<GiftCardActionsProps> = ({
   size = "default"
 }) => {
   // Define styles based on size
-  const iconSize = size === "default" ? "w-3 h-3" : "w-3 h-3";
-  const textSize = size === "default" ? "text-xs" : "text-xs";
-  const buttonPadding = size === "default" ? "px-2 py-1" : "px-1 py-1";
+  const iconSize = size === "default" ? "w-4 h-4" : "w-3 h-3";
+  const textSize = size === "default" ? "text-sm" : "text-xs";
+  const buttonHeight = size === "default" ? "h-9" : "h-8";
   
   // Get wishlist button styles based on state
   const getWishlistStyles = () => {
     return isLiked
-      ? 'bg-rose-100 text-rose-600 border-rose-200'
-      : 'text-gray-600 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100';
+      ? 'bg-rose-100 text-rose-600 border-rose-200 hover:bg-rose-200'
+      : 'bg-white text-gray-600 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 border-gray-200';
   };
   
   // Get cart button styles based on state
   const getCartStyles = () => {
     return isInCart
-      ? 'bg-blue-100 text-blue-600 border-blue-200'
-      : 'text-gray-600 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-100';
+      ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
+      : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-100 border-gray-200';
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-stretch mt-auto gap-2 w-full">
-      <div className="flex gap-1 flex-1">
+    <div className="space-y-2">
+      {/* Top row: Save and Cart buttons */}
+      <div className="flex gap-2">
         <Button
           variant="outline"
           size="sm"
-          className={`${getWishlistStyles()} ${buttonPadding} h-8 flex-1 min-w-0 transition-colors`}
+          className={`${getWishlistStyles()} ${buttonHeight} flex-1 transition-all duration-200`}
           onClick={() => onAddToWishlist(suggestion)}
         >
-          <Heart className={`${isLiked ? 'fill-current' : ''} ${iconSize} flex-shrink-0`} />
-          <span className={`${textSize} truncate ml-1`}>Save</span>
+          <Heart className={`${isLiked ? 'fill-current' : ''} ${iconSize}`} />
+          <span className={`${textSize} ml-1`}>
+            {isLiked ? 'Saved' : 'Save'}
+          </span>
         </Button>
         
         <Button
           variant="outline"
           size="sm"
-          className={`${getCartStyles()} ${buttonPadding} h-8 flex-1 min-w-0 transition-colors`}
+          className={`${getCartStyles()} ${buttonHeight} flex-1 transition-all duration-200`}
           onClick={() => onAddToCart(suggestion)}
         >
-          <ShoppingBag className={`${isInCart ? 'fill-current' : ''} ${iconSize} flex-shrink-0`} />
-          <span className={`${textSize} truncate ml-1`}>Cart</span>
+          <ShoppingBag className={`${isInCart ? 'fill-current' : ''} ${iconSize}`} />
+          <span className={`${textSize} ml-1`}>
+            {isInCart ? 'Added' : 'Cart'}
+          </span>
         </Button>
       </div>
       
+      {/* Bottom row: Buy Now button */}
       <a
         href={suggestion.shopLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-shrink-0"
+        className="block w-full"
       >
         <Button 
           size="sm" 
-          className={`bg-emerald-600 hover:bg-emerald-700 ${buttonPadding} h-8 w-full sm:w-auto transition-colors`}
+          className={`bg-emerald-600 hover:bg-emerald-700 text-white ${buttonHeight} w-full transition-colors duration-200`}
         >
-          <ExternalLink className={`${iconSize} flex-shrink-0`} />
-          <span className={`${textSize} ml-1 whitespace-nowrap`}>Buy Now</span>
+          <ExternalLink className={iconSize} />
+          <span className={`${textSize} ml-1`}>Buy Now</span>
         </Button>
       </a>
     </div>

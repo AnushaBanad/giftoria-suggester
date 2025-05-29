@@ -51,7 +51,7 @@ export const GiftSuggestionResults: React.FC<GiftSuggestionResultsProps> = ({
           </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {suggestions.map((suggestion, index) => (
               <GiftSuggestionCard
                 key={`${suggestion.name}-${index}`}

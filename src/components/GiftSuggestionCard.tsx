@@ -54,7 +54,7 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
     : [];
 
   return (
-    <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full min-h-[400px]">
+    <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
       <div className="absolute top-2 left-2 z-10">
         <Badge variant="secondary" className="bg-violet-100 text-violet-800 flex items-center gap-1">
           <Gift className="w-3 h-3" />
@@ -70,20 +70,22 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
         />
       </div>
       
-      <div className="p-3 md:p-4 flex-grow flex flex-col min-h-0">
-        <h3 className="font-bold text-base md:text-lg mb-1 md:mb-2 line-clamp-2 flex-shrink-0">{safeData.name}</h3>
-        <p className="text-gray-600 text-xs md:text-sm mb-2 md:mb-3 line-clamp-3 flex-shrink-0">{safeData.description}</p>
-        
-        <div className="mb-3 flex-shrink-0">
-          <GiftBadges 
-            isCollection={isCollection} 
-            price={safeData.price}
-            specialOffers={specialOffers}
-            category={safeData.category}
-          />
+      <div className="p-4 flex-grow flex flex-col justify-between min-h-0">
+        <div className="flex-grow">
+          <h3 className="font-bold text-lg mb-2 line-clamp-2">{safeData.name}</h3>
+          <p className="text-gray-600 text-sm mb-3 line-clamp-3">{safeData.description}</p>
+          
+          <div className="mb-4">
+            <GiftBadges 
+              isCollection={isCollection} 
+              price={safeData.price}
+              specialOffers={specialOffers}
+              category={safeData.category}
+            />
+          </div>
         </div>
         
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-4 border-t border-gray-100">
           <GiftCardActions
             suggestion={suggestion}
             isLiked={isLiked}

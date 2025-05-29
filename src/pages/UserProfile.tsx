@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
-  Heart, ShoppingBag, User, ArrowLeft, Gift, Trash2 
+  Heart, ShoppingBag, User, ArrowLeft, Gift, Trash2, LogOut, UserX 
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   getUserPreferences, 
@@ -18,13 +18,17 @@ import {
 } from "@/utils/userPreferences";
 import { giftDatabase } from "@/data/giftDatabase";
 import { GiftImageCarousel } from "@/components/GiftImageCarousel";
+import { supabase } from "@/integrations/supabase/client";
 
 const UserProfile = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set<string>());
   const [likedItemsDetails, setLikedItemsDetails] = useState<any[]>([]);
   const [cartItems, setCartItems] = useState<Set<string>>(new Set<string>());
   const [cartItemsDetails, setCartItemsDetails] = useState<any[]>([]);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     // Load liked and cart items from localStorage
@@ -93,6 +97,63 @@ const UserProfile = () => {
     });
   };
 
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error signing out",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Signed out successfully",
+          description: "You have been logged out of your account.",
+        });
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred while signing out.",
+      });
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      return;
+    }
+
+    setIsDeletingAccount(true);
+    try {
+      // Note: Account deletion requires additional setup in Supabase
+      // For now, we'll just sign out the user
+      await supabase.auth.signOut();
+      
+      toast({
+        title: "Account deletion requested",
+        description: "Please contact support to complete account deletion.",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Delete account error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred while deleting your account.",
+      });
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
   const calculateTotal = () => {
     return cartItemsDetails.reduce((total, item) => total + item.price, 0);
   };
@@ -121,6 +182,33 @@ const UserProfile = () => {
           </div>
         </div>
 
+        {/* Account Actions */}
+        <Card className="backdrop-blur-sm bg-white/10 border-none text-white mb-6">
+          <CardHeader className="pb-4">
+            <h3 className="text-lg font-semibold">Account Settings</h3>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row gap-4">
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="bg-transparent border-white/20 text-white hover:bg-white/20 flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              {isSigningOut ? "Signing out..." : "Sign Out"}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={isDeletingAccount}
+              className="bg-red-600 hover:bg-red-700 border-none flex items-center gap-2"
+            >
+              <UserX className="w-4 h-4" />
+              {isDeletingAccount ? "Deleting..." : "Delete Account"}
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="backdrop-blur-sm bg-white/10 border-none text-white">
           <Tabs defaultValue="wishlist" className="w-full">
             <TabsList className="w-full grid grid-cols-2 bg-white/10 mb-6">
@@ -148,7 +236,7 @@ const UserProfile = () => {
                   </Link>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {likedItemsDetails.map((item) => (
                     <Card key={item.name} className="bg-white/10 backdrop-blur-sm overflow-hidden group border-none">
                       {item.additionalImages ? (
@@ -172,24 +260,25 @@ const UserProfile = () => {
                       <CardContent className="p-4">
                         <h3 className="font-bold text-lg mb-1">{item.name}</h3>
                         <p className="text-white/70 text-sm mb-4 line-clamp-2">{item.description}</p>
-                        <div className="flex justify-between">
+                        <div className="flex flex-col gap-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="bg-transparent border-white/20 text-white hover:bg-white/20"
+                            className="bg-transparent border-white/20 text-white hover:bg-white/20 w-full"
                             onClick={() => handleRemoveFromWishlist(item.name)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Remove
+                            Remove from Wishlist
                           </Button>
                           <a 
                             href={item.shopLink} 
                             target="_blank" 
                             rel="noopener noreferrer"
+                            className="w-full"
                           >
                             <Button 
                               size="sm" 
-                              className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600"
+                              className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 w-full"
                             >
                               Buy Now
                             </Button>
@@ -217,7 +306,7 @@ const UserProfile = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {cartItemsDetails.map((item) => (
                       <Card key={item.name} className="bg-white/10 backdrop-blur-sm overflow-hidden group border-none">
                         {item.additionalImages ? (
@@ -241,24 +330,25 @@ const UserProfile = () => {
                         <CardContent className="p-4">
                           <h3 className="font-bold text-lg mb-1">{item.name}</h3>
                           <p className="text-white/70 text-sm mb-4 line-clamp-2">{item.description}</p>
-                          <div className="flex justify-between">
+                          <div className="flex flex-col gap-2">
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="bg-transparent border-white/20 text-white hover:bg-white/20"
+                              className="bg-transparent border-white/20 text-white hover:bg-white/20 w-full"
                               onClick={() => handleRemoveFromCart(item.name)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Remove
+                              Remove from Cart
                             </Button>
                             <a 
                               href={item.shopLink} 
                               target="_blank" 
                               rel="noopener noreferrer"
+                              className="w-full"
                             >
                               <Button 
                                 size="sm" 
-                                className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600"
+                                className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 w-full"
                               >
                                 Buy Now
                               </Button>
