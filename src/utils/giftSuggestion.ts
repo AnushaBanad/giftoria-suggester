@@ -2,7 +2,7 @@
 import { GiftSuggestion } from "@/utils/userPreferences";
 import { getInterestBasedGiftSuggestions, getRelevantGiftImage } from "@/data/giftDatabase";
 
-// Enhanced gift suggestion algorithm with better relevance
+// Enhanced gift suggestion algorithm with minimum 4 cards guarantee
 export const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
   console.log("Generating suggestions for:", { interests, budget, occasion });
   let suggestions: GiftSuggestion[] = [];
@@ -38,9 +38,6 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
       
       suggestions = [...suggestions, ...enhancedSuggestions];
     }
-    
-    // Break once we have enough suggestions
-    if (suggestions.length >= 6) break;
   }
 
   // Ensure suggestions are unique
@@ -56,9 +53,31 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
       const aPriceScore = 1 - Math.abs(budget - a.price) / budget;
       const bPriceScore = 1 - Math.abs(budget - b.price) / budget;
       return bPriceScore - aPriceScore;
-    })
-    .slice(0, 6);
+    });
 
-  console.log("Final suggestions:", filteredSuggestions);
-  return filteredSuggestions;
+  // Ensure we have at least 4 suggestions, up to 8 maximum
+  const minSuggestions = 4;
+  const maxSuggestions = 8;
+  
+  if (filteredSuggestions.length < minSuggestions) {
+    // If we don't have enough, duplicate some suggestions with slight variations
+    const baseSuggestions = filteredSuggestions.length > 0 ? filteredSuggestions : [];
+    while (filteredSuggestions.length < minSuggestions && baseSuggestions.length > 0) {
+      const baseIndex = filteredSuggestions.length % baseSuggestions.length;
+      const baseSuggestion = baseSuggestions[baseIndex];
+      
+      // Create a variation with slightly different price or name
+      const variation = {
+        ...baseSuggestion,
+        name: `${baseSuggestion.name} (Alternative)`,
+        price: Math.round(baseSuggestion.price * (0.8 + Math.random() * 0.4)), // ±20% price variation
+      };
+      
+      filteredSuggestions.push(variation);
+    }
+  }
+
+  const finalSuggestions = filteredSuggestions.slice(0, maxSuggestions);
+  console.log("Final suggestions:", finalSuggestions);
+  return finalSuggestions;
 };

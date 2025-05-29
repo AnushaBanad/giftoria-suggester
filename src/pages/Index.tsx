@@ -52,9 +52,10 @@ const Index = () => {
             Discover thoughtful gift ideas tailored to your interests and budget
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md sm:max-w-none">
+          {/* Centered Get Started Button */}
+          <div className="flex justify-center w-full">
             <Button
-              className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
+              className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-all duration-300 transform hover:scale-105"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               onClick={() => navigate("/login")}
