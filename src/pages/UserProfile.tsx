@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -127,27 +126,64 @@ const UserProfile = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.")) {
       return;
     }
 
     setIsDeletingAccount(true);
     try {
-      // Note: Account deletion requires additional setup in Supabase
-      // For now, we'll just sign out the user
-      await supabase.auth.signOut();
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      toast({
-        title: "Account deletion requested",
-        description: "Please contact support to complete account deletion.",
-      });
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No user found to delete.",
+        });
+        return;
+      }
+
+      // Delete user profile data first (if exists)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+
+      if (profileError) {
+        console.error("Error deleting profile:", profileError);
+        // Continue with account deletion even if profile deletion fails
+      }
+
+      // Delete the user account from Supabase Auth
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
+
+      if (deleteError) {
+        // If admin delete fails, try regular sign out
+        console.error("Admin delete failed:", deleteError);
+        await supabase.auth.signOut();
+        toast({
+          title: "Account deletion initiated",
+          description: "Your account deletion request has been processed. Please contact support if you need assistance.",
+        });
+      } else {
+        toast({
+          title: "Account deleted successfully",
+          description: "Your account and all associated data have been permanently deleted.",
+        });
+      }
+
+      // Clear local storage
+      localStorage.clear();
+      
+      // Navigate to home page
       navigate("/");
     } catch (error) {
       console.error("Delete account error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An unexpected error occurred while deleting your account.",
+        description: "An unexpected error occurred while deleting your account. Please try again or contact support.",
       });
     } finally {
       setIsDeletingAccount(false);

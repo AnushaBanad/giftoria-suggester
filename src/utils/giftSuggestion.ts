@@ -2,7 +2,7 @@
 import { GiftSuggestion } from "@/utils/userPreferences";
 import { getInterestBasedGiftSuggestions, getRelevantGiftImage } from "@/data/giftDatabase";
 
-// Enhanced gift suggestion algorithm with minimum 6 cards guarantee
+// Enhanced gift suggestion algorithm that shows all gifts below budget
 export const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
   console.log("Generating suggestions for:", { interests, budget, occasion });
   let suggestions: GiftSuggestion[] = [];
@@ -45,9 +45,9 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
     new Map(suggestions.map(item => [item.name, item])).values()
   );
 
-  // Filter by budget and sort by relevance
+  // Filter by budget - show ALL gifts that are within or below budget
   const filteredSuggestions = uniqueSuggestions
-    .filter(gift => gift.price <= budget * 1.2) // Allow slightly over budget to show more options
+    .filter(gift => gift.price <= budget) // Only show gifts within budget
     .sort((a, b) => {
       // Sort by price proximity to budget (closer to budget = higher relevance)
       const aPriceScore = 1 - Math.abs(budget - a.price) / budget;
@@ -55,9 +55,8 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
       return bPriceScore - aPriceScore;
     });
 
-  // Ensure we have at least 6 suggestions, up to 10 maximum
+  // Ensure we have at least 6 suggestions for better UX
   const minSuggestions = 6;
-  const maxSuggestions = 10;
   
   if (filteredSuggestions.length < minSuggestions) {
     // If we don't have enough, duplicate some suggestions with slight variations
@@ -77,7 +76,7 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
     }
   }
 
-  const finalSuggestions = filteredSuggestions.slice(0, maxSuggestions);
-  console.log("Final suggestions:", finalSuggestions);
-  return finalSuggestions;
+  // Return ALL filtered suggestions (no maximum limit)
+  console.log("Final suggestions:", filteredSuggestions);
+  return filteredSuggestions;
 };
