@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -14,22 +15,12 @@ interface InvoiceData {
   invoiceDate: string;
   supplierName: string;
   supplierAddress: string;
-  supplierGSTIN: string;
   recipientName: string;
   recipientAddress: string;
-  recipientGSTIN: string;
   productName: string;
   productDescription: string;
   quantity: number;
-  hsnCode: string;
-  taxableValue: number;
-  gstRate: number;
-  cgstAmount: number;
-  sgstAmount: number;
-  igstAmount: number;
-  totalTaxAmount: number;
   totalAmount: number;
-  placeOfSupply: string;
 }
 
 const ProductPage = () => {
@@ -48,32 +39,11 @@ const ProductPage = () => {
     name: '',
     email: '',
     address: '',
-    gstin: '',
     state: ''
   });
   
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
-
-  // Automatically calculate GST amounts
-  const calculateGSTAmounts = (taxableValue: number, gstRate: number = 18) => {
-    const totalGST = (taxableValue * gstRate) / 100;
-    const cgst = totalGST / 2;
-    const sgst = totalGST / 2;
-    const igst = 0; // For intra-state transactions
-    const totalAmount = taxableValue + totalGST;
-
-    return {
-      cgstAmount: cgst,
-      sgstAmount: sgst,
-      igstAmount: igst,
-      totalTaxAmount: totalGST,
-      totalAmount: totalAmount
-    };
-  };
-
-  // Calculate GST values for display
-  const gstCalculation = calculateGSTAmounts(productData.price);
 
   // Load user profile data on component mount
   useEffect(() => {
@@ -106,17 +76,13 @@ const ProductPage = () => {
       toast({
         variant: "destructive",
         title: "Missing Information",
-        description: "Please fill in all required fields to generate GST invoice.",
+        description: "Please fill in all required fields to generate invoice.",
       });
       return;
     }
 
-    const taxableValue = productData.price;
-    const gstRate = 18;
-    const gstAmounts = calculateGSTAmounts(taxableValue, gstRate);
-
     const invoice: InvoiceData = {
-      invoiceNumber: `GST-INV-${Date.now()}`,
+      invoiceNumber: `INV-${Date.now()}`,
       invoiceDate: new Date().toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'long',
@@ -124,30 +90,20 @@ const ProductPage = () => {
       }),
       supplierName: "GiftWise Solutions Pvt Ltd",
       supplierAddress: "123, Business Park, Electronic City, Bangalore - 560100, Karnataka",
-      supplierGSTIN: "29ABCDE1234F1Z5",
       recipientName: userInfo.name,
       recipientAddress: userInfo.address,
-      recipientGSTIN: userInfo.gstin || "Not Applicable",
       productName: productData.name,
       productDescription: productData.description,
       quantity: 1,
-      hsnCode: "9503",
-      taxableValue: taxableValue,
-      gstRate: gstRate,
-      cgstAmount: gstAmounts.cgstAmount,
-      sgstAmount: gstAmounts.sgstAmount,
-      igstAmount: gstAmounts.igstAmount,
-      totalTaxAmount: gstAmounts.totalTaxAmount,
-      totalAmount: gstAmounts.totalAmount,
-      placeOfSupply: userInfo.state
+      totalAmount: productData.price
     };
 
     setInvoiceData(invoice);
     setShowInvoice(true);
     
     toast({
-      title: "GST Invoice Generated",
-      description: "Your GST compliant invoice has been generated successfully!",
+      title: "Invoice Generated",
+      description: "Your invoice has been generated successfully!",
     });
   };
 
@@ -167,40 +123,36 @@ const ProductPage = () => {
     pdf.setFontSize(12);
     pdf.setFont("helvetica", "normal");
     pdf.text(invoiceData.supplierAddress, 105, 30, { align: "center" });
-    pdf.text(`GSTIN: ${invoiceData.supplierGSTIN}`, 105, 40, { align: "center" });
     
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
-    pdf.text("TAX INVOICE", 105, 55, { align: "center" });
+    pdf.text("INVOICE", 105, 50, { align: "center" });
     
     // Line separator
-    pdf.line(20, 60, 190, 60);
+    pdf.line(20, 55, 190, 55);
     
     // Invoice details
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
     
     // Left side - Invoice details
-    pdf.text("Invoice Details:", 20, 75);
-    pdf.text(`Invoice No: ${invoiceData.invoiceNumber}`, 20, 85);
-    pdf.text(`Invoice Date: ${invoiceData.invoiceDate}`, 20, 95);
-    pdf.text(`Place of Supply: ${invoiceData.placeOfSupply}`, 20, 105);
+    pdf.text("Invoice Details:", 20, 70);
+    pdf.text(`Invoice No: ${invoiceData.invoiceNumber}`, 20, 80);
+    pdf.text(`Invoice Date: ${invoiceData.invoiceDate}`, 20, 90);
     
     // Right side - Bill to
-    pdf.text("Bill To:", 120, 75);
-    pdf.text(`Name: ${invoiceData.recipientName}`, 120, 85);
-    pdf.text(`Address: ${invoiceData.recipientAddress}`, 120, 95);
-    pdf.text(`GSTIN: ${invoiceData.recipientGSTIN}`, 120, 105);
+    pdf.text("Bill To:", 120, 70);
+    pdf.text(`Name: ${invoiceData.recipientName}`, 120, 80);
+    pdf.text(`Address: ${invoiceData.recipientAddress}`, 120, 90);
     
     // Product table header
-    let yPos = 125;
+    let yPos = 110;
     pdf.setFont("helvetica", "bold");
     pdf.text("S.No", 20, yPos);
     pdf.text("Description", 35, yPos);
-    pdf.text("HSN", 100, yPos);
     pdf.text("Qty", 120, yPos);
     pdf.text("Rate", 140, yPos);
-    pdf.text("Taxable Value", 165, yPos);
+    pdf.text("Amount", 165, yPos);
     
     // Product table line
     pdf.line(20, yPos + 3, 190, yPos + 3);
@@ -210,30 +162,14 @@ const ProductPage = () => {
     pdf.setFont("helvetica", "normal");
     pdf.text("1", 20, yPos);
     pdf.text(invoiceData.productName, 35, yPos);
-    pdf.text(invoiceData.hsnCode, 100, yPos);
     pdf.text(invoiceData.quantity.toString(), 120, yPos);
-    pdf.text(`₹${invoiceData.taxableValue.toFixed(2)}`, 140, yPos);
-    pdf.text(`₹${invoiceData.taxableValue.toFixed(2)}`, 165, yPos);
+    pdf.text(`₹${invoiceData.totalAmount.toFixed(2)}`, 140, yPos);
+    pdf.text(`₹${invoiceData.totalAmount.toFixed(2)}`, 165, yPos);
     
-    // GST table
+    // Total
     yPos += 25;
     pdf.setFont("helvetica", "bold");
-    pdf.text("Taxable Value", 20, yPos);
-    pdf.text("CGST (9%)", 60, yPos);
-    pdf.text("SGST (9%)", 100, yPos);
-    pdf.text("Total Tax", 140, yPos);
-    pdf.text("Total Amount", 165, yPos);
-    
-    pdf.line(20, yPos + 3, 190, yPos + 3);
-    
-    yPos += 15;
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`₹${invoiceData.taxableValue.toFixed(2)}`, 20, yPos);
-    pdf.text(`₹${invoiceData.cgstAmount.toFixed(2)}`, 60, yPos);
-    pdf.text(`₹${invoiceData.sgstAmount.toFixed(2)}`, 100, yPos);
-    pdf.text(`₹${invoiceData.totalTaxAmount.toFixed(2)}`, 140, yPos);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(`₹${invoiceData.totalAmount.toFixed(2)}`, 165, yPos);
+    pdf.text(`Total Amount: ₹${invoiceData.totalAmount.toFixed(2)}`, 120, yPos);
     
     // Amount in words
     yPos += 25;
@@ -254,7 +190,7 @@ const ProductPage = () => {
     pdf.text("This is a computer generated invoice and does not require physical signature.", 105, yPos, { align: "center" });
     
     // Save the PDF
-    pdf.save(`GST-Invoice-${invoiceData.invoiceNumber}.pdf`);
+    pdf.save(`Invoice-${invoiceData.invoiceNumber}.pdf`);
   };
 
   const numberToWords = (num: number): string => {
@@ -356,36 +292,10 @@ const ProductPage = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="gstin">GSTIN (Optional)</Label>
-                <Input
-                  id="gstin"
-                  value={userInfo.gstin}
-                  onChange={(e) => setUserInfo(prev => ({ ...prev, gstin: e.target.value }))}
-                  placeholder="Enter your GSTIN if applicable"
-                />
-              </div>
-
               <div className="border-t pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-semibold">Taxable Amount:</span>
-                  <span className="text-lg font-bold">₹{productData.price}</span>
-                </div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600">CGST (9%):</span>
-                  <span className="text-sm">₹{gstCalculation.cgstAmount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">SGST (9%):</span>
-                  <span className="text-sm">₹{gstCalculation.sgstAmount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Total GST (18%):</span>
-                  <span className="text-sm">₹{gstCalculation.totalTaxAmount.toFixed(2)}</span>
-                </div>
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-semibold">Total Amount:</span>
-                  <span className="text-2xl font-bold text-emerald-600">₹{gstCalculation.totalAmount.toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-emerald-600">₹{productData.price}</span>
                 </div>
                 
                 <Button
@@ -393,18 +303,18 @@ const ProductPage = () => {
                   className="w-full bg-emerald-600 hover:bg-emerald-700"
                   disabled={!userInfo.name || !userInfo.email || !userInfo.address || !userInfo.state}
                 >
-                  Generate GST Invoice
+                  Generate Invoice
                 </Button>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* GST Invoice Display */}
+        {/* Invoice Display */}
         {showInvoice && invoiceData && (
           <Card className="mt-8 bg-white/95">
             <CardHeader className="flex flex-row items-center justify-between">
-              <h2 className="text-xl font-bold">GST Invoice Generated</h2>
+              <h2 className="text-xl font-bold">Invoice Generated</h2>
               <Button
                 onClick={downloadInvoicePDF}
                 variant="outline"
@@ -420,8 +330,7 @@ const ProductPage = () => {
                 <div className="text-center border-b pb-4">
                   <h3 className="text-2xl font-bold">{invoiceData.supplierName}</h3>
                   <p className="text-sm text-gray-600">{invoiceData.supplierAddress}</p>
-                  <p className="text-sm"><strong>GSTIN:</strong> {invoiceData.supplierGSTIN}</p>
-                  <h4 className="text-xl font-bold mt-2">TAX INVOICE</h4>
+                  <h4 className="text-xl font-bold mt-2">INVOICE</h4>
                 </div>
                 
                 {/* Invoice Details */}
@@ -430,14 +339,12 @@ const ProductPage = () => {
                     <h4 className="font-semibold mb-2">Invoice Details:</h4>
                     <p><strong>Invoice No:</strong> {invoiceData.invoiceNumber}</p>
                     <p><strong>Invoice Date:</strong> {invoiceData.invoiceDate}</p>
-                    <p><strong>Place of Supply:</strong> {invoiceData.placeOfSupply}</p>
                   </div>
                   
                   <div>
                     <h4 className="font-semibold mb-2">Bill To:</h4>
                     <p><strong>Name:</strong> {invoiceData.recipientName}</p>
                     <p><strong>Address:</strong> {invoiceData.recipientAddress}</p>
-                    <p><strong>GSTIN:</strong> {invoiceData.recipientGSTIN}</p>
                   </div>
                 </div>
                 
@@ -447,10 +354,9 @@ const ProductPage = () => {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="p-3 text-left">Description</th>
-                        <th className="p-3 text-left">HSN</th>
                         <th className="p-3 text-right">Qty</th>
                         <th className="p-3 text-right">Rate</th>
-                        <th className="p-3 text-right">Taxable Value</th>
+                        <th className="p-3 text-right">Amount</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -461,37 +367,19 @@ const ProductPage = () => {
                             <p className="text-gray-600 text-xs">{invoiceData.productDescription}</p>
                           </div>
                         </td>
-                        <td className="p-3">{invoiceData.hsnCode}</td>
                         <td className="p-3 text-right">{invoiceData.quantity}</td>
-                        <td className="p-3 text-right">₹{invoiceData.taxableValue.toFixed(2)}</td>
-                        <td className="p-3 text-right">₹{invoiceData.taxableValue.toFixed(2)}</td>
+                        <td className="p-3 text-right">₹{invoiceData.totalAmount.toFixed(2)}</td>
+                        <td className="p-3 text-right">₹{invoiceData.totalAmount.toFixed(2)}</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                {/* GST Breakdown */}
-                <div className="border rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="p-3 text-right">Taxable Value</th>
-                        <th className="p-3 text-right">CGST (9%)</th>
-                        <th className="p-3 text-right">SGST (9%)</th>
-                        <th className="p-3 text-right">Total Tax</th>
-                        <th className="p-3 text-right">Total Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-t">
-                        <td className="p-3 text-right">₹{invoiceData.taxableValue.toFixed(2)}</td>
-                        <td className="p-3 text-right">₹{invoiceData.cgstAmount.toFixed(2)}</td>
-                        <td className="p-3 text-right">₹{invoiceData.sgstAmount.toFixed(2)}</td>
-                        <td className="p-3 text-right">₹{invoiceData.totalTaxAmount.toFixed(2)}</td>
-                        <td className="p-3 text-right font-bold">₹{invoiceData.totalAmount.toFixed(2)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                {/* Total */}
+                <div className="text-right">
+                  <div className="text-xl font-bold">
+                    Total Amount: ₹{invoiceData.totalAmount.toFixed(2)}
+                  </div>
                 </div>
                 
                 {/* Amount in Words */}
