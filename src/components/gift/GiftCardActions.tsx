@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag, ExternalLink } from "lucide-react";
 import { GiftSuggestion } from "@/utils/userPreferences";
+import { useNavigate } from "react-router-dom";
 
 interface GiftCardActionsProps {
   suggestion: GiftSuggestion;
@@ -21,6 +22,8 @@ export const GiftCardActions: React.FC<GiftCardActionsProps> = ({
   onAddToCart,
   size = "default"
 }) => {
+  const navigate = useNavigate();
+  
   // Define styles based on size
   const iconSize = size === "default" ? "w-4 h-4" : "w-3 h-3";
   const textSize = size === "default" ? "text-sm" : "text-xs";
@@ -38,6 +41,17 @@ export const GiftCardActions: React.FC<GiftCardActionsProps> = ({
     return isInCart
       ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
       : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-100 border-gray-200';
+  };
+
+  const handleBuyNow = () => {
+    // Navigate to product page with product details as URL parameters
+    const params = new URLSearchParams({
+      name: suggestion.name,
+      price: suggestion.price.toString(),
+      image: suggestion.image || '',
+      description: suggestion.description || ''
+    });
+    navigate(`/product?${params.toString()}`);
   };
 
   return (
@@ -70,20 +84,14 @@ export const GiftCardActions: React.FC<GiftCardActionsProps> = ({
       </div>
       
       {/* Bottom row: Buy Now button */}
-      <a
-        href={suggestion.shopLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block w-full"
+      <Button 
+        size="sm" 
+        className={`bg-emerald-600 hover:bg-emerald-700 text-white ${buttonHeight} w-full transition-colors duration-200`}
+        onClick={handleBuyNow}
       >
-        <Button 
-          size="sm" 
-          className={`bg-emerald-600 hover:bg-emerald-700 text-white ${buttonHeight} w-full transition-colors duration-200`}
-        >
-          <ExternalLink className={iconSize} />
-          <span className={`${textSize} ml-1`}>Buy Now</span>
-        </Button>
-      </a>
+        <ExternalLink className={iconSize} />
+        <span className={`${textSize} ml-1`}>Buy Now</span>
+      </Button>
     </div>
   );
 };

@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import UserProfile from "./pages/UserProfile";
+import ProductPage from "./pages/ProductPage";
 import NotFound from "./pages/NotFound";
 import ProjectPresentation from "./pages/ProjectPresentation";
 import { ChatBot } from "./components/chatbot/ChatBot";
@@ -37,6 +38,7 @@ const AppContent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<UserProfile />} />
+        <Route path="/product" element={<ProductPage />} />
         <Route path="/presentation" element={<ProjectPresentation />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
