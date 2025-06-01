@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Download, ShoppingBag } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import jsPDF from 'jspdf';
 
 interface InvoiceData {
   invoiceNumber: string;
@@ -55,6 +55,26 @@ const ProductPage = () => {
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
+  // Automatically calculate GST amounts
+  const calculateGSTAmounts = (taxableValue: number, gstRate: number = 18) => {
+    const totalGST = (taxableValue * gstRate) / 100;
+    const cgst = totalGST / 2;
+    const sgst = totalGST / 2;
+    const igst = 0; // For intra-state transactions
+    const totalAmount = taxableValue + totalGST;
+
+    return {
+      cgstAmount: cgst,
+      sgstAmount: sgst,
+      igstAmount: igst,
+      totalTaxAmount: totalGST,
+      totalAmount: totalAmount
+    };
+  };
+
+  // Calculate GST values for display
+  const gstCalculation = calculateGSTAmounts(productData.price);
+
   // Load user profile data on component mount
   useEffect(() => {
     loadUserProfile();
@@ -81,16 +101,6 @@ const ProductPage = () => {
     }
   };
 
-  const calculateGST = (taxableValue: number, gstRate: number) => {
-    const totalGST = (taxableValue * gstRate) / 100;
-    return {
-      cgst: totalGST / 2,
-      sgst: totalGST / 2,
-      igst: 0, // For inter-state, but keeping 0 for simplicity
-      totalGST
-    };
-  };
-
   const generateInvoice = () => {
     if (!userInfo.name || !userInfo.email || !userInfo.address || !userInfo.state) {
       toast({
@@ -102,9 +112,8 @@ const ProductPage = () => {
     }
 
     const taxableValue = productData.price;
-    const gstRate = 18; // Assuming 18% GST for gifts/accessories
-    const gstCalculation = calculateGST(taxableValue, gstRate);
-    const totalAmount = taxableValue + gstCalculation.totalGST;
+    const gstRate = 18;
+    const gstAmounts = calculateGSTAmounts(taxableValue, gstRate);
 
     const invoice: InvoiceData = {
       invoiceNumber: `GST-INV-${Date.now()}`,
@@ -122,14 +131,14 @@ const ProductPage = () => {
       productName: productData.name,
       productDescription: productData.description,
       quantity: 1,
-      hsnCode: "9503", // HSN code for toys and games/gifts
+      hsnCode: "9503",
       taxableValue: taxableValue,
       gstRate: gstRate,
-      cgstAmount: gstCalculation.cgst,
-      sgstAmount: gstCalculation.sgst,
-      igstAmount: gstCalculation.igst,
-      totalTaxAmount: gstCalculation.totalGST,
-      totalAmount: totalAmount,
+      cgstAmount: gstAmounts.cgstAmount,
+      sgstAmount: gstAmounts.sgstAmount,
+      igstAmount: gstAmounts.igstAmount,
+      totalTaxAmount: gstAmounts.totalTaxAmount,
+      totalAmount: gstAmounts.totalAmount,
       placeOfSupply: userInfo.state
     };
 
@@ -142,132 +151,110 @@ const ProductPage = () => {
     });
   };
 
-  const downloadInvoice = () => {
+  const downloadInvoicePDF = () => {
     if (!invoiceData) return;
 
-    const invoiceHTML = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>GST Invoice - ${invoiceData.invoiceNumber}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
-          .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-          .company-details, .customer-details { margin-bottom: 20px; }
-          .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          .invoice-table th, .invoice-table td { border: 1px solid #000; padding: 8px; text-align: left; }
-          .invoice-table th { background-color: #f0f0f0; font-weight: bold; }
-          .amount-column { text-align: right; }
-          .total-section { margin-top: 20px; }
-          .signature-section { margin-top: 40px; text-align: right; }
-          .gst-details { background-color: #f9f9f9; }
-          .company-name { font-size: 18px; font-weight: bold; }
-          .invoice-title { font-size: 16px; font-weight: bold; margin: 10px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div class="company-name">${invoiceData.supplierName}</div>
-          <div>${invoiceData.supplierAddress}</div>
-          <div><strong>GSTIN:</strong> ${invoiceData.supplierGSTIN}</div>
-          <div class="invoice-title">TAX INVOICE</div>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-          <div class="company-details">
-            <strong>Invoice Details:</strong><br>
-            Invoice No: ${invoiceData.invoiceNumber}<br>
-            Invoice Date: ${invoiceData.invoiceDate}<br>
-            Place of Supply: ${invoiceData.placeOfSupply}
-          </div>
-          
-          <div class="customer-details">
-            <strong>Bill To:</strong><br>
-            ${invoiceData.recipientName}<br>
-            ${invoiceData.recipientAddress}<br>
-            GSTIN: ${invoiceData.recipientGSTIN}
-          </div>
-        </div>
-        
-        <table class="invoice-table">
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Description of Goods/Services</th>
-              <th>HSN/SAC</th>
-              <th>Qty</th>
-              <th>Rate</th>
-              <th>Taxable Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>${invoiceData.productName}<br><small>${invoiceData.productDescription}</small></td>
-              <td>${invoiceData.hsnCode}</td>
-              <td>${invoiceData.quantity}</td>
-              <td class="amount-column">₹${invoiceData.taxableValue.toFixed(2)}</td>
-              <td class="amount-column">₹${invoiceData.taxableValue.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <table class="invoice-table gst-details">
-          <thead>
-            <tr>
-              <th>Taxable Value</th>
-              <th>CGST Rate</th>
-              <th>CGST Amount</th>
-              <th>SGST Rate</th>
-              <th>SGST Amount</th>
-              <th>IGST Rate</th>
-              <th>IGST Amount</th>
-              <th>Total Tax</th>
-              <th>Total Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="amount-column">₹${invoiceData.taxableValue.toFixed(2)}</td>
-              <td class="amount-column">${(invoiceData.gstRate/2).toFixed(1)}%</td>
-              <td class="amount-column">₹${invoiceData.cgstAmount.toFixed(2)}</td>
-              <td class="amount-column">${(invoiceData.gstRate/2).toFixed(1)}%</td>
-              <td class="amount-column">₹${invoiceData.sgstAmount.toFixed(2)}</td>
-              <td class="amount-column">0%</td>
-              <td class="amount-column">₹${invoiceData.igstAmount.toFixed(2)}</td>
-              <td class="amount-column">₹${invoiceData.totalTaxAmount.toFixed(2)}</td>
-              <td class="amount-column"><strong>₹${invoiceData.totalAmount.toFixed(2)}</strong></td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div class="total-section">
-          <p><strong>Total Amount (in words):</strong> ${numberToWords(invoiceData.totalAmount)} Rupees Only</p>
-        </div>
-        
-        <div class="signature-section">
-          <p><strong>For ${invoiceData.supplierName}</strong></p>
-          <br><br>
-          <p>_________________________</p>
-          <p>Authorized Signatory</p>
-        </div>
-        
-        <div style="margin-top: 30px; text-align: center; font-size: 10px;">
-          <p><em>This is a computer generated invoice and does not require physical signature.</em></p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([invoiceHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `GST-Invoice-${invoiceData.invoiceNumber}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const pdf = new jsPDF();
+    
+    // Set font
+    pdf.setFont("helvetica");
+    
+    // Header
+    pdf.setFontSize(20);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(invoiceData.supplierName, 105, 20, { align: "center" });
+    
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(invoiceData.supplierAddress, 105, 30, { align: "center" });
+    pdf.text(`GSTIN: ${invoiceData.supplierGSTIN}`, 105, 40, { align: "center" });
+    
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("TAX INVOICE", 105, 55, { align: "center" });
+    
+    // Line separator
+    pdf.line(20, 60, 190, 60);
+    
+    // Invoice details
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    
+    // Left side - Invoice details
+    pdf.text("Invoice Details:", 20, 75);
+    pdf.text(`Invoice No: ${invoiceData.invoiceNumber}`, 20, 85);
+    pdf.text(`Invoice Date: ${invoiceData.invoiceDate}`, 20, 95);
+    pdf.text(`Place of Supply: ${invoiceData.placeOfSupply}`, 20, 105);
+    
+    // Right side - Bill to
+    pdf.text("Bill To:", 120, 75);
+    pdf.text(`Name: ${invoiceData.recipientName}`, 120, 85);
+    pdf.text(`Address: ${invoiceData.recipientAddress}`, 120, 95);
+    pdf.text(`GSTIN: ${invoiceData.recipientGSTIN}`, 120, 105);
+    
+    // Product table header
+    let yPos = 125;
+    pdf.setFont("helvetica", "bold");
+    pdf.text("S.No", 20, yPos);
+    pdf.text("Description", 35, yPos);
+    pdf.text("HSN", 100, yPos);
+    pdf.text("Qty", 120, yPos);
+    pdf.text("Rate", 140, yPos);
+    pdf.text("Taxable Value", 165, yPos);
+    
+    // Product table line
+    pdf.line(20, yPos + 3, 190, yPos + 3);
+    
+    // Product details
+    yPos += 15;
+    pdf.setFont("helvetica", "normal");
+    pdf.text("1", 20, yPos);
+    pdf.text(invoiceData.productName, 35, yPos);
+    pdf.text(invoiceData.hsnCode, 100, yPos);
+    pdf.text(invoiceData.quantity.toString(), 120, yPos);
+    pdf.text(`₹${invoiceData.taxableValue.toFixed(2)}`, 140, yPos);
+    pdf.text(`₹${invoiceData.taxableValue.toFixed(2)}`, 165, yPos);
+    
+    // GST table
+    yPos += 25;
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Taxable Value", 20, yPos);
+    pdf.text("CGST (9%)", 60, yPos);
+    pdf.text("SGST (9%)", 100, yPos);
+    pdf.text("Total Tax", 140, yPos);
+    pdf.text("Total Amount", 165, yPos);
+    
+    pdf.line(20, yPos + 3, 190, yPos + 3);
+    
+    yPos += 15;
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`₹${invoiceData.taxableValue.toFixed(2)}`, 20, yPos);
+    pdf.text(`₹${invoiceData.cgstAmount.toFixed(2)}`, 60, yPos);
+    pdf.text(`₹${invoiceData.sgstAmount.toFixed(2)}`, 100, yPos);
+    pdf.text(`₹${invoiceData.totalTaxAmount.toFixed(2)}`, 140, yPos);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(`₹${invoiceData.totalAmount.toFixed(2)}`, 165, yPos);
+    
+    // Amount in words
+    yPos += 25;
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Total Amount (in words): ${numberToWords(Math.floor(invoiceData.totalAmount))} Rupees Only`, 20, yPos);
+    
+    // Signature section
+    yPos += 40;
+    pdf.text(`For ${invoiceData.supplierName}`, 120, yPos);
+    yPos += 20;
+    pdf.text("_________________________", 120, yPos);
+    yPos += 10;
+    pdf.text("Authorized Signatory", 120, yPos);
+    
+    // Footer
+    yPos += 20;
+    pdf.setFontSize(8);
+    pdf.text("This is a computer generated invoice and does not require physical signature.", 105, yPos, { align: "center" });
+    
+    // Save the PDF
+    pdf.save(`GST-Invoice-${invoiceData.invoiceNumber}.pdf`);
   };
 
   const numberToWords = (num: number): string => {
@@ -384,13 +371,21 @@ const ProductPage = () => {
                   <span className="font-semibold">Taxable Amount:</span>
                   <span className="text-lg font-bold">₹{productData.price}</span>
                 </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-600">CGST (9%):</span>
+                  <span className="text-sm">₹{gstCalculation.cgstAmount.toFixed(2)}</span>
+                </div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">GST (18%):</span>
-                  <span className="text-sm">₹{((productData.price * 18) / 100).toFixed(2)}</span>
+                  <span className="text-sm text-gray-600">SGST (9%):</span>
+                  <span className="text-sm">₹{gstCalculation.sgstAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">Total GST (18%):</span>
+                  <span className="text-sm">₹{gstCalculation.totalTaxAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-semibold">Total Amount:</span>
-                  <span className="text-2xl font-bold text-emerald-600">₹{(productData.price + (productData.price * 18) / 100).toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-emerald-600">₹{gstCalculation.totalAmount.toFixed(2)}</span>
                 </div>
                 
                 <Button
@@ -411,12 +406,12 @@ const ProductPage = () => {
             <CardHeader className="flex flex-row items-center justify-between">
               <h2 className="text-xl font-bold">GST Invoice Generated</h2>
               <Button
-                onClick={downloadInvoice}
+                onClick={downloadInvoicePDF}
                 variant="outline"
                 className="flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Download Invoice
+                Download PDF
               </Button>
             </CardHeader>
             <CardContent>
