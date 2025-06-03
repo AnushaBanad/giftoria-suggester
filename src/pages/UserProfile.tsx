@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
-  Heart, ShoppingBag, User, ArrowLeft, Gift, Trash2, LogOut, UserX 
+  Heart, ShoppingBag, User, ArrowLeft, Gift, Trash2, LogOut, UserX, ExternalLink 
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -58,6 +58,17 @@ const UserProfile = () => {
     });
     
     setDetailsFunction(details);
+  };
+
+  const handleBuyNow = (item: any) => {
+    // Navigate to product page with product details as URL parameters
+    const params = new URLSearchParams({
+      name: item.name,
+      price: item.price.toString(),
+      image: item.image || '',
+      description: item.description || ''
+    });
+    navigate(`/product?${params.toString()}`);
   };
 
   const handleRemoveFromWishlist = (itemName: string) => {
@@ -306,19 +317,14 @@ const UserProfile = () => {
                             <Trash2 className="h-4 w-4 mr-2" />
                             Remove from Wishlist
                           </Button>
-                          <a 
-                            href={item.shopLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="w-full"
+                          <Button 
+                            size="sm" 
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white w-full"
+                            onClick={() => handleBuyNow(item)}
                           >
-                            <Button 
-                              size="sm" 
-                              className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 w-full"
-                            >
-                              Buy Now
-                            </Button>
-                          </a>
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Buy Now
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -376,19 +382,14 @@ const UserProfile = () => {
                               <Trash2 className="h-4 w-4 mr-2" />
                               Remove from Cart
                             </Button>
-                            <a 
-                              href={item.shopLink} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="w-full"
+                            <Button 
+                              size="sm" 
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white w-full"
+                              onClick={() => handleBuyNow(item)}
                             >
-                              <Button 
-                                size="sm" 
-                                className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 w-full"
-                              >
-                                Buy Now
-                              </Button>
-                            </a>
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Buy Now
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
