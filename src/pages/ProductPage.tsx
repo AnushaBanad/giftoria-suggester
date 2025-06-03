@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Download, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Download, ShoppingBag, Plus, Minus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from 'jspdf';
@@ -20,6 +19,7 @@ interface InvoiceData {
   productName: string;
   productDescription: string;
   quantity: number;
+  unitPrice: number;
   totalAmount: number;
 }
 
@@ -42,8 +42,12 @@ const ProductPage = () => {
     state: ''
   });
   
+  const [quantity, setQuantity] = useState(1);
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+
+  // Calculate total amount based on quantity
+  const totalAmount = productData.price * quantity;
 
   // Load user profile data on component mount
   useEffect(() => {
@@ -94,8 +98,9 @@ const ProductPage = () => {
       recipientAddress: userInfo.address,
       productName: productData.name,
       productDescription: productData.description,
-      quantity: 1,
-      totalAmount: productData.price
+      quantity: quantity,
+      unitPrice: productData.price,
+      totalAmount: totalAmount
     };
 
     setInvoiceData(invoice);
@@ -163,7 +168,7 @@ const ProductPage = () => {
     pdf.text("1", 20, yPos);
     pdf.text(invoiceData.productName, 35, yPos);
     pdf.text(invoiceData.quantity.toString(), 120, yPos);
-    pdf.text(`₹${invoiceData.totalAmount.toFixed(2)}`, 140, yPos);
+    pdf.text(`₹${invoiceData.unitPrice.toFixed(2)}`, 140, yPos);
     pdf.text(`₹${invoiceData.totalAmount.toFixed(2)}`, 165, yPos);
     
     // Total
@@ -209,6 +214,12 @@ const ProductPage = () => {
     return 'Amount too large';
   };
 
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity >= 1) {
+      setQuantity(newQuantity);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1A1F2C] to-[#2C3E50] p-4">
       <div className="container mx-auto max-w-4xl">
@@ -237,7 +248,7 @@ const ProductPage = () => {
               )}
               <p className="text-gray-600 mb-4">{productData.description}</p>
               <div className="text-3xl font-bold text-emerald-600 mb-6">
-                ₹{productData.price}
+                ₹{productData.price} <span className="text-sm text-gray-500">per unit</span>
               </div>
             </CardContent>
           </Card>
@@ -292,10 +303,51 @@ const ProductPage = () => {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="quantity">Quantity *</Label>
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleQuantityChange(quantity - 1)}
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                    className="text-center w-20"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
               <div className="border-t pt-4">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="font-semibold">Total Amount:</span>
-                  <span className="text-2xl font-bold text-emerald-600">₹{productData.price}</span>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Unit Price:</span>
+                    <span>₹{productData.price}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Quantity:</span>
+                    <span>{quantity}</span>
+                  </div>
+                  <div className="flex justify-between items-center font-semibold text-lg border-t pt-2">
+                    <span>Total Amount:</span>
+                    <span className="text-2xl font-bold text-emerald-600">₹{totalAmount}</span>
+                  </div>
                 </div>
                 
                 <Button
@@ -355,7 +407,7 @@ const ProductPage = () => {
                       <tr>
                         <th className="p-3 text-left">Description</th>
                         <th className="p-3 text-right">Qty</th>
-                        <th className="p-3 text-right">Rate</th>
+                        <th className="p-3 text-right">Unit Price</th>
                         <th className="p-3 text-right">Amount</th>
                       </tr>
                     </thead>
@@ -368,7 +420,7 @@ const ProductPage = () => {
                           </div>
                         </td>
                         <td className="p-3 text-right">{invoiceData.quantity}</td>
-                        <td className="p-3 text-right">₹{invoiceData.totalAmount.toFixed(2)}</td>
+                        <td className="p-3 text-right">₹{invoiceData.unitPrice.toFixed(2)}</td>
                         <td className="p-3 text-right">₹{invoiceData.totalAmount.toFixed(2)}</td>
                       </tr>
                     </tbody>
