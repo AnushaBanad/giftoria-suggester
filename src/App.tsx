@@ -12,6 +12,7 @@ import UserProfile from "./pages/UserProfile";
 import ProductPage from "./pages/ProductPage";
 import NotFound from "./pages/NotFound";
 import ProjectPresentation from "./pages/ProjectPresentation";
+import Admin from "./pages/Admin";
 import { ChatBot } from "./components/chatbot/ChatBot";
 import { ChatBotToggle } from "./components/chatbot/ChatBotToggle";
 import { useChatBot } from "./hooks/useChatBot";
@@ -39,6 +40,7 @@ const AppContent = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/product" element={<ProductPage />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/presentation" element={<ProjectPresentation />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
