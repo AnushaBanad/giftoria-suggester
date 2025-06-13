@@ -20,14 +20,19 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validateEmail = (email: string) => {
+    // More comprehensive email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email.trim()) return "Email is required";
+    if (!emailRegex.test(email.trim())) return "Please enter a valid email address (e.g., name@gmail.com)";
+    return "";
+  };
+
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Please enter a valid email";
-    }
+    const emailError = validateEmail(email);
+    if (emailError) newErrors.email = emailError;
 
     if (!password) {
       newErrors.password = "Password is required";
@@ -39,14 +44,34 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+    setEmail(value);
+    
+    // Clear error if field becomes valid
+    if (errors.email && validateEmail(value) === "") {
+      setErrors(prev => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    
+    // Clear error if field becomes valid
+    if (errors.password && value.length >= 8) {
+      setErrors(prev => ({ ...prev, password: "" }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please check the form for errors.",
+        title: "Validation Error",
+        description: "Please correct the errors below and try again.",
       });
       return;
     }
@@ -55,7 +80,7 @@ const Login = () => {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
+        email: email.trim(),
         password: password,
       });
 
@@ -104,11 +129,12 @@ const Login = () => {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!forgotPasswordEmail.trim() || !/\S+@\S+\.\S+/.test(forgotPasswordEmail)) {
+    const emailError = validateEmail(forgotPasswordEmail);
+    if (emailError) {
       toast({
         variant: "destructive",
         title: "Invalid email",
-        description: "Please enter a valid email address.",
+        description: emailError,
       });
       return;
     }
@@ -116,7 +142,7 @@ const Login = () => {
     setIsResettingPassword(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -166,9 +192,9 @@ const Login = () => {
                 <Input
                   id="forgot-email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Enter your email (e.g., name@gmail.com)"
                   value={forgotPasswordEmail}
-                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value.trim())}
                   className="w-full text-sm sm:text-base"
                   disabled={isResettingPassword}
                 />
@@ -215,9 +241,9 @@ const Login = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email (e.g., name@gmail.com)"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 className={`w-full text-sm sm:text-base ${errors.email ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />
@@ -233,7 +259,7 @@ const Login = () => {
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 className={`w-full text-sm sm:text-base ${errors.password ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />

@@ -19,17 +19,44 @@ const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validateName = (name: string) => {
+    // Only letters and spaces allowed, minimum 2 characters
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!name.trim()) return "Full name is required";
+    if (name.trim().length < 2) return "Full name must be at least 2 characters long";
+    if (!nameRegex.test(name.trim())) return "Full name can only contain letters and spaces";
+    return "";
+  };
+
+  const validateEmail = (email: string) => {
+    // More comprehensive email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email.trim()) return "Email is required";
+    if (!emailRegex.test(email.trim())) return "Please enter a valid email address (e.g., name@gmail.com)";
+    return "";
+  };
+
+  const validatePhone = (phone: string) => {
+    // Exactly 10 digits
+    const phoneRegex = /^\d{10}$/;
+    if (phone && !phoneRegex.test(phone.replace(/\s/g, ""))) {
+      return "Phone number must be exactly 10 digits";
+    }
+    return "";
+  };
+
   const validatePassword = (password: string) => {
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
     
+    if (!password) return "Password is required";
+    if (password.length < 8) return "Password must be at least 8 characters long";
     if (!hasUpperCase) return "Password must contain at least one uppercase letter";
     if (!hasLowerCase) return "Password must contain at least one lowercase letter";
     if (!hasNumbers) return "Password must contain at least one number";
-    if (!hasSpecialChar) return "Password must contain at least one special character";
-    if (password.length < 8) return "Password must be at least 8 characters long";
+    if (!hasSpecialChar) return "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)";
     
     return "";
   };
@@ -37,23 +64,64 @@ const Register = () => {
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!name.trim()) {
-      newErrors.name = "Name is required";
-    }
+    const nameError = validateName(name);
+    if (nameError) newErrors.name = nameError;
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Please enter a valid email";
-    }
+    const emailError = validateEmail(email);
+    if (emailError) newErrors.email = emailError;
+
+    const phoneError = validatePhone(phone);
+    if (phoneError) newErrors.phone = phoneError;
 
     const passwordError = validatePassword(password);
-    if (passwordError) {
-      newErrors.password = passwordError;
-    }
+    if (passwordError) newErrors.password = passwordError;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow letters and spaces
+    const filteredValue = value.replace(/[^a-zA-Z\s]/g, "");
+    setName(filteredValue);
+    
+    // Clear error if field becomes valid
+    if (errors.name && validateName(filteredValue) === "") {
+      setErrors(prev => ({ ...prev, name: "" }));
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+    setEmail(value);
+    
+    // Clear error if field becomes valid
+    if (errors.email && validateEmail(value) === "") {
+      setErrors(prev => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow digits and limit to 10
+    const filteredValue = value.replace(/\D/g, "").slice(0, 10);
+    setPhone(filteredValue);
+    
+    // Clear error if field becomes valid
+    if (errors.phone && validatePhone(filteredValue) === "") {
+      setErrors(prev => ({ ...prev, phone: "" }));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    
+    // Clear error if field becomes valid
+    if (errors.password && validatePassword(value) === "") {
+      setErrors(prev => ({ ...prev, password: "" }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,8 +130,8 @@ const Register = () => {
     if (!validateForm()) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please check the form for errors.",
+        title: "Validation Error",
+        description: "Please correct the errors below and try again.",
       });
       return;
     }
@@ -72,11 +140,11 @@ const Register = () => {
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: email,
+        email: email.trim(),
         password: password,
         options: {
           data: {
-            name: name,
+            name: name.trim(),
             phone: phone || null
           }
         }
@@ -137,9 +205,9 @@ const Register = () => {
               <Input
                 id="name"
                 type="text"
-                placeholder="Enter your name"
+                placeholder="Enter your full name (letters only)"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
                 className={`w-full text-sm sm:text-base ${errors.name ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />
@@ -153,9 +221,9 @@ const Register = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email (e.g., name@gmail.com)"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 className={`w-full text-sm sm:text-base ${errors.email ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />
@@ -169,12 +237,15 @@ const Register = () => {
               <Input
                 id="phone"
                 type="tel"
-                placeholder="Enter your phone number"
+                placeholder="Enter 10-digit phone number"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="text-sm sm:text-base"
+                onChange={handlePhoneChange}
+                className={`text-sm sm:text-base ${errors.phone ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />
+              {errors.phone && (
+                <p className="text-xs sm:text-sm text-red-500">{errors.phone}</p>
+              )}
             </div>
 
             <div className="space-y-1 sm:space-y-2">
@@ -182,9 +253,9 @@ const Register = () => {
               <Input
                 id="password"
                 type="password"
-                placeholder="Create a password"
+                placeholder="Create a strong password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 className={`w-full text-sm sm:text-base ${errors.password ? 'border-red-500' : ''}`}
                 disabled={isLoading}
               />
