@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Carousel,
@@ -27,11 +26,16 @@ export const GiftImageCarousel: React.FC<GiftImageCarouselProps> = ({
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const [hasError, setHasError] = useState(false);
   
-  // Process the images to ensure we have valid ones
-  const finalImages = prepareCarouselImages(
-    Array.isArray(images) && images.length > 0 ? images[0] : undefined,
-    Array.isArray(images) && images.length > 1 ? images.slice(1) : []
-  );
+  // Process the images - if we have admin-uploaded images, use them directly
+  // Otherwise, use the prepareCarouselImages function for fallback behavior
+  const finalImages = images && images.length > 0 
+    ? images.filter(img => img && img.trim() !== '') // Use admin images directly, filter out empty strings
+    : prepareCarouselImages(
+        Array.isArray(images) && images.length > 0 ? images[0] : undefined,
+        Array.isArray(images) && images.length > 1 ? images.slice(1) : []
+      );
+
+  console.log("GiftImageCarousel - images:", images, "finalImages:", finalImages);
 
   // Initialize the imagesLoaded state with false for each image
   useEffect(() => {
