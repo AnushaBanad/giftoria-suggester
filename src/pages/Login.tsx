@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Gift } from "lucide-react";
+import { Gift, Shield } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -108,11 +109,33 @@ const Login = () => {
       }
 
       if (data.user) {
+        // Check if user is admin
+        const { data: adminData } = await supabase
+          .from('admin_roles')
+          .select('*')
+          .eq('user_id', data.user.id)
+          .single();
+
+        const userIsAdmin = !!adminData;
+
+        // Validate admin login attempt
+        if (isAdmin && !userIsAdmin) {
+          toast({
+            variant: "destructive",
+            title: "Access Denied",
+            description: "This account does not have admin privileges.",
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
         toast({
           title: "Login successful!",
-          description: "Welcome back to our gift recommendation platform.",
+          description: userIsAdmin ? "Welcome back, Admin!" : "Welcome back to our gift recommendation platform.",
         });
-        navigate("/dashboard");
+        
+        // Navigate based on actual admin status
+        navigate(userIsAdmin ? "/admin" : "/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -226,13 +249,35 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-theme-warm to-white p-4 sm:p-6 lg:p-8">
       <Card className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 backdrop-blur-sm bg-white/80 shadow-xl animate-fadeIn">
         <div className="flex flex-col items-center space-y-4 sm:space-y-6">
-          <div className="rounded-full bg-theme-sage p-3">
-            <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
+          <div className={`rounded-full p-3 ${isAdmin ? 'bg-red-100' : 'bg-theme-sage'}`}>
+            {isAdmin ? (
+              <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+            ) : (
+              <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
+            )}
           </div>
           
           <div className="text-center">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Welcome Back</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2">Log in to your account</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+              {isAdmin ? "Admin Login" : "Welcome Back"}
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">
+              {isAdmin ? "Access the admin dashboard" : "Log in to your account"}
+            </p>
+          </div>
+
+          {/* Admin Toggle */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="adminToggle"
+              checked={isAdmin}
+              onChange={(e) => setIsAdmin(e.target.checked)}
+              className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+            />
+            <Label htmlFor="adminToggle" className="text-sm text-gray-700">
+              Login as Admin
+            </Label>
           </div>
 
           <form onSubmit={handleSubmit} className="w-full space-y-3 sm:space-y-4">
@@ -270,10 +315,14 @@ const Login = () => {
 
             <Button
               type="submit"
-              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 sm:py-3 text-sm sm:text-base"
+              className={`w-full py-2 sm:py-3 text-sm sm:text-base ${
+                isAdmin 
+                  ? "bg-red-600 hover:bg-red-700" 
+                  : "bg-gray-800 hover:bg-gray-700"
+              } text-white`}
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Log In"}
+              {isLoading ? "Logging in..." : (isAdmin ? "Login as Admin" : "Log In")}
             </Button>
           </form>
 
