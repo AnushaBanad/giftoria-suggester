@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageUpload } from "./ImageUpload";
 
 interface Gift {
   id: string;
@@ -22,6 +23,7 @@ interface Gift {
   interests: string[];
   occasions: string[];
   image_url: string;
+  image_urls: string[];
 }
 
 interface Interest {
@@ -47,7 +49,7 @@ export const GiftManagement = () => {
     category: "",
     interests: [] as string[],
     occasions: [] as string[],
-    image_url: ""
+    images: [] as string[]
   });
   const { toast } = useToast();
 
@@ -92,6 +94,11 @@ export const GiftManagement = () => {
       return;
     }
 
+    if (formData.images.length !== 2) {
+      toast({ variant: "destructive", title: "Error", description: "Please add exactly 2 images" });
+      return;
+    }
+
     const giftData = {
       name: formData.name,
       description: formData.description,
@@ -99,7 +106,8 @@ export const GiftManagement = () => {
       category: formData.category,
       interests: formData.interests,
       occasions: formData.occasions,
-      image_url: formData.image_url
+      image_url: formData.images[0], // First image as main image
+      image_urls: formData.images // All images in the array
     };
 
     try {
@@ -134,7 +142,7 @@ export const GiftManagement = () => {
       category: gift.category,
       interests: gift.interests,
       occasions: gift.occasions,
-      image_url: gift.image_url || ""
+      images: gift.image_urls && gift.image_urls.length > 0 ? gift.image_urls : [gift.image_url].filter(Boolean)
     });
     setIsDialogOpen(true);
   };
@@ -160,7 +168,7 @@ export const GiftManagement = () => {
       category: "",
       interests: [],
       occasions: [],
-      image_url: ""
+      images: []
     });
     setEditingGift(null);
   };
@@ -183,6 +191,10 @@ export const GiftManagement = () => {
     }));
   };
 
+  const handleImagesChange = (images: string[]) => {
+    setFormData(prev => ({ ...prev, images }));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -194,11 +206,11 @@ export const GiftManagement = () => {
               Add Gift
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingGift ? "Edit Gift" : "Add New Gift"}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Name *</Label>
@@ -251,15 +263,11 @@ export const GiftManagement = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                />
-              </div>
+              <ImageUpload
+                images={formData.images}
+                onImagesChange={handleImagesChange}
+                maxImages={2}
+              />
 
               <div>
                 <Label>Interests</Label>
@@ -297,7 +305,7 @@ export const GiftManagement = () => {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" disabled={formData.images.length !== 2}>
                   {editingGift ? "Update" : "Create"} Gift
                 </Button>
               </div>
@@ -314,6 +322,7 @@ export const GiftManagement = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Images</TableHead>
                 <TableHead>Interests</TableHead>
                 <TableHead>Occasions</TableHead>
                 <TableHead>Actions</TableHead>
@@ -325,6 +334,22 @@ export const GiftManagement = () => {
                   <TableCell className="font-medium">{gift.name}</TableCell>
                   <TableCell>{gift.category}</TableCell>
                   <TableCell>₹{gift.price}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {(gift.image_urls && gift.image_urls.length > 0 ? gift.image_urls : [gift.image_url].filter(Boolean)).slice(0, 2).map((url, index) => (
+                        <img
+                          key={index}
+                          src={url}
+                          alt={`${gift.name} ${index + 1}`}
+                          className="w-8 h-8 object-cover rounded"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&auto=format&fit=crop";
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {gift.interests.slice(0, 2).map((interest) => (
