@@ -16,20 +16,38 @@ export const generateGiftSuggestions = async (interests: string[], budget: numbe
   
   try {
     // First, fetch gifts from Supabase database (admin-created gifts)
+    // Get all gifts within budget first, then filter by interests and occasions in JavaScript
     const { data: supabaseGifts, error } = await supabase
       .from('gifts')
       .select('*')
-      .lte('price', budget)
-      .filter('interests', 'ov', interests)
-      .filter('occasions', 'cs', `{${occasion}}`);
+      .lte('price', budget);
 
     if (error) {
       console.error("Error fetching gifts from Supabase:", error);
-    } else if (supabaseGifts) {
-      console.log(`Found ${supabaseGifts.length} gifts from Supabase database`);
+    } else if (supabaseGifts && supabaseGifts.length > 0) {
+      console.log(`Found ${supabaseGifts.length} total gifts from Supabase database`);
+      
+      // Filter gifts that match any of the selected interests and occasions
+      const filteredGifts = supabaseGifts.filter(gift => {
+        // Check if gift has any matching interests
+        const hasMatchingInterest = gift.interests && gift.interests.some((giftInterest: string) => 
+          interests.some(userInterest => 
+            userInterest.toLowerCase() === giftInterest.toLowerCase()
+          )
+        );
+        
+        // Check if gift has the matching occasion
+        const hasMatchingOccasion = gift.occasions && gift.occasions.some((giftOccasion: string) => 
+          giftOccasion.toLowerCase() === occasion.toLowerCase()
+        );
+        
+        return hasMatchingInterest && hasMatchingOccasion;
+      });
+      
+      console.log(`Found ${filteredGifts.length} matching gifts from Supabase database`);
       
       // Convert Supabase gifts to GiftSuggestion format
-      const convertedSupabaseGifts: GiftSuggestion[] = supabaseGifts.map(gift => ({
+      const convertedSupabaseGifts: GiftSuggestion[] = filteredGifts.map(gift => ({
         name: gift.name,
         price: Number(gift.price),
         description: gift.description || "",
