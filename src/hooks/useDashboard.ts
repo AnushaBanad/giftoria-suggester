@@ -76,7 +76,7 @@ export const useDashboard = () => {
     setSelectedOccasion(occasion);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted with:", {
       interests: selectedInterests,
@@ -111,24 +111,33 @@ export const useDashboard = () => {
       return;
     }
 
-    // Get interest-specific suggestions only
-    const newSuggestions = generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
+    try {
+      // Get interest-specific suggestions from both Supabase and local data
+      const newSuggestions = await generateGiftSuggestions(selectedInterests, Number(budget), selectedOccasion);
 
-    console.log("Generated suggestions:", newSuggestions);
-    
-    setSuggestions(newSuggestions);
-    setShowSuggestions(true);
+      console.log("Generated suggestions:", newSuggestions);
+      
+      setSuggestions(newSuggestions);
+      setShowSuggestions(true);
 
-    if (newSuggestions.length === 0) {
+      if (newSuggestions.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "No gifts found",
+          description: "No gift suggestions found for the selected interests and budget. Try adjusting your selections or increasing your budget.",
+        });
+      } else {
+        toast({
+          title: "Perfect gifts found!",
+          description: `Found ${newSuggestions.length} gift suggestions for ${selectedOccasion}`,
+        });
+      }
+    } catch (error) {
+      console.error("Error generating suggestions:", error);
       toast({
         variant: "destructive",
-        title: "No gifts found",
-        description: "No gift suggestions found for the selected interests and budget. Try adjusting your selections or increasing your budget.",
-      });
-    } else {
-      toast({
-        title: "Perfect gifts found!",
-        description: `Found ${newSuggestions.length} gift suggestions for ${selectedOccasion}`,
+        title: "Error",
+        description: "Failed to generate gift suggestions. Please try again.",
       });
     }
   };

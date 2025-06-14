@@ -1,9 +1,10 @@
 
 import { GiftSuggestion } from "@/utils/userPreferences";
 import { getInterestBasedGiftSuggestions, getRelevantGiftImage } from "@/data/giftDatabase";
+import { supabase } from "@/integrations/supabase/client";
 
 // Enhanced gift suggestion algorithm that shows all gifts below budget
-export const generateGiftSuggestions = (interests: string[], budget: number, occasion: string): GiftSuggestion[] => {
+export const generateGiftSuggestions = async (interests: string[], budget: number, occasion: string): Promise<GiftSuggestion[]> => {
   console.log("Generating suggestions for:", { interests, budget, occasion });
   let suggestions: GiftSuggestion[] = [];
   
@@ -13,7 +14,41 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
     return [];
   }
   
-  // Process each interest to get suggestions
+  try {
+    // First, fetch gifts from Supabase database (admin-created gifts)
+    const { data: supabaseGifts, error } = await supabase
+      .from('gifts')
+      .select('*')
+      .lte('price', budget)
+      .filter('interests', 'ov', interests)
+      .filter('occasions', 'cs', `{${occasion}}`);
+
+    if (error) {
+      console.error("Error fetching gifts from Supabase:", error);
+    } else if (supabaseGifts) {
+      console.log(`Found ${supabaseGifts.length} gifts from Supabase database`);
+      
+      // Convert Supabase gifts to GiftSuggestion format
+      const convertedSupabaseGifts: GiftSuggestion[] = supabaseGifts.map(gift => ({
+        name: gift.name,
+        price: Number(gift.price),
+        description: gift.description || "",
+        image: gift.image_url || getRelevantGiftImage(Number(gift.price), interests),
+        additionalImages: [
+          gift.image_url || getRelevantGiftImage(Number(gift.price), interests),
+          getRelevantGiftImage(Number(gift.price), interests)
+        ].filter(Boolean),
+        category: gift.category,
+        shopLink: "https://www.meesho.com/gift-finder"
+      }));
+      
+      suggestions = [...suggestions, ...convertedSupabaseGifts];
+    }
+  } catch (error) {
+    console.error("Error fetching from Supabase:", error);
+  }
+  
+  // Then, get suggestions from local database as fallback/additional options
   for (const interest of interests) {
     console.log(`Looking for suggestions for interest: ${interest}, budget: ${budget}, occasion: ${occasion}`);
     const interestSuggestions = getInterestBasedGiftSuggestions(interest, budget, occasion);
@@ -40,7 +75,7 @@ export const generateGiftSuggestions = (interests: string[], budget: number, occ
     }
   }
 
-  // Ensure suggestions are unique
+  // Ensure suggestions are unique by name
   const uniqueSuggestions = Array.from(
     new Map(suggestions.map(item => [item.name, item])).values()
   );
