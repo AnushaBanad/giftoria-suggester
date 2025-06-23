@@ -47,22 +47,18 @@ export const generateGiftSuggestions = async (interests: string[], budget: numbe
       console.log(`Found ${filteredGifts.length} matching gifts from Supabase database`);
       
       // Convert Supabase gifts to GiftSuggestion format
-      const convertedSupabaseGifts: GiftSuggestion[] = filteredGifts.map(gift => {
-        // Use image_urls if available (new format), fallback to image_url (old format)
-        const images = gift.image_urls && gift.image_urls.length > 0 
-          ? gift.image_urls 
-          : (gift.image_url ? [gift.image_url] : []);
-        
-        return {
-          name: gift.name,
-          price: Number(gift.price),
-          description: gift.description || "",
-          image: images[0] || getRelevantGiftImage(Number(gift.price), interests),
-          additionalImages: images.length > 1 ? images.slice(1) : [getRelevantGiftImage(Number(gift.price), interests)],
-          category: gift.category,
-          shopLink: "https://www.meesho.com/gift-finder"
-        };
-      });
+      const convertedSupabaseGifts: GiftSuggestion[] = filteredGifts.map(gift => ({
+        name: gift.name,
+        price: Number(gift.price),
+        description: gift.description || "",
+        image: gift.image_url || getRelevantGiftImage(Number(gift.price), interests),
+        additionalImages: [
+          gift.image_url || getRelevantGiftImage(Number(gift.price), interests),
+          getRelevantGiftImage(Number(gift.price), interests)
+        ].filter(Boolean),
+        category: gift.category,
+        shopLink: "https://www.meesho.com/gift-finder"
+      }));
       
       suggestions = [...suggestions, ...convertedSupabaseGifts];
     }

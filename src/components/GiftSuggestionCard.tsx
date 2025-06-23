@@ -42,13 +42,11 @@ export const GiftSuggestionCard: React.FC<GiftSuggestionCardProps> = ({
   // Determine if this is a collection
   const isCollection = safeData.name.includes("Collection");
   
-  // Prepare images for the carousel - combine main image with additional images
+  // Prepare images for the carousel
   const carouselImages = [
     safeData.image,
     ...(safeData.additionalImages || [])
-  ].filter(Boolean); // Remove any empty/null/undefined values
-
-  console.log("GiftSuggestionCard - suggestion:", suggestion, "carouselImages:", carouselImages);
+  ].filter(Boolean);
 
   // Extract special offers from description if available
   const specialOffers = safeData.description?.includes("Special Offer")
