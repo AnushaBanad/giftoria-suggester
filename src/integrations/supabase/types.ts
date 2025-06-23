@@ -30,6 +30,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bills: {
+        Row: {
+          amount: number
+          created_at: string
+          email: string
+          id: string
+          name: string
+          product_description: string | null
+          product_name: string | null
+          quantity: number
+          state: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          product_description?: string | null
+          product_name?: string | null
+          quantity?: number
+          state: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          product_description?: string | null
+          product_name?: string | null
+          quantity?: number
+          state?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       budget_ranges: {
         Row: {
           created_at: string
@@ -129,6 +168,60 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_state: string
+          id: string
+          invoice_number: string
+          order_date: string
+          product_description: string | null
+          product_name: string
+          quantity: number
+          total_amount: number
+          unit_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_state: string
+          id?: string
+          invoice_number: string
+          order_date?: string
+          product_description?: string | null
+          product_name: string
+          quantity?: number
+          total_amount: number
+          unit_price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string
+          customer_email?: string
+          customer_name?: string
+          customer_state?: string
+          id?: string
+          invoice_number?: string
+          order_date?: string
+          product_description?: string | null
+          product_name?: string
+          quantity?: number
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
