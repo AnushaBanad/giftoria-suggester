@@ -132,6 +132,60 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          created_at: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_state: string
+          id: string
+          invoice_number: string
+          order_date: string
+          product_description: string | null
+          product_name: string
+          quantity: number
+          total_amount: number
+          unit_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_state: string
+          id?: string
+          invoice_number: string
+          order_date?: string
+          product_description?: string | null
+          product_name: string
+          quantity?: number
+          total_amount: number
+          unit_price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string
+          customer_email?: string
+          customer_name?: string
+          customer_state?: string
+          id?: string
+          invoice_number?: string
+          order_date?: string
+          product_description?: string | null
+          product_name?: string
+          quantity?: number
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
