@@ -45,6 +45,7 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Calculate total amount based on quantity
   const totalAmount = productData.price * quantity;
@@ -75,7 +76,50 @@ const ProductPage = () => {
     }
   };
 
-  const generateInvoice = () => {
+  const saveBillAndSendEmail = async (invoiceData: InvoiceData) => {
+    try {
+      setIsProcessing(true);
+      console.log('Saving bill and sending confirmation email...');
+
+      const { data, error } = await supabase.functions.invoke('send-purchase-confirmation', {
+        body: {
+          name: invoiceData.recipientName,
+          email: userInfo.email,
+          state: userInfo.state,
+          quantity: invoiceData.quantity,
+          amount: invoiceData.totalAmount,
+          productName: invoiceData.productName,
+          productDescription: invoiceData.productDescription,
+          invoiceNumber: invoiceData.invoiceNumber,
+          invoiceDate: invoiceData.invoiceDate
+        }
+      });
+
+      if (error) {
+        console.error('Error calling edge function:', error);
+        throw error;
+      }
+
+      console.log('Bill saved and email sent successfully:', data);
+      
+      toast({
+        title: "Purchase Confirmed! 🎉",
+        description: "Your bill has been saved and a confirmation email has been sent to you.",
+      });
+
+    } catch (error: any) {
+      console.error('Error saving bill and sending email:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save purchase details or send confirmation email. Please try again.",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const generateInvoice = async () => {
     if (!userInfo.name || !userInfo.email || !userInfo.address || !userInfo.state) {
       toast({
         variant: "destructive",
@@ -105,6 +149,9 @@ const ProductPage = () => {
 
     setInvoiceData(invoice);
     setShowInvoice(true);
+    
+    // Automatically save bill and send confirmation email
+    await saveBillAndSendEmail(invoice);
     
     toast({
       title: "Invoice Generated",
@@ -353,9 +400,9 @@ const ProductPage = () => {
                 <Button
                   onClick={generateInvoice}
                   className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  disabled={!userInfo.name || !userInfo.email || !userInfo.address || !userInfo.state}
+                  disabled={!userInfo.name || !userInfo.email || !userInfo.address || !userInfo.state || isProcessing}
                 >
-                  Generate Invoice
+                  {isProcessing ? "Processing..." : "Generate Invoice & Complete Purchase"}
                 </Button>
               </div>
             </CardContent>
